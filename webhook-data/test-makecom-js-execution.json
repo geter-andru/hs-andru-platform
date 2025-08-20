@@ -1,0 +1,68 @@
+{
+  "sessionId": "test-makecom-js-execution",
+  "customerId": "CUST_5",
+  "recordId": "recKU4vMCwMzVvFxD",
+  "productName": "Emit Earth Emissions Tracker",
+  "businessType": "B2B",
+  "generationStatus": "completed_with_warnings",
+  "timestamp": "2025-08-19T23:51:35.166Z",
+  "qualityMetrics": {
+    "overall_confidence": 7,
+    "icp_confidence": 7,
+    "persona_confidence": 7,
+    "empathy_confidence": 7,
+    "assessment_confidence": 7,
+    "validation_status": "parsing_error",
+    "total_modules_valid": 4
+  },
+  "validationResults": {
+    "content_quality_check": "warning",
+    "business_logic_validation": "passed",
+    "factual_accuracy_check": "passed",
+    "completeness_score": 70,
+    "recommendation": "approved_for_delivery",
+    "notes": "Make.com JavaScript execution result processed successfully. Average confidence: 7"
+  },
+  "resources": {
+    "icp_analysis": {
+      "title": "Ideal Customer Profile Analysis",
+      "confidence_score": 7,
+      "content": {
+        "text": "AI-generated ICP analysis from Make.com scenario"
+      },
+      "generated": true,
+      "generation_method": "claude_with_web_research",
+      "web_research_sources": []
+    },
+    "persona": {
+      "title": "Target Buyer Personas",
+      "confidence_score": 7,
+      "content": {
+        "text": "AI-generated buyer personas from Make.com scenario"
+      },
+      "generated": true,
+      "generation_method": "claude_with_web_research",
+      "personas_count": 1,
+      "web_research_sources": []
+    },
+    "empathyMap": {
+      "title": "Customer Empathy Map",
+      "confidence_score": 7,
+      "content": {
+        "text": "AI-generated empathy map from Make.com scenario"
+      },
+      "generated": true,
+      "generation_method": "claude_with_web_research"
+    },
+    "productPotential": {
+      "title": "Product Market Fit Assessment",
+      "confidence_score": 7,
+      "content": {
+        "text": "AI-generated market assessment from Make.com scenario"
+      },
+      "generated": true,
+      "generation_method": "claude_with_web_research",
+      "market_research_sources": []
+    }
+  }
+}

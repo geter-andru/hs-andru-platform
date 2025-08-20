@@ -1,0 +1,52 @@
+{
+  "sessionId": "manual-test-123",
+  "customerId": "CUST_5",
+  "productName": "Test Product",
+  "businessType": "B2B",
+  "generationStatus": "completed",
+  "timestamp": "2025-08-19T23:18:51.735Z",
+  "qualityMetrics": {},
+  "validationResults": {},
+  "resources": {
+    "icp_analysis": {
+      "title": "Test ICP",
+      "confidence_score": 8.5,
+      "content": {
+        "text": "Test ICP content"
+      },
+      "generated": true,
+      "generation_method": "claude_with_web_research",
+      "web_research_sources": []
+    },
+    "persona": {
+      "title": "Target Buyer Personas",
+      "confidence_score": 9,
+      "content": {
+        "text": "AI-generated buyer personas for Test Product (B2B)"
+      },
+      "generated": false,
+      "generation_method": "claude_with_web_research",
+      "personas_count": 1,
+      "web_research_sources": []
+    },
+    "empathyMap": {
+      "title": "Customer Empathy Map",
+      "confidence_score": 8.8,
+      "content": {
+        "text": "AI-generated empathy map for Test Product (B2B)"
+      },
+      "generated": false,
+      "generation_method": "claude_with_web_research"
+    },
+    "productPotential": {
+      "title": "Product Market Fit Assessment",
+      "confidence_score": 9.2,
+      "content": {
+        "text": "AI-generated market assessment for Test Product (B2B)"
+      },
+      "generated": false,
+      "generation_method": "claude_with_web_research",
+      "market_research_sources": []
+    }
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "sessionId": "test-session-123",
+  "customerId": "CUST_5",
+  "recordId": "recKU4vMCwMzVvFxD",
+  "productName": "AI Sales Assistant",
+  "businessType": "B2B",
+  "generationStatus": "completed",
+  "timestamp": "2025-08-19T22:59:00.000Z",
+  "resources": {
+    "icp_analysis": {
+      "title": "Ideal Customer Profile Analysis",
+      "confidence_score": 9.2,
+      "content": {
+        "text": "Comprehensive ICP analysis for AI Sales Assistant. Your B2B product targets mid-market technology companies with 100-500 employees..."
+      }
+    },
+    "persona": {
+      "title": "Target Buyer Persona",
+      "confidence_score": 9,
+      "content": {
+        "text": "Primary Buyer Persona: Operations Executive\n\nDemographics:\n- Role: VP/Director of Operations\n- Age: 35-50 years old\n- Education: MBA or equivalent experience\n- Company Size: 100-500 employees\n\nPsychographics:\n- Results-driven and metrics-focused\n- Values efficiency and process optimization\n- Early adopter of business technology\n- Collaborative decision-making style\n\nGoals & Motivations:\n- Streamline operations for better scalability\n- Implement data-driven decision making\n- Reduce operational costs while improving quality\n- Drive company growth and competitive advantage\n\nChallenges & Pain Points:\n- Limited visibility into operational metrics\n- Manual processes creating bottlenecks\n- Difficulty measuring ROI of operational improvements\n- Resistance to change from team members\n\nPreferred Communication:\n- Email for initial outreach\n- LinkedIn for professional networking\n- Detailed proposals with clear ROI metrics\n- Case studies from similar companies"
+      },
+      "generated": true
+    },
+    "empathyMap": {
+      "title": "Customer Empathy Map",
+      "confidence_score": 8.8,
+      "content": {
+        "text": "Customer Empathy Map for AI Sales Assistant Users\n\nWhat They THINK:\n- \"We need better visibility into our operations\"\n- \"Our current processes are holding us back\"\n- \"I need to prove ROI to get budget approval\"\n- \"How can we scale without adding complexity?\"\n\nWhat They FEEL:\n- Frustrated with manual, time-consuming processes\n- Pressure to deliver better results with limited resources\n- Excited about technology that can solve real problems\n- Cautious about implementing new systems\n\nWhat They SEE:\n- Competitors gaining advantages through automation\n- Team members struggling with inefficient tools\n- Leadership demanding better performance metrics\n- Industry trends toward digital transformation\n\nWhat They SAY & DO:\n- Researches solutions during business hours\n- Asks for references and case studies\n- Involves team in evaluation process\n- Seeks approval from finance/executive team\n\nPAINS:\n- Time wasted on manual reporting\n- Difficulty getting accurate, real-time data\n- Integration challenges with existing systems\n- Limited budget for new technology\n\nGAINS:\n- Improved operational efficiency\n- Better decision-making with real-time data\n- Reduced manual work for team\n- Competitive advantage in the market"
+      },
+      "generated": true
+    },
+    "productPotential": {
+      "title": "Product Market Fit Assessment",
+      "confidence_score": 9.2,
+      "content": {
+        "text": "Market Assessment for AI Sales Assistant\n\nMarket Opportunity:\n- Total Addressable Market (TAM): $45B globally\n- Serviceable Addressable Market (SAM): $12B\n- Serviceable Obtainable Market (SOM): $500M\n\nMarket Dynamics:\n- Growing demand for B2B automation solutions\n- Increasing focus on operational efficiency post-pandemic\n- Digital transformation acceleration across industries\n- Rising labor costs driving automation adoption\n\nCompetitive Landscape:\n- Direct competitors: 3-5 established players\n- Indirect competitors: Custom development, manual processes\n- Differentiation opportunities: Integration, ease of use, pricing\n\nProduct-Market Fit Indicators:\n- Strong initial customer interest\n- Clear pain point alignment\n- Willingness to pay premium for solution\n- Positive early customer feedback\n\nGrowth Potential:\n- Estimated market growth: 15-20% annually\n- Expansion opportunities: Additional modules, integrations\n- Geographic expansion potential: International markets\n- Vertical expansion: Industry-specific solutions\n\nRecommendations:\n- Focus on proven B2B use cases\n- Develop strong customer success programs\n- Build strategic partnerships for market entry\n- Invest in content marketing and thought leadership"
+      },
+      "generated": true
+    }
+  }
+}
