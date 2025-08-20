@@ -300,11 +300,11 @@ hs-andru-platform/       # Pure React application
 - **GitHub Repository:** https://github.com/geter-andru/hs-andru-platform
 - **Deployment Status:** Ready for clean Netlify deployment
 
-### 🖥️ Local Development
+### 🖥️ Local Development  
 - **Modern Premium Dashboard:** `http://localhost:3000/customer/CUST_4/simplified/dashboard-premium?token=admin-demo-token-2025`
 - **Standard Dashboard:** `http://localhost:3000/customer/CUST_4/simplified/dashboard?token=admin-demo-token-2025`
 - **Admin Access:** `/customer/CUST_4?token=admin-demo-token-2025`
-- **Test User CUST_02:** `/customer/CUST_02?token=test-token-123456`
+- **Test User:** `/customer/CUST_02?token=test-token-123456`
 
 ### 🔧 Repository Information
 - **New Clean Repository:** https://github.com/geter-andru/hs-andru-platform

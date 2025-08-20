@@ -46,32 +46,40 @@ export const authService = {
 
   // Load admin user data
   async loadAdminUser() {
-    try {
-      // Load admin record from Airtable using CUST_4
-      const adminData = await airtableService.getCustomerDataByRecordId('CUST_4');
-      
-      return {
-        ...adminData,
-        isAdmin: true,
-        demoMode: true,
-        hasPersonalizedICP: true,
-        hasDetailedAnalysis: true,
-        adminAccess: true
-      };
-    } catch (error) {
-      console.error('Error loading admin user:', error);
-      // Fallback admin data if Airtable fails
-      return {
-        customerId: 'CUST_4',
-        customerName: 'Platform Administrator',
-        company: 'H&S Revenue Intelligence',
-        isAdmin: true,
-        demoMode: true,
-        hasPersonalizedICP: true,
-        hasDetailedAnalysis: true,
-        adminAccess: true
-      };
-    }
+    // Return static admin data for reliable demo access
+    return {
+      customerId: 'CUST_4',
+      customer_id: 'CUST_4',
+      customerName: 'Platform Administrator',
+      customer_name: 'Platform Administrator',
+      company: 'H&S Revenue Intelligence',
+      email: 'admin@hs-platform.com',
+      isAdmin: true,
+      demoMode: true,
+      hasPersonalizedICP: true,
+      hasDetailedAnalysis: true,
+      adminAccess: true,
+      // Include sample content for admin demos
+      icp_content: JSON.stringify({
+        title: "Advanced ICP Analysis Framework",
+        description: "Enterprise-grade customer profiling system",
+        segments: [
+          { name: "Enterprise SaaS Companies", score: 95, criteria: ["500+ employees", "$50M+ revenue", "Tech-forward culture"] },
+          { name: "Mid-Market Tech Companies", score: 85, criteria: ["100-500 employees", "$10M-50M revenue", "Digital transformation focus"] },
+          { name: "Growth-Stage Startups", score: 75, criteria: ["Series B+", "Strong tech adoption", "Scaling challenges"] }
+        ]
+      }),
+      cost_calculator_content: JSON.stringify({
+        title: "Cost of Inaction Calculator",
+        scenarios: ["Conservative", "Realistic", "Aggressive"],
+        categories: ["Lost Revenue", "Operational Inefficiencies", "Competitive Disadvantage"]
+      }),
+      business_case_content: JSON.stringify({
+        title: "Business Case Builder",
+        templates: ["Pilot Program", "Full Implementation"],
+        frameworks: ["ROI Calculation", "Payback Period"]
+      })
+    };
   },
 
   // Load test user data
