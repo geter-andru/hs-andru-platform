@@ -37,8 +37,20 @@ exports.handler = async (event, context) => {
       };
     }
 
-    // Parse the incoming data from Make.com
-    const data = JSON.parse(event.body);
+    // Parse the incoming data from Make.com with error handling
+    let data;
+    try {
+      data = JSON.parse(event.body);
+      console.log('Raw webhook body:', event.body);
+    } catch (parseError) {
+      console.error('JSON parsing error:', parseError, 'Body:', event.body);
+      return {
+        statusCode: 400,
+        headers: corsHeaders,
+        body: JSON.stringify({ error: 'Invalid JSON format', details: parseError.message })
+      };
+    }
+    
     const sessionId = data.session_id || event.headers['x-session-id'];
     const customerId = data.customer_id || event.headers['x-customer-id'];
 
@@ -62,35 +74,44 @@ exports.handler = async (event, context) => {
     // Handle the new Make.com data format with resourcesCollection
     let icpData, personaData, empathyData, assessmentData;
     
-    if (data.resourcesCollection) {
-      // New format from Make.com
-      const resources = data.resourcesCollection;
-      icpData = resources.icp_analysisCollection;
-      personaData = resources.buyer_personasCollection;
-      empathyData = resources.empathy_mapCollection;
-      assessmentData = resources.product_assessmentCollection;
-      
-      console.log('Using resourcesCollection format:', {
-        hasIcp: !!icpData,
-        hasPersona: !!personaData,
-        hasEmpathy: !!empathyData,
-        hasAssessment: !!assessmentData
-      });
-    } else {
-      // Legacy format - try to parse nested JSON
-      try {
-        icpData = data.icpData ? JSON.parse(data.icpData) : null;
-        personaData = data.personaData ? JSON.parse(data.personaData) : null;
-        empathyData = data.empathyData ? JSON.parse(data.empathyData) : null;
-        assessmentData = data.assessmentData ? JSON.parse(data.assessmentData) : null;
-      } catch (parseError) {
-        console.error('Error parsing nested JSON:', parseError);
-        return {
-          statusCode: 400,
-          headers: corsHeaders,
-          body: JSON.stringify({ error: 'Invalid JSON format in nested data' })
-        };
+    try {
+      if (data.resourcesCollection) {
+        // New format from Make.com
+        const resources = data.resourcesCollection;
+        icpData = resources.icp_analysisCollection;
+        personaData = resources.buyer_personasCollection;
+        empathyData = resources.empathy_mapCollection;
+        assessmentData = resources.product_assessmentCollection;
+        
+        console.log('Using resourcesCollection format:', {
+          hasIcp: !!icpData,
+          hasPersona: !!personaData,
+          hasEmpathy: !!empathyData,
+          hasAssessment: !!assessmentData
+        });
+      } else {
+        // Legacy format - try to parse nested JSON
+        try {
+          icpData = data.icpData ? JSON.parse(data.icpData) : null;
+          personaData = data.personaData ? JSON.parse(data.personaData) : null;
+          empathyData = data.empathyData ? JSON.parse(data.empathyData) : null;
+          assessmentData = data.assessmentData ? JSON.parse(data.assessmentData) : null;
+        } catch (parseError) {
+          console.error('Error parsing nested JSON:', parseError);
+          return {
+            statusCode: 400,
+            headers: corsHeaders,
+            body: JSON.stringify({ error: 'Invalid JSON format in nested data' })
+          };
+        }
       }
+    } catch (resourceError) {
+      console.error('Error processing resources:', resourceError);
+      return {
+        statusCode: 500,
+        headers: corsHeaders,
+        body: JSON.stringify({ error: 'Resource processing failed', details: resourceError.message })
+      };
     }
 
     // Transform Make.com data into platform format
