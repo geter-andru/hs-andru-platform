@@ -3,6 +3,7 @@ import { Target, Briefcase, DollarSign, Shield, Copy, ExternalLink, ChevronDown 
 import { motion, AnimatePresence } from 'framer-motion';
 import stakeholderArsenalService from '../../../services/StakeholderArsenalService';
 import { useUserIntelligence } from '../../../contexts/simplified/UserIntelligenceContext';
+import webhookService from '../../../services/webhookService';
 
 /**
  * StakeholderArsenalWidget - Sarah Chen's 10:15 AM Customer Call Prep
@@ -27,6 +28,7 @@ const StakeholderArsenalWidget = ({
   const [activeTab, setActiveTab] = useState('overview');
   const [copiedField, setCopiedField] = useState(null);
   const [showConfiguration, setShowConfiguration] = useState(false);
+  const [generatedResources, setGeneratedResources] = useState(null);
 
   // Map user's industry to available framework
   const mapIndustryToFramework = (userIndustry) => {
@@ -37,26 +39,100 @@ const StakeholderArsenalWidget = ({
     return 'healthcare'; // Default fallback
   };
 
-  // Form state populated from user's actual data
-  const [config, setConfig] = useState({
-    industry: mapIndustryToFramework(businessContext.industry),
-    stakeholderRole: icpAnalysis.buyerPersonas?.[0]?.replace(/\s+/g, '') || 'CFO',
-    customerName: 'Your Next Prospect',
-    meetingObjective: 'Initial discovery and ROI validation',
-    customerSize: businessContext.targetMarket === 'Enterprise' ? 'Enterprise' : 'Mid-Market',
-    customerChallenges: icpAnalysis.painPoints || []
-  });
-
-  // Update config when user context changes
+  // Load generated resources from localStorage
   useEffect(() => {
-    setConfig(prev => ({
-      ...prev,
+    const loadGeneratedResources = async () => {
+      try {
+        // Try to get current session resources first
+        const currentSessionId = localStorage.getItem('current_generation_id');
+        if (currentSessionId) {
+          const resources = await webhookService.getResources(currentSessionId);
+          if (resources) {
+            setGeneratedResources(resources);
+            return;
+          }
+        }
+        
+        // Fallback to any stored generated resources
+        const storedResources = localStorage.getItem('generatedResources');
+        if (storedResources) {
+          const parsed = JSON.parse(storedResources);
+          setGeneratedResources(parsed);
+        }
+      } catch (error) {
+        console.log('No generated resources found:', error.message);
+      }
+    };
+    
+    loadGeneratedResources();
+  }, []);
+
+  // Extract personalized data from generated resources
+  const getPersonalizedConfig = () => {
+    const config = {
       industry: mapIndustryToFramework(businessContext.industry),
-      stakeholderRole: icpAnalysis.buyerPersonas?.[0]?.replace(/\s+/g, '') || 'CFO',
+      stakeholderRole: 'CFO',
+      customerName: 'Your Next Prospect',
+      meetingObjective: 'Initial discovery and ROI validation',
       customerSize: businessContext.targetMarket === 'Enterprise' ? 'Enterprise' : 'Mid-Market',
-      customerChallenges: icpAnalysis.painPoints || []
-    }));
-  }, [businessContext, icpAnalysis]);
+      customerChallenges: []
+    };
+
+    // Use generated ICP analysis for industry and customer size
+    if (generatedResources?.icp_analysis?.content) {
+      const icpContent = generatedResources.icp_analysis.content;
+      
+      // Extract industry from ICP analysis
+      const industryMatch = icpContent.match(/Industry Verticals?:\s*([^.\n]*)/i);
+      if (industryMatch) {
+        const industries = industryMatch[1].toLowerCase();
+        if (industries.includes('health') || industries.includes('medical')) config.industry = 'healthcare';
+        else if (industries.includes('logistics') || industries.includes('supply')) config.industry = 'logistics';
+        else if (industries.includes('fintech') || industries.includes('financial')) config.industry = 'fintech';
+      }
+
+      // Extract company size
+      const sizeMatch = icpContent.match(/Company Size Range:\s*([^.\n]*)/i);
+      if (sizeMatch) {
+        const size = sizeMatch[1].toLowerCase();
+        if (size.includes('enterprise') || size.includes('large')) config.customerSize = 'Enterprise';
+        else if (size.includes('mid') || size.includes('medium')) config.customerSize = 'Mid-Market';
+        else if (size.includes('small') || size.includes('smb')) config.customerSize = 'SMB';
+      }
+
+      // Extract challenges/pain points
+      const painMatch = icpContent.match(/Primary Pain Points:\s*([^*]+)/i);
+      if (painMatch) {
+        const pains = painMatch[1].split(',').map(p => p.trim()).filter(p => p.length > 0);
+        config.customerChallenges = pains.slice(0, 3); // Take first 3 pain points
+      }
+    }
+
+    // Use generated buyer personas for stakeholder role
+    if (generatedResources?.buyer_personas?.content) {
+      const personaContent = generatedResources.buyer_personas.content;
+      const stakeholderMatch = personaContent.match(/(?:Job Title|Decision Maker):\s*([^.\n]*)/i);
+      if (stakeholderMatch) {
+        const title = stakeholderMatch[1].trim();
+        if (title.includes('CFO') || title.includes('Financial')) config.stakeholderRole = 'CFO';
+        else if (title.includes('COO') || title.includes('Operations')) config.stakeholderRole = 'COO';
+        else if (title.includes('CTO') || title.includes('Technology')) config.stakeholderRole = 'CTO';
+        else if (title.includes('Medical')) config.stakeholderRole = 'Medical Director';
+        else if (title.includes('Chief')) config.stakeholderRole = title.split(' ')[0];
+      }
+    }
+
+    return config;
+  };
+
+  // Form state populated from generated resources when available
+  const [config, setConfig] = useState(getPersonalizedConfig());
+
+  // Update config when resources or user context changes
+  useEffect(() => {
+    const updatedConfig = getPersonalizedConfig();
+    setConfig(updatedConfig);
+  }, [generatedResources, businessContext, icpAnalysis]);
 
   // Load default arsenal on mount and when config changes
   useEffect(() => {
@@ -70,7 +146,8 @@ const StakeholderArsenalWidget = ({
     try {
       await new Promise(resolve => setTimeout(resolve, 1200)); // Simulate processing
       
-      const result = stakeholderArsenalService.generateStakeholderArsenal({
+      // Prepare enhanced data from generated resources
+      const enhancedData = {
         industry: config.industry,
         stakeholderRole: config.stakeholderRole,
         customerName: config.customerName,
@@ -83,8 +160,35 @@ const StakeholderArsenalWidget = ({
         competitorMentions: [
           { name: 'Competitor X', claim: '40% cost reduction' }
         ],
-        technicalAdvantages: icpAnalysis.competitiveAdvantages || ['10x processing speed', '99% accuracy improvement']
-      });
+        technicalAdvantages: []
+      };
+
+      // Extract technical advantages from generated resources
+      if (generatedResources?.icp_analysis?.content) {
+        const icpContent = generatedResources.icp_analysis.content;
+        
+        // Look for key benefits or competitive factors
+        const benefitsMatch = icpContent.match(/Key Benefits?:\s*([^*]+)/i);
+        if (benefitsMatch) {
+          const benefits = benefitsMatch[1].split(',').map(b => b.trim()).filter(b => b.length > 0);
+          enhancedData.technicalAdvantages = benefits.slice(0, 3);
+        }
+        
+        // Fallback to looking for any performance claims
+        if (enhancedData.technicalAdvantages.length === 0) {
+          const performanceMatches = icpContent.match(/(\d+[x%]?\s*(?:faster|better|more|improved|reduced|increased)[^.]*)/gi);
+          if (performanceMatches) {
+            enhancedData.technicalAdvantages = performanceMatches.slice(0, 3);
+          }
+        }
+      }
+
+      // Fallback to user context if no generated resources
+      if (enhancedData.technicalAdvantages.length === 0) {
+        enhancedData.technicalAdvantages = icpAnalysis.competitiveAdvantages || ['10x processing speed', '99% accuracy improvement'];
+      }
+
+      const result = stakeholderArsenalService.generateStakeholderArsenal(enhancedData);
       
       setArsenal(result);
     } catch (error) {

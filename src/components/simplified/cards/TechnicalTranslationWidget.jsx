@@ -3,6 +3,7 @@ import { ArrowRight, Target, Lightbulb, Copy, ExternalLink, Zap } from 'lucide-r
 import { motion, AnimatePresence } from 'framer-motion';
 import technicalTranslationService from '../../../services/TechnicalTranslationService';
 import { useUserIntelligence } from '../../../contexts/simplified/UserIntelligenceContext';
+import webhookService from '../../../services/webhookService';
 
 /**
  * TechnicalTranslationWidget - Sarah Chen's 6:47 AM Crisis Solver
@@ -23,6 +24,7 @@ const TechnicalTranslationWidget = ({
   const [isTranslating, setIsTranslating] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
   const [copiedField, setCopiedField] = useState(null);
+  const [generatedResources, setGeneratedResources] = useState(null);
 
   // Map user's industry to available framework
   const mapIndustryToFramework = (userIndustry) => {
@@ -33,8 +35,47 @@ const TechnicalTranslationWidget = ({
     return 'healthcare'; // Default fallback
   };
 
-  // Extract technical capabilities from user's competitive advantages
+  // Load generated resources from localStorage
+  useEffect(() => {
+    const loadGeneratedResources = async () => {
+      try {
+        // Try to get current session resources first
+        const currentSessionId = localStorage.getItem('current_generation_id');
+        if (currentSessionId) {
+          const resources = await webhookService.getResources(currentSessionId);
+          if (resources) {
+            setGeneratedResources(resources);
+            return;
+          }
+        }
+        
+        // Fallback to any stored generated resources
+        const storedResources = localStorage.getItem('generatedResources');
+        if (storedResources) {
+          const parsed = JSON.parse(storedResources);
+          setGeneratedResources(parsed);
+        }
+      } catch (error) {
+        console.log('No generated resources found:', error.message);
+      }
+    };
+    
+    loadGeneratedResources();
+  }, []);
+
+  // Extract technical capabilities from generated ICP analysis or user's competitive advantages
   const getUserTechnicalMetric = () => {
+    // First try to get from generated ICP analysis
+    if (generatedResources?.icp_analysis?.content) {
+      const icpContent = generatedResources.icp_analysis.content.toLowerCase();
+      if (icpContent.includes('speed') || icpContent.includes('fast') || icpContent.includes('processing')) return 'processing_speed';
+      if (icpContent.includes('accura') || icpContent.includes('precise') || icpContent.includes('quality')) return 'accuracy_improvement';
+      if (icpContent.includes('cost') || icpContent.includes('save') || icpContent.includes('efficiency')) return 'cost_reduction';
+      if (icpContent.includes('fraud') || icpContent.includes('security')) return 'fraud_detection';
+      if (icpContent.includes('track') || icpContent.includes('monitor')) return 'tracking_accuracy';
+    }
+    
+    // Fallback to user context
     const advantages = icpAnalysis.competitiveAdvantages || [];
     const firstAdvantage = advantages[0]?.toLowerCase() || '';
     
@@ -44,26 +85,61 @@ const TechnicalTranslationWidget = ({
     return 'processing_speed'; // Default
   };
 
-  // Form state populated from user's actual data
-  const [formData, setFormData] = useState({
-    technicalMetric: getUserTechnicalMetric(),
-    improvement: icpAnalysis.competitiveAdvantages?.[0] || '10x faster processing',
-    industry: mapIndustryToFramework(businessContext.industry),
-    targetStakeholder: icpAnalysis.buyerPersonas?.[0]?.replace(/\s+/g, '') || 'CFO',
-    customerName: 'Your Next Prospect',
-    competitorClaim: ''
-  });
-
-  // Update form data when user context changes
-  useEffect(() => {
-    setFormData(prev => ({
-      ...prev,
+  // Extract data from generated resources for more personalized experience
+  const getPersonalizedData = () => {
+    const data = {
       technicalMetric: getUserTechnicalMetric(),
-      improvement: icpAnalysis.competitiveAdvantages?.[0] || '10x faster processing',
+      improvement: '10x faster processing',
       industry: mapIndustryToFramework(businessContext.industry),
-      targetStakeholder: icpAnalysis.buyerPersonas?.[0]?.replace(/\s+/g, '') || 'CFO'
-    }));
-  }, [businessContext, icpAnalysis]);
+      targetStakeholder: 'CFO',
+      customerName: 'Your Next Prospect',
+      competitorClaim: ''
+    };
+
+    // Use generated ICP analysis for more specific data
+    if (generatedResources?.icp_analysis?.content) {
+      const icpContent = generatedResources.icp_analysis.content;
+      
+      // Extract improvement claims from ICP content
+      const improvementMatch = icpContent.match(/(\d+[x%]?\s*(?:faster|better|more|improved|reduced|increased)[^.]*)/i);
+      if (improvementMatch) {
+        data.improvement = improvementMatch[1];
+      }
+      
+      // Extract industry from ICP analysis
+      const industryMatch = icpContent.match(/Industry Verticals?:\s*([^.\n]*)/i);
+      if (industryMatch) {
+        const industries = industryMatch[1].toLowerCase();
+        if (industries.includes('health') || industries.includes('medical')) data.industry = 'healthcare';
+        else if (industries.includes('logistics') || industries.includes('supply')) data.industry = 'logistics';
+        else if (industries.includes('fintech') || industries.includes('financial')) data.industry = 'fintech';
+      }
+    }
+
+    // Use generated buyer personas for stakeholder info
+    if (generatedResources?.buyer_personas?.content) {
+      const personaContent = generatedResources.buyer_personas.content;
+      const stakeholderMatch = personaContent.match(/(?:Job Title|Decision Maker):\s*([^.\n]*)/i);
+      if (stakeholderMatch) {
+        const title = stakeholderMatch[1].trim();
+        if (title.includes('CFO') || title.includes('Financial')) data.targetStakeholder = 'CFO';
+        else if (title.includes('COO') || title.includes('Operations')) data.targetStakeholder = 'COO';
+        else if (title.includes('CTO') || title.includes('Technology')) data.targetStakeholder = 'CTO';
+        else if (title.includes('Chief') || title.includes('VP')) data.targetStakeholder = title.split(' ')[0];
+      }
+    }
+
+    return data;
+  };
+
+  // Form state populated from generated resources when available
+  const [formData, setFormData] = useState(getPersonalizedData());
+
+  // Update form data when resources or user context changes
+  useEffect(() => {
+    const updatedData = getPersonalizedData();
+    setFormData(updatedData);
+  }, [generatedResources, businessContext, icpAnalysis]);
 
   // Load default translation on mount and when form data changes
   useEffect(() => {
