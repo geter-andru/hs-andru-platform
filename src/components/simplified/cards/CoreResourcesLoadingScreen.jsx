@@ -171,9 +171,9 @@ const CoreResourcesLoadingScreen = ({ sessionId, onComplete }) => {
       setSubMessage(currentStage.subMessage);
       setCurrentIcon(currentStage.icon);
       
-      // Complete after 1 minute (fallback) - reduced from 5 minutes due to Netlify stateless limitation
-      if (elapsed >= 60) {
-        console.log('⏰ Loading screen timeout - using fallback resources (Netlify limitation)');
+      // Complete after 4 minutes (allowing for Make.com 3-minute processing + buffer)
+      if (elapsed >= 240) {
+        console.log('⏰ Loading screen timeout after 4 minutes - using fallback resources');
         if (onComplete) {
           setTimeout(() => {
             onComplete();
@@ -188,13 +188,13 @@ const CoreResourcesLoadingScreen = ({ sessionId, onComplete }) => {
     // Initial update
     updateProgress();
     
-    // Update every 1 second (check for resources + progress animation)
+    // Update every 3 seconds for resource checking + 1 second for progress animation
     const interval = setInterval(async () => {
       const shouldContinue = await updateProgress();
       if (!shouldContinue) {
         clearInterval(interval);
       }
-    }, 1000);
+    }, 3000); // Reduced polling frequency to be less aggressive on webhook endpoints
     
     return () => clearInterval(interval);
   }, [sessionId, onComplete]);
