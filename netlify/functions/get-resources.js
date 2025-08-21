@@ -48,9 +48,26 @@ exports.handler = async (event, context) => {
       };
     }
 
-    // Check if resources exist in global storage
+    // Check if resources exist in multiple storage locations
+    let storedData = null;
+    
+    // 1. Check global storage first (same function instance)
     global.completedResources = global.completedResources || {};
-    const storedData = global.completedResources[sessionId];
+    storedData = global.completedResources[sessionId];
+    
+    // 2. If not found, check process environment (cross-instance)
+    if (!storedData) {
+      const envData = process.env[`RESOURCES_${sessionId}`];
+      if (envData) {
+        try {
+          storedData = JSON.parse(envData);
+          // Cache it in global for future calls
+          global.completedResources[sessionId] = storedData;
+        } catch (parseError) {
+          console.error('Error parsing stored data:', parseError);
+        }
+      }
+    }
 
     if (!storedData) {
       return {
@@ -59,7 +76,11 @@ exports.handler = async (event, context) => {
         body: JSON.stringify({ 
           error: 'Resources not found',
           sessionId,
-          message: 'Resources may not be ready yet or session ID is invalid'
+          message: 'Resources may not be ready yet or session ID is invalid',
+          debug: {
+            globalKeys: Object.keys(global.completedResources || {}),
+            envKeys: Object.keys(process.env).filter(key => key.startsWith('RESOURCES_')).length
+          }
         })
       };
     }

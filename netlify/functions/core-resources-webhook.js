@@ -131,7 +131,7 @@ exports.handler = async (event, context) => {
     };
 
     // Store resources for frontend retrieval
-    // Using a global storage approach for production deployment
+    // Using environment variable storage for production deployment
     
     // Create a storage object for this session
     const storedData = {
@@ -148,9 +148,13 @@ exports.handler = async (event, context) => {
       ].reduce((a, b) => a + b, 0) / 4
     };
 
-    // Store in global/memory for this Netlify function instance
+    // Store in multiple places for reliability
+    // 1. Global/memory for immediate access (same function instance)
     global.completedResources = global.completedResources || {};
     global.completedResources[sessionId] = storedData;
+    
+    // 2. Process environment for cross-instance access  
+    process.env[`RESOURCES_${sessionId}`] = JSON.stringify(storedData);
     
     // Also return the storage URL for frontend to fetch
     const resourcesUrl = `/.netlify/functions/get-resources?sessionId=${sessionId}`;
