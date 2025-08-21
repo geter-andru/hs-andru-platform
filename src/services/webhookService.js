@@ -123,8 +123,22 @@ class WebhookService {
       return this.completedResources[sessionId];
     }
     
-    // In production, resources are stored directly by the Netlify function
-    // Check localStorage for completed resources
+    // Try to fetch from Netlify function (production)
+    try {
+      const response = await fetch(`/.netlify/functions/get-resources?sessionId=${sessionId}`);
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.resources) {
+          // Store in memory and localStorage for future access
+          this.completedResources[sessionId] = data.resources;
+          this.cleanupOldResources();
+          localStorage.setItem(`resources_${sessionId}`, JSON.stringify(data.resources));
+          return data.resources;
+        }
+      }
+    } catch (error) {
+      console.log('Could not fetch from Netlify function:', error.message);
+    }
     
     // Check localStorage as fallback
     const stored = localStorage.getItem(`resources_${sessionId}`);

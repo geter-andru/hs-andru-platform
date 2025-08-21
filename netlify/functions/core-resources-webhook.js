@@ -131,8 +131,7 @@ exports.handler = async (event, context) => {
     };
 
     // Store resources for frontend retrieval
-    // In production, you would store this in a database
-    // For now, we'll use a simple approach that the frontend can poll
+    // Using a global storage approach for production deployment
     
     // Create a storage object for this session
     const storedData = {
@@ -148,6 +147,13 @@ exports.handler = async (event, context) => {
         assessmentData?.confidence_score || 9.2
       ].reduce((a, b) => a + b, 0) / 4
     };
+
+    // Store in global/memory for this Netlify function instance
+    global.completedResources = global.completedResources || {};
+    global.completedResources[sessionId] = storedData;
+    
+    // Also return the storage URL for frontend to fetch
+    const resourcesUrl = `/.netlify/functions/get-resources?sessionId=${sessionId}`;
 
     // Log completion for debugging
     console.log('Resources generated successfully:', {
@@ -172,6 +178,7 @@ exports.handler = async (event, context) => {
         resources_generated: Object.keys(resources).length,
         average_confidence: storedData.averageConfidence,
         resources: resources, // Include the actual resources in the response
+        resources_url: resourcesUrl, // URL for frontend to fetch resources
         message: 'Resources received and processed successfully',
         timestamp: new Date().toISOString()
       })

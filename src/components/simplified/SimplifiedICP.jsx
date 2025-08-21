@@ -49,6 +49,46 @@ const SimplifiedICP = ({ customerId }) => {
     sectionsViewedRef.current.add(activeSection);
   }, [activeSection]);
 
+  // Check for completed resources on component mount and periodically
+  useEffect(() => {
+    const checkForCompletedResources = async () => {
+      // Check if there's a pending generation
+      const pendingGeneration = JSON.parse(localStorage.getItem('pendingSalesSageGeneration') || 'null');
+      if (pendingGeneration && pendingGeneration.customerId === customerId) {
+        const sessionId = generationSessionId || localStorage.getItem('current_generation_id');
+        if (sessionId) {
+          try {
+            const resources = await webhookService.getResources(sessionId);
+            if (resources && Object.keys(resources).length > 0) {
+              console.log('🎉 Resources loaded successfully!', resources);
+              setCustomerData(prev => ({
+                ...prev,
+                salesSageResources: resources
+              }));
+              setIsGeneratingResources(false);
+              // Clear pending generation flag
+              localStorage.removeItem('pendingSalesSageGeneration');
+            }
+          } catch (error) {
+            console.log('Still checking for resources:', error.message);
+          }
+        }
+      }
+    };
+
+    // Check immediately
+    checkForCompletedResources();
+
+    // Check every 5 seconds if we're generating resources
+    const interval = setInterval(() => {
+      if (isGeneratingResources || localStorage.getItem('pendingSalesSageGeneration')) {
+        checkForCompletedResources();
+      }
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [customerId, generationSessionId, isGeneratingResources]);
+
   // Track clicks for engagement assessment
   const trackClick = useCallback((action) => {
     clickCountRef.current += 1;

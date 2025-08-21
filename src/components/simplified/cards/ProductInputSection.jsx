@@ -16,7 +16,8 @@ const ProductInputSection = ({ customerId, onProductSubmit }) => {
     productName: '',
     productDescription: '',
     businessType: '',
-    keyFeatures: ''
+    keyFeatures: '',
+    targetMarket: ''
   });
   const [isGenerating, setIsGenerating] = useState(false);
 
@@ -45,6 +46,7 @@ const ProductInputSection = ({ customerId, onProductSubmit }) => {
         body: JSON.stringify({
           product_name: productData.productName,
           product_description: productData.productDescription,
+          target_market: productData.targetMarket,
           company_name: productData.productName + ' Inc', // Derive company name from product name
           customer_id: customerId || 'CUST_DOTUN_01',
           record_id: customerId === 'CUST_5' ? 'recKU4vMCwMzVvFxD' : customerId === 'CUST_4' ? 'recgnU6LXDbCYYcXt' : 'rechze4X0QFwHRD01',
@@ -79,7 +81,8 @@ const ProductInputSection = ({ customerId, onProductSubmit }) => {
           productName: '',
           productDescription: '',
           businessType: '',
-          keyFeatures: ''
+          keyFeatures: '',
+          targetMarket: ''
         });
       } else {
         throw new Error('Webhook response not ok');
@@ -93,7 +96,7 @@ const ProductInputSection = ({ customerId, onProductSubmit }) => {
   };
 
   const isFormValid = productData.productName && productData.productDescription && 
-                     productData.businessType && productData.keyFeatures;
+                     productData.businessType && productData.keyFeatures && productData.targetMarket;
 
   return (
     <div className="bg-gradient-to-br from-blue-900/20 to-purple-900/20 border border-blue-500/30 rounded-xl p-6 mb-6">
@@ -151,6 +154,19 @@ const ProductInputSection = ({ customerId, onProductSubmit }) => {
           className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none transition-colors"
           rows={3}
           placeholder="Describe what your product does and how it helps customers..."
+        />
+      </div>
+      
+      <div className="mb-4">
+        <label className="block text-sm font-medium text-gray-300 mb-2">
+          Target Market
+        </label>
+        <input
+          type="text"
+          value={productData.targetMarket}
+          onChange={(e) => setProductData({...productData, targetMarket: e.target.value})}
+          className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none transition-colors"
+          placeholder="e.g., B2B SaaS companies with 50-500 employees"
         />
       </div>
       
