@@ -207,6 +207,25 @@ class WebhookService {
   }
 
   /**
+   * Manual completion for testing (if webhook fails)
+   * Call this from browser console: webhookService.manualComplete()
+   */
+  manualComplete(sessionId = null) {
+    const currentSession = sessionId || localStorage.getItem('current_generation_id');
+    if (!currentSession) {
+      console.warn('No active session found');
+      return false;
+    }
+
+    console.log('🔧 Manually completing resources for session:', currentSession);
+    const resources = this.getMockResources();
+    this.completeGeneration(currentSession, resources);
+    console.log('✅ Mock resources generated and stored');
+    console.log('🔄 Refresh the page to see them!');
+    return true;
+  }
+
+  /**
    * Poll for completion from webhook server
    */
   async pollForCompletion(sessionId, maxAttempts = 60, interval = 2000) {
@@ -246,5 +265,10 @@ class WebhookService {
 
 // Create singleton instance
 const webhookService = new WebhookService();
+
+// Make available globally for debugging
+if (typeof window !== 'undefined') {
+  window.webhookService = webhookService;
+}
 
 export default webhookService;

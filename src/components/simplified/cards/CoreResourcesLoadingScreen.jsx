@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Loader2, Sparkles, Brain, Zap, Coffee, Rocket } from 'lucide-react';
+import webhookService from '../../../services/webhookService';
 
 /**
  * Loading screen with witty progress updates for Core Resources generation
@@ -116,8 +117,33 @@ const CoreResourcesLoadingScreen = ({ sessionId, onComplete }) => {
 
   useEffect(() => {
     const startTime = Date.now();
+    let completed = false;
     
-    const updateProgress = () => {
+    const updateProgress = async () => {
+      // Check if resources are ready early
+      if (!completed && sessionId) {
+        try {
+          const resources = await webhookService.getResources(sessionId);
+          if (resources && Object.keys(resources).length > 0) {
+            console.log('🎉 Resources ready early!', resources);
+            completed = true;
+            setProgress(100);
+            setCurrentMessage("Core Resources generated successfully!");
+            setSubMessage("Your competitive advantage awaits ✅");
+            setCurrentIcon(Sparkles);
+            
+            if (onComplete) {
+              setTimeout(() => {
+                onComplete();
+              }, 1000); // Small delay for visual effect
+            }
+            return false; // Stop the interval
+          }
+        } catch (error) {
+          console.log('Checking for resources...', error.message);
+        }
+      }
+      
       const elapsed = (Date.now() - startTime) / 1000; // Convert to seconds
       
       // Find the appropriate stage based on elapsed time
@@ -145,8 +171,9 @@ const CoreResourcesLoadingScreen = ({ sessionId, onComplete }) => {
       setSubMessage(currentStage.subMessage);
       setCurrentIcon(currentStage.icon);
       
-      // Complete after 2 minutes
+      // Complete after 2 minutes (fallback)
       if (elapsed >= 120) {
+        console.log('⏰ Loading screen timeout - using fallback resources');
         if (onComplete) {
           setTimeout(() => {
             onComplete();
@@ -161,12 +188,13 @@ const CoreResourcesLoadingScreen = ({ sessionId, onComplete }) => {
     // Initial update
     updateProgress();
     
-    // Update every 100ms for smooth progress
-    const interval = setInterval(() => {
-      if (!updateProgress()) {
+    // Update every 1 second (check for resources + progress animation)
+    const interval = setInterval(async () => {
+      const shouldContinue = await updateProgress();
+      if (!shouldContinue) {
         clearInterval(interval);
       }
-    }, 100);
+    }, 1000);
     
     return () => clearInterval(interval);
   }, [sessionId, onComplete]);
