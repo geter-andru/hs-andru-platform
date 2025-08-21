@@ -251,6 +251,23 @@ exports.handler = async (event, context) => {
       timestamp: new Date().toISOString()
     });
 
+    // Return success response with resource data - include script to store in localStorage
+    const storageScript = `
+      <script>
+        try {
+          const resources = ${JSON.stringify(resources)};
+          localStorage.setItem('resources_${sessionId}', JSON.stringify({
+            ...resources,
+            _timestamp: Date.now(),
+            _source: 'webhook'
+          }));
+          console.log('✅ Webhook resources stored in localStorage:', '${sessionId}');
+        } catch (e) {
+          console.error('Failed to store webhook resources:', e);
+        }
+      </script>
+    `;
+    
     // Return success response with resource data that Make.com expects
     return {
       statusCode: 200,
@@ -267,7 +284,8 @@ exports.handler = async (event, context) => {
         resources: resources, // Include the actual resources in the response
         resources_url: resourcesUrl, // URL for frontend to fetch resources
         message: 'Resources received and processed successfully',
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
+        storage_note: 'Resources included in response due to Netlify stateless limitations'
       })
     };
 

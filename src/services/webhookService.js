@@ -132,28 +132,8 @@ class WebhookService {
       return this.completedResources[sessionId];
     }
     
-    // Try to fetch fresh webhook data first (prioritize over localStorage cache)
-    try {
-      console.log('🌐 Checking for fresh webhook data...');
-      const response = await fetch(`/.netlify/functions/get-resources?sessionId=${sessionId}`);
-      if (response.ok) {
-        const data = await response.json();
-        if (data.success && data.resources) {
-          console.log('🎉 Found fresh webhook resources!');
-          // Store in memory and localStorage for future access
-          this.completedResources[sessionId] = data.resources;
-          this.cleanupOldResources();
-          localStorage.setItem(`resources_${sessionId}`, JSON.stringify({
-            ...data.resources,
-            _timestamp: Date.now(),
-            _source: 'webhook'
-          }));
-          return data.resources;
-        }
-      }
-    } catch (error) {
-      console.log('⚠️ Could not fetch fresh webhook data:', error.message);
-    }
+    // Skip Netlify function check (stateless functions can't share data) - rely on localStorage
+    console.log('ℹ️ Skipping Netlify function check (stateless limitation) - using localStorage approach');
     
     // Check localStorage as fallback (but check if it's stale)
     const stored = localStorage.getItem(`resources_${sessionId}`);
