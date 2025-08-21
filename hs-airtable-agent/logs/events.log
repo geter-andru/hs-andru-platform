@@ -6,3 +6,4 @@
 2025-08-21T03:15:16.513Z | manual_trigger | manual_trigger | evt_1755746116513_s871zp4br | {"operation":"consolidate_fields","manual":true,"triggeredAt":"2025-08-21T03:15:16.513Z"}
 2025-08-21T03:22:24.978Z | manual_trigger | manual_trigger | evt_1755746544978_57bqajoog | {"operation":"test","message":"Test webhook trigger","source":"webhook","timestamp":"2025-08-21T03:22:24.978Z","userAgent":"curl/8.7.1","ip":"::1","manual":true,"triggeredAt":"2025-08-21T03:22:24.978Z"}
 2025-08-21T03:22:37.295Z | backup_required | backup_trigger | evt_1755746557295_eqk1ozw4a | {"reason":"Webhook test backup","priority":"low","tables":[],"source":"webhook_request"}
+2025-08-21T04:58:10.762Z | manual_trigger | manual_trigger | evt_1755752290762_vfrgg97qp | {"operation":"backup","reason":"integration-testing","tables":["Customer Assets"],"priority":"high","manual":true,"triggeredAt":"2025-08-21T04:58:10.761Z"}

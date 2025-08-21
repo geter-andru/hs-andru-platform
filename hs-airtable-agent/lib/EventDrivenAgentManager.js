@@ -6,14 +6,15 @@
 const EventBus = require('./EventBus');
 const EventDetector = require('./EventDetector');
 const WebhookServer = require('./WebhookServer');
-const { AgentCoordinator } = require('./AgentCoordinator');
+const AgentCoordinator = require('./AgentCoordinator');
+const agentConfig = require('../config/agent.config');
 
 class EventDrivenAgentManager {
     constructor(options = {}) {
         this.eventBus = options.eventBus || new EventBus();
         this.eventDetector = options.eventDetector || new EventDetector({ eventBus: this.eventBus });
         this.webhookServer = options.webhookServer || null; // Initialize only when needed
-        this.coordinator = options.coordinator || new AgentCoordinator();
+        this.coordinator = options.coordinator || new AgentCoordinator(agentConfig);
         this.airtableClient = options.airtableClient;
         this.auditEngine = options.auditEngine;
         this.optimizationEngine = options.optimizationEngine;
