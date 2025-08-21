@@ -65,6 +65,12 @@ const SimplifiedICP = ({ customerId }) => {
             const resources = await webhookService.getResources(actualSessionId);
             if (resources && Object.keys(resources).length > 0) {
               console.log('🎉 Resources loaded successfully!', resources);
+              
+              // Debug: Check if this is webhook content or fallback content
+              const isWebhookContent = resources.icp_analysis?.content?.length > 5000; // Rich content is much longer
+              const contentSource = isWebhookContent ? 'WEBHOOK (Rich Make.com content)' : 'FALLBACK (Mock realistic content)';
+              console.log(`🔍 Content Source: ${contentSource}`);
+              console.log(`📊 Content Length: ${resources.icp_analysis?.content?.length || 0} characters`);
               setCustomerData(prev => ({
                 ...prev,
                 salesSageResources: resources

@@ -14,6 +14,11 @@ class WebhookService {
    */
   startGeneration(customerId, sessionId) {
     const id = sessionId || Date.now().toString();
+    
+    // Clear any existing resources for this session to prevent cache conflicts
+    console.log(`🧹 Starting fresh generation for session: ${id}`);
+    delete this.completedResources[id];
+    
     this.generationStatus[id] = {
       customerId,
       status: 'processing',
@@ -24,8 +29,9 @@ class WebhookService {
     
     // Store session ID in localStorage for persistence (with quota handling)
     try {
-      // Clear old resources to free up space
+      // Clear old resources to free up space and remove stale data for this session
       this.cleanupOldResources();
+      localStorage.removeItem(`resources_${id}`); // Clear any existing resources for this session
       localStorage.setItem('current_generation_id', id);
     } catch (e) {
       console.warn('localStorage quota exceeded, continuing without persistence:', e);
@@ -115,45 +121,67 @@ class WebhookService {
   }
 
   /**
-   * Get completed resources
+   * Get completed resources - prioritize fresh webhook data over cached localStorage
    */
   async getResources(sessionId) {
-    // Check memory first
+    console.log(`🔍 Getting resources for session: ${sessionId}`);
+    
+    // Check memory first (most recent)
     if (this.completedResources[sessionId]) {
+      console.log('📦 Found resources in memory');
       return this.completedResources[sessionId];
     }
     
-    // Check localStorage as primary storage (since Netlify functions are stateless)
-    const stored = localStorage.getItem(`resources_${sessionId}`);
-    if (stored) {
-      try {
-        const resources = JSON.parse(stored);
-        // Cache in memory for faster access
-        this.completedResources[sessionId] = resources;
-        return resources;
-      } catch (parseError) {
-        console.error('Error parsing stored resources:', parseError);
-        localStorage.removeItem(`resources_${sessionId}`);
-      }
-    }
-    
-    // Try to fetch from Netlify function (unlikely to work due to stateless nature)
+    // Try to fetch fresh webhook data first (prioritize over localStorage cache)
     try {
+      console.log('🌐 Checking for fresh webhook data...');
       const response = await fetch(`/.netlify/functions/get-resources?sessionId=${sessionId}`);
       if (response.ok) {
         const data = await response.json();
         if (data.success && data.resources) {
+          console.log('🎉 Found fresh webhook resources!');
           // Store in memory and localStorage for future access
           this.completedResources[sessionId] = data.resources;
           this.cleanupOldResources();
-          localStorage.setItem(`resources_${sessionId}`, JSON.stringify(data.resources));
+          localStorage.setItem(`resources_${sessionId}`, JSON.stringify({
+            ...data.resources,
+            _timestamp: Date.now(),
+            _source: 'webhook'
+          }));
           return data.resources;
         }
       }
     } catch (error) {
-      console.log('Could not fetch from Netlify function:', error.message);
+      console.log('⚠️ Could not fetch fresh webhook data:', error.message);
     }
     
+    // Check localStorage as fallback (but check if it's stale)
+    const stored = localStorage.getItem(`resources_${sessionId}`);
+    if (stored) {
+      try {
+        const storedData = JSON.parse(stored);
+        const isStale = storedData._timestamp && (Date.now() - storedData._timestamp) > 300000; // 5 minutes
+        const source = storedData._source || 'unknown';
+        
+        console.log(`📋 Found localStorage resources (source: ${source}, stale: ${isStale})`);
+        
+        if (!isStale || !storedData._timestamp) {
+          // Remove metadata before returning
+          const { _timestamp, _source, ...resources } = storedData;
+          // Cache in memory for faster access
+          this.completedResources[sessionId] = resources;
+          return resources;
+        } else {
+          console.log('🗑️ Removing stale localStorage resources');
+          localStorage.removeItem(`resources_${sessionId}`);
+        }
+      } catch (parseError) {
+        console.error('❌ Error parsing stored resources:', parseError);
+        localStorage.removeItem(`resources_${sessionId}`);
+      }
+    }
+    
+    console.log('❌ No resources found for session:', sessionId);
     return null;
   }
 

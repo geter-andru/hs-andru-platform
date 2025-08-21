@@ -54,12 +54,14 @@ exports.handler = async (event, context) => {
     const sessionId = data.session_id || event.headers['x-session-id'];
     const customerId = data.customer_id || event.headers['x-customer-id'];
 
-    console.log('Received webhook:', { 
+    console.log('🔔 WEBHOOK RECEIVED - Core Resources:', { 
       sessionId, 
       customerId, 
       timestamp: new Date().toISOString(),
       dataKeys: Object.keys(data),
-      hasResourcesCollection: !!data.resourcesCollection
+      hasResourcesCollection: !!data.resourcesCollection,
+      bodyLength: event.body?.length || 0,
+      hasRichContent: event.body?.length > 10000
     });
 
     // Validate required fields
