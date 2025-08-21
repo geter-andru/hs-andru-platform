@@ -242,7 +242,7 @@ class WebhookService {
 
     try {
       // Transform webhook data to our format
-      const resources = this.transformWebhookData(data);
+      const resources = this.transformMakeComData(data);
       
       // Store immediately in localStorage and memory
       this.completedResources[sessionId] = resources;
@@ -258,44 +258,113 @@ class WebhookService {
   }
 
   /**
-   * Transform raw webhook data to our resource format
+   * Transform Make.com resourcesCollection format to our UI format
    */
-  transformWebhookData(data) {
-    // This should match the format expected by the UI
+  transformMakeComData(data) {
+    const resources = data.resourcesCollection || {};
+    
     return {
       icp_analysis: {
-        title: "Ideal Customer Profile Analysis",
-        confidence_score: data.icp_confidence || 8.5,
-        content: data.icp_content || "Generated ICP analysis...",
-        company_size_range: data.icp_company_size,
-        industry_verticals: data.icp_industries,
+        title: resources.icp_analysisCollection?.title || "Ideal Customer Profile Analysis",
+        confidence_score: resources.icp_analysisCollection?.confidence_score || 8.5,
+        generation_date: resources.icp_analysisCollection?.generation_date || new Date().toISOString(),
+        content: resources.icp_analysisCollection?.content || "Generated ICP analysis...",
+        company_size_range: resources.icp_analysisCollection?.company_size_range,
+        industry_verticals: resources.icp_analysisCollection?.industry_verticals,
+        annual_revenue_range: resources.icp_analysisCollection?.annual_revenue_range,
+        geographic_markets: resources.icp_analysisCollection?.geographic_markets,
+        technology_stack: resources.icp_analysisCollection?.technology_stack,
+        budget_range: resources.icp_analysisCollection?.budget_range,
+        decision_makers: resources.icp_analysisCollection?.decision_makers,
+        growth_stage: resources.icp_analysisCollection?.growth_stage,
         generated: true
       },
       buyer_personas: {
-        title: "Target Buyer Personas", 
-        confidence_score: data.persona_confidence || 9.0,
-        content: data.persona_content || "Generated buyer personas...",
-        persona_name: data.persona_name,
-        job_title: data.persona_job_title,
+        title: resources.buyer_personasCollection?.title || "Target Buyer Personas",
+        confidence_score: resources.buyer_personasCollection?.confidence_score || 9.0,
+        generation_date: resources.buyer_personasCollection?.generation_date || new Date().toISOString(),
+        content: resources.buyer_personasCollection?.content || "Generated buyer personas...",
+        persona_name: resources.buyer_personasCollection?.persona_name,
+        job_title: resources.buyer_personasCollection?.job_title,
+        pain_points: resources.buyer_personasCollection?.pain_points,
+        goals_and_objectives: resources.buyer_personasCollection?.goals_and_objectives,
+        decision_timeline: resources.buyer_personasCollection?.decision_timeline,
+        success_metrics: resources.buyer_personasCollection?.success_metrics,
         generated: true
       },
       empathy_map: {
-        title: "Customer Empathy Map",
-        confidence_score: data.empathy_confidence || 8.8,
-        content: data.empathy_content || "Generated empathy mapping...",
-        what_they_think: data.empathy_think,
-        what_they_feel: data.empathy_feel,
+        title: resources.empathy_mapCollection?.title || "Customer Empathy Map",
+        confidence_score: resources.empathy_mapCollection?.confidence_score || 8.8,
+        generation_date: resources.empathy_mapCollection?.generation_date || new Date().toISOString(),
+        content: resources.empathy_mapCollection?.content || "Generated empathy mapping...",
+        what_they_think: resources.empathy_mapCollection?.what_they_think,
+        what_they_feel: resources.empathy_mapCollection?.what_they_feel,
+        what_they_see: resources.empathy_mapCollection?.what_they_see,
+        what_they_do: resources.empathy_mapCollection?.what_they_do,
+        what_they_hear: resources.empathy_mapCollection?.what_they_hear,
+        pains_and_frustrations: resources.empathy_mapCollection?.pains_and_frustrations,
+        gains_and_benefits: resources.empathy_mapCollection?.gains_and_benefits,
         generated: true
       },
       product_assessment: {
-        title: "Product Market Fit Assessment",
-        confidence_score: data.assessment_confidence || 9.2,
-        content: data.assessment_content || "Generated market assessment...",
-        current_product_potential_score: data.assessment_score,
-        market_opportunity: data.market_opportunity,
+        title: resources.product_assessmentCollection?.title || "Product Market Fit Assessment",
+        confidence_score: resources.product_assessmentCollection?.confidence_score || 9.2,
+        generation_date: resources.product_assessmentCollection?.generation_date || new Date().toISOString(),
+        content: resources.product_assessmentCollection?.content || "Generated market assessment...",
+        current_product_potential_score: resources.product_assessmentCollection?.current_product_potential_score,
+        gaps_preventing_10: resources.product_assessmentCollection?.gaps_preventing_10,
+        market_opportunity: resources.product_assessmentCollection?.market_opportunity,
+        problems_solved_today: resources.product_assessmentCollection?.problems_solved_today,
+        customer_conversion: resources.product_assessmentCollection?.customer_conversion,
+        value_indicators: resources.product_assessmentCollection?.value_indicators,
         generated: true
       }
     };
+  }
+
+  /**
+   * Simulate a direct Make.com webhook for testing
+   * Uses the exact format from your Make.com output
+   */
+  simulateMakeComWebhook(sessionId) {
+    const makeComData = {
+      session_id: sessionId,
+      resourcesCollection: {
+        icp_analysisCollection: {
+          title: "Ideal Customer Profile Analysis",
+          confidence_score: 8,
+          generation_date: new Date().toISOString(),
+          content: "**Company Size Range:** 100-500 employees\n\n**Industry Verticals:** Technology, SaaS, B2B Services\n\n**Annual Revenue Range:** $10M - $50M\n\n**Geographic Markets:** North America, Europe\n\n**Technology Stack:** Cloud-native, API-first\n\n**Budget Range:** $50K - $200K annually\n\n**Decision Makers:** VP Engineering, CTO, Head of Operations",
+          generated: true
+        },
+        buyer_personasCollection: {
+          title: "Target Buyer Personas",
+          confidence_score: 9,
+          generation_date: new Date().toISOString(),
+          content: "**Technology Decision Maker**\n\n**Job Title:** VP Engineering / CTO\n\n**Pain Points:** Legacy systems, integration challenges, scaling issues\n\n**Goals & Objectives:** Modernize tech stack, improve efficiency, reduce technical debt\n\n**Decision Timeline:** 3-6 months evaluation cycle\n\n**Success Metrics:** System reliability, team productivity, cost reduction",
+          generated: true
+        },
+        empathy_mapCollection: {
+          title: "Customer Empathy Map",
+          confidence_score: 8.8,
+          generation_date: new Date().toISOString(),
+          content: "**What They Think:** Need reliable solutions that integrate well\n\n**What They Feel:** Pressure to modernize while maintaining stability\n\n**What They See:** Competitive pressure and rapid tech evolution\n\n**What They Do:** Research extensively, consult teams, evaluate ROI\n\n**What They Hear:** Industry trends, peer recommendations, vendor pitches",
+          generated: true
+        },
+        product_assessmentCollection: {
+          title: "Product Market Fit Assessment",
+          confidence_score: 9.2,
+          generation_date: new Date().toISOString(),
+          content: "**Current Product Potential Score:** 8.5/10\n\n**Problems You Solve Today:** Integration complexity, manual processes, scaling bottlenecks\n\n**Gaps Preventing 10/10:** Enterprise features, advanced security, broader integrations\n\n**Market Opportunity:** Significant demand in mid-market B2B segment",
+          generated: true
+        }
+      },
+      resources_url: `/.netlify/functions/get-resources?sessionId=${sessionId}`,
+      message: "Resources received and processed successfully",
+      timestamp: new Date().toISOString()
+    };
+
+    return this.receiveWebhookData(makeComData);
   }
 
   /**
@@ -315,6 +384,131 @@ class WebhookService {
     console.log('✅ Mock resources generated and stored');
     console.log('🔄 Refresh the page to see them!');
     return true;
+  }
+
+  /**
+   * Debug method: Simulate receiving the exact Make.com webhook data
+   * Call from console: webhookService.testMakeComWebhook()
+   */
+  testMakeComWebhook(sessionId = null) {
+    const currentSession = sessionId || localStorage.getItem('current_generation_id');
+    if (!currentSession) {
+      console.warn('No active session found');
+      return false;
+    }
+
+    // Simulate the EXACT data structure that Make.com should be sending
+    const makeComWebhookData = {
+      session_id: currentSession,
+      resourcesCollection: {
+        icp_analysisCollection: {
+          title: "Ideal Customer Profile Analysis",
+          confidence_score: 8,
+          generation_date: "2025-01-27",
+          content: `**Company Size Range:** Mid-market to large enterprises (500-10,000+ employees)
+
+**Industry Verticals:** Manufacturing, Energy & Utilities, Transportation & Logistics, Technology, Financial Services, Retail & Consumer Goods, Construction & Real Estate, Healthcare
+
+**Annual Revenue Range:** $100M - $10B+
+
+**Geographic Markets:** North America, Europe, Asia-Pacific (primarily developed markets with strong ESG regulations)
+
+**Technology Stack:** Cloud-based infrastructure, existing ERP systems (SAP, Oracle, Microsoft Dynamics), supply chain management platforms, data analytics tools, API-enabled systems
+
+**Budget Range:** $50,000 - $500,000+ annually for emissions tracking solutions
+
+**Decision Makers:** Chief Sustainability Officers, VP of ESG, CFOs, Chief Risk Officers, Environmental Compliance Managers, Procurement Directors`,
+          company_size_range: "Mid-market to large enterprises (500-10,000+ employees)",
+          industry_verticals: "Manufacturing, Energy & Utilities, Transportation & Logistics, Technology, Financial Services, Retail & Consumer Goods, Construction & Real Estate, Healthcare",
+          annual_revenue_range: "$100M - $10B+",
+          geographic_markets: "North America, Europe, Asia-Pacific",
+          technology_stack: "Cloud-based infrastructure, existing ERP systems",
+          budget_range: "$50,000 - $500,000+ annually",
+          decision_makers: "Chief Sustainability Officers, VP of ESG, CFOs",
+          generated: true
+        },
+        buyer_personasCollection: {
+          title: "Target Buyer Personas",
+          confidence_score: 9,
+          generation_date: "2025-01-27",
+          content: `**Chief Sustainability Officer**
+
+**Job Title:** Chief Sustainability Officer / VP of ESG
+
+**Pain Points:** Manual data collection processes, fragmented emissions data across multiple systems, difficulty meeting evolving regulatory requirements
+
+**Goals & Objectives:** Automate emissions tracking, achieve regulatory compliance, improve ESG ratings
+
+**Decision Timeline:** 6-18 month evaluation cycle involving multiple stakeholders
+
+**Success Metrics:** Automated data collection reducing manual effort by 70%+, comprehensive emissions visibility, regulatory compliance achievement`,
+          persona_name: "Chief Sustainability Officer",
+          job_title: "Chief Sustainability Officer / VP of ESG",
+          pain_points: "Manual data collection processes, fragmented emissions data, regulatory compliance challenges",
+          goals_and_objectives: "Automate emissions tracking, achieve regulatory compliance, improve ESG ratings",
+          generated: true
+        },
+        empathy_mapCollection: {
+          title: "Customer Empathy Map",
+          confidence_score: 8.8,
+          generation_date: "2025-01-27",
+          content: `**What They Think:** "We need automated solutions to handle complex emissions calculations and regulatory reporting"
+
+**What They Feel:** Pressure from investors and regulators for ESG transparency, overwhelmed by manual processes
+
+**What They See:** Increasing regulatory requirements, competitor sustainability initiatives, investor ESG demands
+
+**What They Do:** Research emissions tracking solutions, evaluate multiple vendors, seek pilot programs
+
+**What They Hear:** Industry discussions about SEC climate rules, peer recommendations, vendor presentations`,
+          what_they_think: "We need automated solutions to handle complex emissions calculations",
+          what_they_feel: "Pressure from investors and regulators for ESG transparency",
+          what_they_see: "Increasing regulatory requirements, competitor sustainability initiatives",
+          what_they_do: "Research emissions tracking solutions, evaluate multiple vendors",
+          what_they_hear: "Industry discussions about SEC climate rules, peer recommendations",
+          generated: true
+        },
+        product_assessmentCollection: {
+          title: "Product Market Fit Assessment",
+          confidence_score: 9.2,
+          generation_date: "2025-01-27",
+          content: `**Current Product Potential Score:** 8.5/10
+
+**Problems You Solve Today:** Manual data collection processes, fragmented emissions data across multiple systems, lack of real-time visibility into Scope 3 emissions
+
+**Gaps Preventing 10/10:** Enhanced AI-powered automation, deeper ERP integrations, expanded Scope 3 coverage
+
+**Market Opportunity:** Rapidly growing market valued at $12.4B in 2023, projected to reach $28.6B by 2030, driven by regulatory requirements and investor pressure`,
+          current_product_potential_score: 8.5,
+          gaps_preventing_10: "Enhanced AI-powered automation, deeper ERP integrations, expanded Scope 3 coverage",
+          market_opportunity: "Rapidly growing market valued at $12.4B in 2023, projected to reach $28.6B by 2030",
+          problems_solved_today: "Manual data collection processes, fragmented emissions data, real-time visibility gaps",
+          generated: true
+        }
+      },
+      message: "Resources received and processed successfully",
+      timestamp: new Date().toISOString()
+    };
+
+    console.log('🧪 Testing Make.com webhook simulation with rich data...');
+    const success = this.receiveWebhookData(makeComWebhookData);
+    
+    if (success) {
+      console.log('✅ Rich Make.com webhook data processed successfully!');
+      console.log('🔄 Refresh the page to see the detailed resources!');
+      
+      // Trigger UI update if we're on the right page
+      if (window.location.pathname.includes('/icp')) {
+        setTimeout(() => {
+          window.location.reload();
+        }, 1000);
+      }
+      
+      return true;
+    } else {
+      console.error('❌ Failed to process webhook data');
+      return false;
+    }
   }
 
   /**

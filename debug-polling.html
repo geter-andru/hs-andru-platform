@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug Make.com Polling Issue</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #1a1a1a; color: white; }
+        .debug-section { margin: 20px 0; padding: 15px; background: #2a2a2a; border-radius: 8px; }
+        .success { background: #1e4a1e; border-left: 4px solid #4ade80; }
+        .error { background: #4a1e1e; border-left: 4px solid #ef4444; }
+        .info { background: #1e2a4a; border-left: 4px solid #3b82f6; }
+        button { background: #3b82f6; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; margin: 5px; }
+        button:hover { background: #2563eb; }
+        pre { background: #000; padding: 10px; border-radius: 4px; overflow-x: auto; }
+        input { padding: 8px; margin: 5px; border-radius: 4px; border: 1px solid #555; background: #333; color: white; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Make.com Polling Debug Tool</h1>
+    
+    <div class="debug-section info">
+        <h2>Current Status</h2>
+        <p>User reported: "make scenario is completed, but the loading screen is still going"</p>
+        <p>This indicates our polling mechanism isn't detecting the completed resources.</p>
+    </div>
+
+    <div class="debug-section">
+        <h2>1. Check localStorage State</h2>
+        <button onclick="checkLocalStorage()">Check localStorage</button>
+        <pre id="localStorage-output"></pre>
+    </div>
+
+    <div class="debug-section">
+        <h2>2. Test Netlify Function</h2>
+        <input type="text" id="sessionId" placeholder="Enter session ID" />
+        <button onclick="testNetlifyFunction()">Test /.netlify/functions/get-resources</button>
+        <pre id="netlify-output"></pre>
+    </div>
+
+    <div class="debug-section">
+        <h2>3. Test webhookService Methods</h2>
+        <button onclick="testWebhookService()">Test webhookService.getResources()</button>
+        <pre id="webhook-output"></pre>
+    </div>
+
+    <div class="debug-section">
+        <h2>4. Manual Resource Completion</h2>
+        <button onclick="manualComplete()">Force Complete with Mock Resources</button>
+        <pre id="manual-output"></pre>
+    </div>
+
+    <div class="debug-section">
+        <h2>5. Debug Steps</h2>
+        <ol>
+            <li>Check localStorage for pending generation and session ID</li>
+            <li>Test if Netlify function is receiving/storing the Make.com response</li>
+            <li>Verify webhookService polling is working correctly</li>
+            <li>If all else fails, manually complete to unblock the user</li>
+        </ol>
+    </div>
+
+    <script>
+        function checkLocalStorage() {
+            const output = document.getElementById('localStorage-output');
+            const data = {
+                pendingSalesSageGeneration: localStorage.getItem('pendingSalesSageGeneration'),
+                current_generation_id: localStorage.getItem('current_generation_id'),
+                allLocalStorageKeys: Object.keys(localStorage).filter(key => 
+                    key.includes('resources_') || 
+                    key.includes('pending') || 
+                    key.includes('generation')
+                )
+            };
+            
+            output.textContent = JSON.stringify(data, null, 2);
+            
+            if (data.current_generation_id) {
+                document.getElementById('sessionId').value = data.current_generation_id;
+            }
+        }
+
+        async function testNetlifyFunction() {
+            const sessionId = document.getElementById('sessionId').value || 'test';
+            const output = document.getElementById('netlify-output');
+            
+            try {
+                const response = await fetch(`/.netlify/functions/get-resources?sessionId=${sessionId}`);
+                const data = await response.json();
+                output.textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                output.textContent = `Error: ${error.message}`;
+            }
+        }
+
+        async function testWebhookService() {
+            const output = document.getElementById('webhook-output');
+            
+            if (typeof window.webhookService === 'undefined') {
+                output.textContent = 'webhookService not available - need to access from main app';
+                return;
+            }
+            
+            const sessionId = document.getElementById('sessionId').value || localStorage.getItem('current_generation_id');
+            if (!sessionId) {
+                output.textContent = 'No session ID found';
+                return;
+            }
+            
+            try {
+                const resources = await window.webhookService.getResources(sessionId);
+                output.textContent = JSON.stringify(resources, null, 2);
+            } catch (error) {
+                output.textContent = `Error: ${error.message}`;
+            }
+        }
+
+        function manualComplete() {
+            const output = document.getElementById('manual-output');
+            
+            if (typeof window.webhookService === 'undefined') {
+                output.textContent = 'webhookService not available - run this from main app console:\n\nwebhookService.manualComplete()';
+                return;
+            }
+            
+            const result = window.webhookService.manualComplete();
+            output.textContent = result ? 'Manual completion triggered - refresh page' : 'Failed to complete';
+        }
+
+        // Auto-check localStorage on page load
+        window.onload = function() {
+            checkLocalStorage();
+        }
+    </script>
+</body>
+</html>

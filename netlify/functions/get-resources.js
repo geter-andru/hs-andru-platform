@@ -48,26 +48,9 @@ exports.handler = async (event, context) => {
       };
     }
 
-    // Check if resources exist in multiple storage locations
-    let storedData = null;
-    
-    // 1. Check global storage first (same function instance)
+    // Check global storage (limited to same function instance)
     global.completedResources = global.completedResources || {};
-    storedData = global.completedResources[sessionId];
-    
-    // 2. If not found, check process environment (cross-instance)
-    if (!storedData) {
-      const envData = process.env[`RESOURCES_${sessionId}`];
-      if (envData) {
-        try {
-          storedData = JSON.parse(envData);
-          // Cache it in global for future calls
-          global.completedResources[sessionId] = storedData;
-        } catch (parseError) {
-          console.error('Error parsing stored data:', parseError);
-        }
-      }
-    }
+    const storedData = global.completedResources[sessionId];
 
     if (!storedData) {
       return {
@@ -79,7 +62,8 @@ exports.handler = async (event, context) => {
           message: 'Resources may not be ready yet or session ID is invalid',
           debug: {
             globalKeys: Object.keys(global.completedResources || {}),
-            envKeys: Object.keys(process.env).filter(key => key.startsWith('RESOURCES_')).length
+            fileExists: require('fs').existsSync(`/tmp/resources/${sessionId}.json`),
+            tmpDir: require('fs').existsSync('/tmp/resources') ? require('fs').readdirSync('/tmp/resources') : 'Not found'
           }
         })
       };

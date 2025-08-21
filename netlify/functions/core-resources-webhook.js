@@ -42,7 +42,13 @@ exports.handler = async (event, context) => {
     const sessionId = data.session_id || event.headers['x-session-id'];
     const customerId = data.customer_id || event.headers['x-customer-id'];
 
-    console.log('Received webhook:', { sessionId, customerId, timestamp: new Date().toISOString() });
+    console.log('Received webhook:', { 
+      sessionId, 
+      customerId, 
+      timestamp: new Date().toISOString(),
+      dataKeys: Object.keys(data),
+      hasResourcesCollection: !!data.resourcesCollection
+    });
 
     // Validate required fields
     if (!sessionId) {
@@ -53,22 +59,38 @@ exports.handler = async (event, context) => {
       };
     }
 
-    // Parse the nested JSON objects from Make.com Claude outputs
+    // Handle the new Make.com data format with resourcesCollection
     let icpData, personaData, empathyData, assessmentData;
     
-    try {
-      // Your Make.com scenario sends these as stringified JSON in the data object
-      icpData = data.icpData ? JSON.parse(data.icpData) : null;
-      personaData = data.personaData ? JSON.parse(data.personaData) : null;
-      empathyData = data.empathyData ? JSON.parse(data.empathyData) : null;
-      assessmentData = data.assessmentData ? JSON.parse(data.assessmentData) : null;
-    } catch (parseError) {
-      console.error('Error parsing nested JSON:', parseError);
-      return {
-        statusCode: 400,
-        headers: corsHeaders,
-        body: JSON.stringify({ error: 'Invalid JSON format in nested data' })
-      };
+    if (data.resourcesCollection) {
+      // New format from Make.com
+      const resources = data.resourcesCollection;
+      icpData = resources.icp_analysisCollection;
+      personaData = resources.buyer_personasCollection;
+      empathyData = resources.empathy_mapCollection;
+      assessmentData = resources.product_assessmentCollection;
+      
+      console.log('Using resourcesCollection format:', {
+        hasIcp: !!icpData,
+        hasPersona: !!personaData,
+        hasEmpathy: !!empathyData,
+        hasAssessment: !!assessmentData
+      });
+    } else {
+      // Legacy format - try to parse nested JSON
+      try {
+        icpData = data.icpData ? JSON.parse(data.icpData) : null;
+        personaData = data.personaData ? JSON.parse(data.personaData) : null;
+        empathyData = data.empathyData ? JSON.parse(data.empathyData) : null;
+        assessmentData = data.assessmentData ? JSON.parse(data.assessmentData) : null;
+      } catch (parseError) {
+        console.error('Error parsing nested JSON:', parseError);
+        return {
+          statusCode: 400,
+          headers: corsHeaders,
+          body: JSON.stringify({ error: 'Invalid JSON format in nested data' })
+        };
+      }
     }
 
     // Transform Make.com data into platform format
@@ -148,13 +170,13 @@ exports.handler = async (event, context) => {
       ].reduce((a, b) => a + b, 0) / 4
     };
 
-    // Store in multiple places for reliability
-    // 1. Global/memory for immediate access (same function instance)
+    // Simple approach: Return resources directly in webhook response
+    // Since Netlify functions are stateless, we'll rely on the webhook response
+    // and have the frontend handle the resources immediately
+    
+    // Also store in global for immediate access within same instance
     global.completedResources = global.completedResources || {};
     global.completedResources[sessionId] = storedData;
-    
-    // 2. Process environment for cross-instance access  
-    process.env[`RESOURCES_${sessionId}`] = JSON.stringify(storedData);
     
     // Also return the storage URL for frontend to fetch
     const resourcesUrl = `/.netlify/functions/get-resources?sessionId=${sessionId}`;
