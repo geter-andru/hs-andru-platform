@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Rocket, Package, Building2, Sparkles } from 'lucide-react';
 import webhookService from '../../../services/webhookService';
+import ProductFeatureParser from '../../tools/ProductFeatureParser';
 
 /**
  * ProductInputSection - Generate Core Resources based on product information
@@ -19,6 +20,7 @@ const ProductInputSection = ({ customerId, onProductSubmit }) => {
     keyFeatures: ''
   });
   const [isGenerating, setIsGenerating] = useState(false);
+  const [featuresAnalysis, setFeaturesAnalysis] = useState(null);
 
   const handleSubmit = async () => {
     setIsGenerating(true);
@@ -50,6 +52,7 @@ const ProductInputSection = ({ customerId, onProductSubmit }) => {
           record_id: customerId === 'CUST_5' ? 'recKU4vMCwMzVvFxD' : customerId === 'CUST_4' ? 'recgnU6LXDbCYYcXt' : 'rechze4X0QFwHRD01',
           business_type: productData.businessType,
           key_features: productData.keyFeatures,
+          features_analysis: featuresAnalysis, // Include parsed features analysis
           session_id: sessionId,
           webhook_callback: webhookService.getWebhookUrl(),
           timestamp: new Date().toISOString()
@@ -62,7 +65,8 @@ const ProductInputSection = ({ customerId, onProductSubmit }) => {
         onProductSubmit({
           ...productData,
           sessionId: sessionId,
-          isGenerating: true
+          isGenerating: true,
+          featuresAnalysis: featuresAnalysis // Include intelligent feature analysis
         });
         
         // Start polling for completion from webhook server (fallback to realistic mock after 1 minute)
@@ -161,17 +165,19 @@ const ProductInputSection = ({ customerId, onProductSubmit }) => {
       </div>
       
       
+      {/* Product Feature Parser Integration */}
       <div className="mb-6">
-        <label className="block text-sm font-medium text-gray-300 mb-2">
-          <Sparkles className="w-4 h-4 inline mr-1" />
-          Key Features
-        </label>
-        <textarea
-          value={productData.keyFeatures}
-          onChange={(e) => setProductData({...productData, keyFeatures: e.target.value})}
-          className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none transition-colors"
-          rows={2}
-          placeholder="List 3-5 key features that differentiate your product..."
+        <ProductFeatureParser
+          initialFeatures={productData.keyFeatures}
+          productName={productData.productName}
+          businessType={productData.businessType}
+          onFeaturesUpdate={(analysis) => {
+            setFeaturesAnalysis(analysis);
+            setProductData({
+              ...productData, 
+              keyFeatures: analysis.rawFeatures || ''
+            });
+          }}
         />
       </div>
       
