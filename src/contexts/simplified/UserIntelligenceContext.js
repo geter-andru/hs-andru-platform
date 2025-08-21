@@ -203,7 +203,7 @@ export const UserIntelligenceProvider = ({ children, customerId }) => {
       setUserIntelligence(prev => ({ ...prev, loading: true, error: null }));
       
       // For test environments and admin users ALWAYS use mock data
-      if (customerId.includes('TEST') || customerId === 'CUST_4') {
+      if (customerId.includes('TEST') || customerId === 'CUST_4' || customerId === 'CUST_02' || customerId === 'CUST_2') {
         console.log('✅ Test/Admin mode detected - using mock data for', customerId);
         setUserIntelligence({
           assessment: {
