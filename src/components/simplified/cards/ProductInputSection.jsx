@@ -67,8 +67,8 @@ const ProductInputSection = ({ customerId, onProductSubmit }) => {
           isGenerating: true
         });
         
-        // Start polling for completion from webhook server (fallback to mock after 2 minutes)
-        webhookService.pollForCompletion(sessionId, 60, 2000);
+        // Start polling for completion from webhook server (fallback to mock after 5 minutes)
+        webhookService.pollForCompletion(sessionId, 150, 2000);
         
         // Store in localStorage for persistence
         localStorage.setItem('pendingSalesSageGeneration', JSON.stringify({

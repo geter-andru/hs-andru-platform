@@ -4,7 +4,7 @@ import webhookService from '../../../services/webhookService';
 
 /**
  * Loading screen with witty progress updates for Core Resources generation
- * Total duration: 2 minutes with staged messages
+ * Total duration: 5 minutes with staged messages
  */
 
 const CoreResourcesLoadingScreen = ({ sessionId, onComplete }) => {
@@ -13,7 +13,7 @@ const CoreResourcesLoadingScreen = ({ sessionId, onComplete }) => {
   const [subMessage, setSubMessage] = useState('');
   const [currentIcon, setCurrentIcon] = useState(null);
 
-  // Witty progress messages with timing (120 seconds total)
+  // Witty progress messages with timing (300 seconds total - 5 minutes)
   const progressStages = [
     { 
       time: 0, 
@@ -23,91 +23,91 @@ const CoreResourcesLoadingScreen = ({ sessionId, onComplete }) => {
       icon: Zap 
     },
     { 
-      time: 10, 
+      time: 25, 
       progress: 8, 
       message: "Analyzing your product DNA...", 
       subMessage: "Discovering what makes your solution unique 🧬",
       icon: Brain 
     },
     { 
-      time: 20, 
+      time: 50, 
       progress: 16, 
       message: "Researching market intelligence...", 
       subMessage: "Scanning 1,000+ data points across the web 🌐",
       icon: Sparkles 
     },
     { 
-      time: 30, 
+      time: 75, 
       progress: 25, 
       message: "Crafting your Ideal Customer Profile...", 
       subMessage: "Finding your perfect match in the market 💝",
       icon: Brain 
     },
     { 
-      time: 40, 
+      time: 100, 
       progress: 33, 
       message: "Building buyer personas...", 
       subMessage: "Getting inside your customers' minds 🧠",
       icon: Coffee 
     },
     { 
-      time: 50, 
+      time: 125, 
       progress: 42, 
       message: "Brewing a strong cup of insights...", 
       subMessage: "Extra shot of competitive intelligence ☕",
       icon: Coffee 
     },
     { 
-      time: 60, 
+      time: 150, 
       progress: 50, 
       message: "Mapping customer emotions...", 
       subMessage: "Understanding their hopes, dreams, and fears 💭",
       icon: Brain 
     },
     { 
-      time: 70, 
+      time: 175, 
       progress: 58, 
       message: "Calculating market potential...", 
       subMessage: "Crunching numbers like a Wall Street quant 📊",
       icon: Zap 
     },
     { 
-      time: 80, 
+      time: 200, 
       progress: 67, 
       message: "Cross-referencing with industry benchmarks...", 
       subMessage: "Making sure you're ahead of the curve 📈",
       icon: Sparkles 
     },
     { 
-      time: 90, 
+      time: 225, 
       progress: 75, 
       message: "Applying secret sauce algorithms...", 
       subMessage: "This is where the magic happens ✨",
       icon: Rocket 
     },
     { 
-      time: 100, 
+      time: 250, 
       progress: 83, 
       message: "Quality checking with our AI council...", 
       subMessage: "Four AI models walk into a bar... 🤖",
       icon: Brain 
     },
     { 
-      time: 110, 
+      time: 275, 
       progress: 92, 
       message: "Polishing your Core Resources...", 
       subMessage: "Making them shine like diamonds 💎",
       icon: Sparkles 
     },
     { 
-      time: 118, 
+      time: 295, 
       progress: 98, 
       message: "Finalizing your strategic intelligence...", 
       subMessage: "Almost there... preparing for liftoff! 🚀",
       icon: Rocket 
     },
     { 
-      time: 120, 
+      time: 300, 
       progress: 100, 
       message: "Core Resources generated successfully!", 
       subMessage: "Your competitive advantage awaits ✅",
@@ -171,8 +171,8 @@ const CoreResourcesLoadingScreen = ({ sessionId, onComplete }) => {
       setSubMessage(currentStage.subMessage);
       setCurrentIcon(currentStage.icon);
       
-      // Complete after 2 minutes (fallback)
-      if (elapsed >= 120) {
+      // Complete after 5 minutes (fallback)
+      if (elapsed >= 300) {
         console.log('⏰ Loading screen timeout - using fallback resources');
         if (onComplete) {
           setTimeout(() => {
