@@ -74,7 +74,6 @@ const ProductInputSection = ({ customerId, onProductSubmit }) => {
           customerId,
           timestamp: Date.now()
         }));
-        alert('🎉 Resources are being generated! Check the Resource Library in 2-3 minutes.');
         // Clear form after successful submission
         setProductData({
           productName: '',
