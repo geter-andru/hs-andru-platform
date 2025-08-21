@@ -90,19 +90,30 @@ exports.handler = async (event, context) => {
           hasAssessment: !!assessmentData
         });
       } else {
-        // Legacy format - try to parse nested JSON
+        // Current Make.com format - parse JSON strings
+        console.log('Using individual resource fields format');
         try {
           icpData = data.icpData ? JSON.parse(data.icpData) : null;
           personaData = data.personaData ? JSON.parse(data.personaData) : null;
           empathyData = data.empathyData ? JSON.parse(data.empathyData) : null;
           assessmentData = data.assessmentData ? JSON.parse(data.assessmentData) : null;
+          
+          console.log('Parsed resource data:', {
+            hasIcp: !!icpData,
+            hasPersona: !!personaData,
+            hasEmpathy: !!empathyData,
+            hasAssessment: !!assessmentData
+          });
         } catch (parseError) {
-          console.error('Error parsing nested JSON:', parseError);
-          return {
-            statusCode: 400,
-            headers: corsHeaders,
-            body: JSON.stringify({ error: 'Invalid JSON format in nested data' })
-          };
+          console.error('Error parsing nested JSON strings:', parseError, 'Field causing error:', parseError.message);
+          // Try to continue with partial data instead of failing completely
+          console.log('Attempting to parse resources individually...');
+          
+          // Parse each field individually to isolate issues
+          try { icpData = data.icpData ? JSON.parse(data.icpData) : null; } catch (e) { console.error('icpData parse error:', e.message); icpData = null; }
+          try { personaData = data.personaData ? JSON.parse(data.personaData) : null; } catch (e) { console.error('personaData parse error:', e.message); personaData = null; }
+          try { empathyData = data.empathyData ? JSON.parse(data.empathyData) : null; } catch (e) { console.error('empathyData parse error:', e.message); empathyData = null; }
+          try { assessmentData = data.assessmentData ? JSON.parse(data.assessmentData) : null; } catch (e) { console.error('assessmentData parse error:', e.message); assessmentData = null; }
         }
       }
     } catch (resourceError) {
