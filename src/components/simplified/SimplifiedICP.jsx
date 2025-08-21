@@ -54,11 +54,15 @@ const SimplifiedICP = ({ customerId }) => {
     const checkForCompletedResources = async () => {
       // Check if there's a pending generation
       const pendingGeneration = JSON.parse(localStorage.getItem('pendingSalesSageGeneration') || 'null');
-      if (pendingGeneration && pendingGeneration.customerId === customerId) {
-        const sessionId = generationSessionId || localStorage.getItem('current_generation_id');
-        if (sessionId) {
+      const sessionId = generationSessionId || localStorage.getItem('current_generation_id');
+      
+      
+      // Check for resources even if no pending generation (in case generation completed)
+      if (sessionId || (pendingGeneration && pendingGeneration.customerId === customerId)) {
+        const actualSessionId = sessionId || localStorage.getItem('current_generation_id');
+        if (actualSessionId) {
           try {
-            const resources = await webhookService.getResources(sessionId);
+            const resources = await webhookService.getResources(actualSessionId);
             if (resources && Object.keys(resources).length > 0) {
               console.log('🎉 Resources loaded successfully!', resources);
               setCustomerData(prev => ({
@@ -636,6 +640,7 @@ const SimplifiedICP = ({ customerId }) => {
             <CoreResourcesSection 
               customerData={customerData}
             />
+            
           </div>
         )}
 

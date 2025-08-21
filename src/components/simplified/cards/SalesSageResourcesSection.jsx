@@ -226,6 +226,7 @@ const CoreResourcesSection = ({ customerData }) => {
   // Map the webhook response format to display format
   const resources = customerData?.salesSageResources || {};
   
+  
   const salesSageResources = [
     {
       id: 'icp',
