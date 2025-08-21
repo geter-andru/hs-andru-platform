@@ -45,9 +45,7 @@ const SimplifiedResourceLibrary = ({ customerId }) => {
           duration: '25 min',
           popularity: 92,
           tags: ['personas', 'targeting', 'qualification'],
-          content: 'Detailed framework for identifying poor-fit customers...',
-          placeholder: true,
-          comingSoonLabel: 'Negative Buyer Persona'
+          content: 'Detailed framework for identifying poor-fit customers...'
         },
         {
           id: 'core-value-messaging',
@@ -57,9 +55,7 @@ const SimplifiedResourceLibrary = ({ customerId }) => {
           duration: '35 min',
           popularity: 95,
           tags: ['messaging', 'value-prop', 'positioning'],
-          content: 'Complete messaging framework and positioning guide...',
-          placeholder: true,
-          comingSoonLabel: 'Value Messaging Overview'
+          content: 'Complete messaging framework and positioning guide...'
         },
         {
           id: 'core-moment-in-life',
@@ -69,9 +65,7 @@ const SimplifiedResourceLibrary = ({ customerId }) => {
           duration: '30 min',
           popularity: 89,
           tags: ['triggers', 'timing', 'moments'],
-          content: 'Framework for identifying customer trigger moments...',
-          placeholder: true,
-          comingSoonLabel: 'Moment in Life Description'
+          content: 'Framework for identifying customer trigger moments...'
         }
       ],
       'Advanced Sales Resources': [
@@ -576,9 +570,120 @@ const SimplifiedResourceLibrary = ({ customerId }) => {
     return null;
   }, [resourceDatabase]);
 
-  // Get generated resources from localStorage
+  // Add state for real-time resource updates
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+
+  // Listen for resource updates
+  useEffect(() => {
+    const handleStorageChange = () => {
+      setRefreshTrigger(prev => prev + 1);
+    };
+
+    // Listen for localStorage changes (webhook completions)
+    window.addEventListener('storage', handleStorageChange);
+    
+    // Also check periodically for new resources
+    const interval = setInterval(() => {
+      const currentSessionId = localStorage.getItem('current_generation_id');
+      if (currentSessionId && !localStorage.getItem(`notification_shown_${currentSessionId}`)) {
+        setRefreshTrigger(prev => prev + 1);
+      }
+    }, 5000);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      clearInterval(interval);
+    };
+  }, []);
+
+  // Get generated resources from localStorage with webhook service integration
   const getGeneratedResources = useMemo(() => {
-    // First check for resources stored directly from webhook service
+    // Check current session resources via webhook service
+    const currentSessionId = localStorage.getItem('current_generation_id');
+    if (currentSessionId) {
+      // Check for session-specific resources first
+      const sessionResources = localStorage.getItem(`resources_${currentSessionId}`);
+      if (sessionResources) {
+        try {
+          const parsed = JSON.parse(sessionResources);
+          const resources = [];
+          
+          // Transform webhook service format to Resource Library format
+          if (parsed.icp_analysis) {
+            resources.push({
+              id: 'session-icp-1',
+              title: 'ICP Analysis Report',
+              description: 'AI-generated ideal customer profile analysis',
+              type: 'analysis',
+              duration: '20 min',
+              popularity: 100,
+              tags: ['icp', 'ai-generated', 'session'],
+              content: parsed.icp_analysis.content || 'Generated ICP analysis content',
+              confidence: parsed.icp_analysis.confidence_score || 85,
+              generated: true,
+              sessionId: currentSessionId,
+              generatedAt: Date.now()
+            });
+          }
+          if (parsed.buyer_personas) {
+            resources.push({
+              id: 'session-persona-1',
+              title: 'Buyer Personas',
+              description: 'Detailed buyer persona profiles',
+              type: 'personas',
+              duration: '15 min',
+              popularity: 98,
+              tags: ['personas', 'ai-generated', 'session'],
+              content: parsed.buyer_personas.content || 'Generated buyer personas',
+              confidence: parsed.buyer_personas.confidence_score || 88,
+              generated: true,
+              sessionId: currentSessionId,
+              generatedAt: Date.now()
+            });
+          }
+          if (parsed.empathy_map) {
+            resources.push({
+              id: 'session-empathy-1',
+              title: 'Customer Empathy Map',
+              description: 'Understanding customer psychology',
+              type: 'empathy',
+              duration: '12 min',
+              popularity: 95,
+              tags: ['empathy', 'ai-generated', 'session'],
+              content: parsed.empathy_map.content || 'Generated empathy map',
+              confidence: parsed.empathy_map.confidence_score || 87,
+              generated: true,
+              sessionId: currentSessionId,
+              generatedAt: Date.now()
+            });
+          }
+          if (parsed.product_assessment) {
+            resources.push({
+              id: 'session-assessment-1',
+              title: 'Product Market Assessment',
+              description: 'Market fit and opportunity analysis',
+              type: 'assessment',
+              duration: '25 min',
+              popularity: 96,
+              tags: ['product', 'ai-generated', 'session'],
+              content: parsed.product_assessment.content || 'Generated product assessment',
+              confidence: parsed.product_assessment.confidence_score || 90,
+              generated: true,
+              sessionId: currentSessionId,
+              generatedAt: Date.now()
+            });
+          }
+          
+          if (resources.length > 0) {
+            return resources;
+          }
+        } catch (e) {
+          console.error('Error parsing session resources:', e);
+        }
+      }
+    }
+    
+    // Fallback to legacy generatedResources format
     const storedResources = localStorage.getItem('generatedResources');
     if (storedResources) {
       try {
@@ -734,61 +839,73 @@ const SimplifiedResourceLibrary = ({ customerId }) => {
     }
     
     return [];
-  }, []);
+  }, [refreshTrigger]);
 
-  // Generate core resource placeholders when resources don't exist
-  const getCoreResourcePlaceholders = useMemo(() => {
+  // Generate core resource templates (now accessible resources)
+  const getCoreResourceTemplates = useMemo(() => {
     const coreResourceTemplates = [
       {
-        id: 'placeholder-target-persona',
+        id: 'core-target-persona',
         title: 'Target Buyer Persona',
         description: 'Detailed ideal customer personality and behavioral profile',
         type: 'personas',
-        placeholder: true,
-        comingSoonLabel: 'Target Buyer Persona'
+        duration: '20 min',
+        popularity: 95,
+        tags: ['personas', 'targeting', 'buyer'],
+        content: 'Comprehensive buyer persona framework including demographics, psychographics, pain points, goals, preferred communication channels, and decision-making process. This template helps identify the specific individual within target companies who makes purchasing decisions.',
+        confidence: 90
       },
       {
-        id: 'placeholder-icp',
+        id: 'core-icp',
         title: 'Ideal Customer Profile (ICP)',
         description: 'Company-level characteristics for B2B targeting',
         type: 'analysis',
-        placeholder: true,
-        comingSoonLabel: 'Ideal Customer Profile'
+        duration: '25 min',
+        popularity: 98,
+        tags: ['icp', 'targeting', 'b2b'],
+        content: 'Complete ICP analysis framework covering company size, industry, revenue, growth stage, technology stack, budget, decision-making process, and key indicators that signal high-value prospects.',
+        confidence: 92
       },
       {
-        id: 'placeholder-empathy',
+        id: 'core-empathy',
         title: 'Empathy Map',
         description: 'Customer thoughts, feelings, and motivations visualization',
         type: 'empathy',
-        placeholder: true,
-        comingSoonLabel: 'Empathy Map'
+        duration: '15 min',
+        popularity: 88,
+        tags: ['empathy', 'psychology', 'customer'],
+        content: 'Visual empathy mapping framework exploring what customers think, feel, see, say, do, and hear. Includes pain points, gains, motivations, and emotional drivers that influence purchasing decisions.',
+        confidence: 87
       },
       {
-        id: 'placeholder-assessment',
+        id: 'core-assessment',
         title: 'Product Potential Assessment',
         description: 'Market opportunity and success probability analysis',
         type: 'assessment',
-        placeholder: true,
-        comingSoonLabel: 'Product Potential Assessment'
+        duration: '30 min',
+        popularity: 91,
+        tags: ['product', 'market-fit', 'assessment'],
+        content: 'Comprehensive product-market fit evaluation covering market size, competitive landscape, product differentiation, pricing strategy, and success probability metrics.',
+        confidence: 89
       }
     ];
     
     const existingResources = getGeneratedResources;
     const existingIds = existingResources.map(r => r.type);
     
-    // Only show placeholders for resources that don't exist
-    const placeholders = coreResourceTemplates.filter(template => 
+    // Only show templates for resources that don't exist as generated
+    const templates = coreResourceTemplates.filter(template => 
       !existingIds.includes(template.type)
     );
     
-    return placeholders;
+    return templates;
   }, [getGeneratedResources]);
 
   // Filter resources based on current selections
   const filteredResources = useMemo(() => {
     // Handle Core Resources category
     if (selectedCategory === 'Core Resources') {
-      let resources = [...getGeneratedResources, ...getCoreResourcePlaceholders];
+      let resources = [...getGeneratedResources, ...getCoreResourceTemplates];
       
       // Apply search filter
       if (searchTerm) {
@@ -840,7 +957,7 @@ const SimplifiedResourceLibrary = ({ customerId }) => {
       // Within same type, sort by popularity
       return (b.popularity || 0) - (a.popularity || 0);
     });
-  }, [resourceDatabase, selectedTier, selectedCategory, searchTerm, milestone, getGeneratedResources, getCoreResourcePlaceholders]);
+  }, [resourceDatabase, selectedTier, selectedCategory, searchTerm, milestone, getGeneratedResources, getCoreResourceTemplates]);
 
   // Track resource access
   const handleResourceAccess = useCallback((resource) => {
@@ -1056,39 +1173,44 @@ const SimplifiedResourceLibrary = ({ customerId }) => {
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {[...getGeneratedResources, ...getCoreResourcePlaceholders].map((resource) => {
+            {[...getGeneratedResources, ...getCoreResourceTemplates].map((resource) => {
               const ResourceIcon = getResourceIcon(resource.type);
+              
+              // Core resources are always accessible (no blur, View/Copy buttons)
+              // This section only shows core resources and webhook-generated resources
+              const isCoreResource = true; // All resources in core section are accessible
+              const needsGeneration = false; // Core resources never need generation
               
               return (
                 <div key={resource.id} className={`
                   relative bg-gray-900 border rounded-xl p-4 transition-colors
-                  ${resource.placeholder 
+                  ${needsGeneration 
                     ? 'border-gray-600 border-dashed hover:border-purple-500' 
                     : 'border-gray-800 hover:border-gray-700'
                   }
                 `}>
-                  {/* Blur overlay for placeholder content */}
-                  {resource.placeholder && (
+                  {/* Generate overlay for non-generated resources */}
+                  {needsGeneration && (
                     <div className="absolute inset-0 bg-gray-900/60 backdrop-blur-sm rounded-xl flex items-center justify-center z-10">
                       <div className="text-center">
                         <div className="bg-gradient-to-r from-purple-500 to-blue-500 text-white px-3 py-1.5 rounded-full text-xs font-medium mb-2">
-                          {resource.comingSoonLabel || 'Coming Soon'}
+                          Generate {resource.title}
                         </div>
                         <p className="text-gray-300 text-xs">Generate with AI</p>
                       </div>
                     </div>
                   )}
                   
-                  {/* Content - no blur for core resources so titles are visible */}
+                  {/* Content */}
                   <div>
                   <div className="flex items-start justify-between mb-3">
                     <div className={`p-2 rounded-lg ${
-                      resource.placeholder 
+                      needsGeneration 
                         ? 'bg-gray-700/50' 
                         : 'bg-yellow-900/30'
                     }`}>
                       <ResourceIcon className={`w-4 h-4 ${
-                        resource.placeholder 
+                        needsGeneration 
                           ? 'text-gray-400' 
                           : 'text-yellow-400'
                       }`} />
@@ -1101,10 +1223,10 @@ const SimplifiedResourceLibrary = ({ customerId }) => {
                   </div>
                   
                   <h3 className={`font-medium mb-2 text-sm ${
-                    resource.placeholder ? 'text-gray-300' : 'text-white'
+                    needsGeneration ? 'text-gray-300' : 'text-white'
                   }`}>
                     {resource.title}
-                    {resource.placeholder && (
+                    {needsGeneration && (
                       <span className="ml-1 text-xs bg-gray-700 text-gray-400 px-1 py-0.5 rounded">
                         Not Generated
                       </span>
@@ -1112,13 +1234,13 @@ const SimplifiedResourceLibrary = ({ customerId }) => {
                   </h3>
                   
                   <p className="text-gray-400 text-xs mb-3 line-clamp-2">
-                    {resource.placeholder 
+                    {needsGeneration 
                       ? `${resource.description}. Generate using AI.`
                       : resource.description
                     }
                   </p>
                   
-                  {resource.placeholder ? (
+                  {needsGeneration ? (
                     <button
                       onClick={() => navigate(`/customer/${customerId}/simplified/icp`)}
                       className="w-full py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors flex items-center justify-center gap-2 text-sm"
@@ -1176,10 +1298,10 @@ const SimplifiedResourceLibrary = ({ customerId }) => {
                   {/* Coming Soon overlay for Advanced Resources */}
                   <div className="absolute inset-0 bg-gray-900/60 backdrop-blur-sm rounded-xl flex items-center justify-center z-10">
                     <div className="text-center">
-                      <div className="bg-gradient-to-r from-blue-500 to-green-500 text-white px-3 py-1.5 rounded-full text-xs font-medium mb-2">
+                      <h3 className="text-white text-sm font-semibold mb-2">{resource.title}</h3>
+                      <div className="bg-gradient-to-r from-blue-500 to-green-500 text-white px-3 py-1.5 rounded-full text-xs font-medium">
                         Coming Soon
                       </div>
-                      <p className="text-gray-300 text-xs">Advanced Features</p>
                     </div>
                   </div>
                   
@@ -1265,10 +1387,10 @@ const SimplifiedResourceLibrary = ({ customerId }) => {
                   {/* Coming Soon overlay for Strategic Resources */}
                   <div className="absolute inset-0 bg-gray-900/60 backdrop-blur-sm rounded-xl flex items-center justify-center z-10">
                     <div className="text-center">
-                      <div className="bg-gradient-to-r from-purple-500 to-orange-500 text-white px-3 py-1.5 rounded-full text-xs font-medium mb-2">
+                      <h3 className="text-white text-sm font-semibold mb-2">{resource.title}</h3>
+                      <div className="bg-gradient-to-r from-purple-500 to-orange-500 text-white px-3 py-1.5 rounded-full text-xs font-medium">
                         Coming Soon
                       </div>
-                      <p className="text-gray-300 text-xs">Strategic Features</p>
                     </div>
                   </div>
                   

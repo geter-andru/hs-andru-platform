@@ -10,6 +10,7 @@ import SimplifiedICP from '../components/simplified/SimplifiedICP';
 import SimplifiedFinancialImpact from '../components/simplified/SimplifiedFinancialImpact';
 import SimplifiedResourceLibrary from '../components/simplified/SimplifiedResourceLibrary';
 import ErrorBoundary from '../components/common/ErrorBoundary';
+import ResourcesReadyNotification from '../components/notifications/ResourcesReadyNotification';
 
 const SimplifiedPlatform = () => {
   const { customerId } = useParams();
@@ -118,6 +119,9 @@ const SimplifiedPlatform = () => {
                 <Route path="*" element={<Navigate to="dashboard" replace />} />
               </Routes>
             </ModernSidebarLayout>
+            
+            {/* Global Resources Ready Notification */}
+            <ResourcesReadyNotification customerId={customerId} />
           </div>
         </UserIntelligenceProvider>
       </FeatureFlagProvider>
