@@ -171,9 +171,9 @@ const CoreResourcesLoadingScreen = ({ sessionId, onComplete }) => {
       setSubMessage(currentStage.subMessage);
       setCurrentIcon(currentStage.icon);
       
-      // Complete after 5 minutes (fallback)
-      if (elapsed >= 300) {
-        console.log('⏰ Loading screen timeout - using fallback resources');
+      // Complete after 1 minute (fallback) - reduced from 5 minutes due to Netlify stateless limitation
+      if (elapsed >= 60) {
+        console.log('⏰ Loading screen timeout - using fallback resources (Netlify limitation)');
         if (onComplete) {
           setTimeout(() => {
             onComplete();

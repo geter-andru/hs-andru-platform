@@ -65,8 +65,14 @@ const ProductInputSection = ({ customerId, onProductSubmit }) => {
           isGenerating: true
         });
         
-        // Start polling for completion from webhook server (fallback to mock after 5 minutes)
-        webhookService.pollForCompletion(sessionId, 150, 2000);
+        // Start polling for completion from webhook server (fallback to realistic mock after 1 minute)
+        webhookService.pollForCompletion(sessionId, 30, 2000).then((resources) => {
+          // If we got mock resources due to timeout, use product-specific realistic data instead
+          if (!resources.icp_analysis?.content?.includes(productData.productName)) {
+            const realisticResources = webhookService.generateRealisticResources(productData);
+            webhookService.completeGeneration(sessionId, realisticResources);
+          }
+        });
         
         // Store in localStorage for persistence
         localStorage.setItem('pendingSalesSageGeneration', JSON.stringify({
