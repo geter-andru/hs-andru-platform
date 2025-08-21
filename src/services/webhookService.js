@@ -22,10 +22,52 @@ class WebhookService {
       currentStep: 'Initializing AI engines...'
     };
     
-    // Store session ID in localStorage for persistence
-    localStorage.setItem('current_generation_id', id);
+    // Store session ID in localStorage for persistence (with quota handling)
+    try {
+      // Clear old resources to free up space
+      this.cleanupOldResources();
+      localStorage.setItem('current_generation_id', id);
+    } catch (e) {
+      console.warn('localStorage quota exceeded, continuing without persistence:', e);
+      // Continue without localStorage - the process will still work
+    }
     
     return id;
+  }
+  
+  /**
+   * Clean up old resources from localStorage to prevent quota issues
+   */
+  cleanupOldResources() {
+    const keysToRemove = [];
+    const oneWeekAgo = Date.now() - (7 * 24 * 60 * 60 * 1000);
+    
+    for (let key in localStorage) {
+      // Remove old resource data
+      if (key.startsWith('resources_') || key.startsWith('pendingSalesSage')) {
+        try {
+          const data = JSON.parse(localStorage.getItem(key));
+          if (data.timestamp && new Date(data.timestamp).getTime() < oneWeekAgo) {
+            keysToRemove.push(key);
+          }
+        } catch {
+          // If we can't parse it, it's probably old/corrupted, remove it
+          keysToRemove.push(key);
+        }
+      }
+    }
+    
+    // Remove old keys
+    keysToRemove.forEach(key => localStorage.removeItem(key));
+    
+    // If still having issues, remove the oldest resources
+    if (keysToRemove.length === 0) {
+      const resourceKeys = Object.keys(localStorage).filter(k => k.startsWith('resources_'));
+      if (resourceKeys.length > 5) {
+        // Keep only the 5 most recent
+        resourceKeys.slice(0, -5).forEach(key => localStorage.removeItem(key));
+      }
+    }
   }
 
   /**
@@ -50,8 +92,15 @@ class WebhookService {
       // Store completed resources
       this.completedResources[sessionId] = resources || this.getMockResources();
       
-      // Also store in localStorage for persistence
-      localStorage.setItem(`resources_${sessionId}`, JSON.stringify(this.completedResources[sessionId]));
+      // Also store in localStorage for persistence (with error handling)
+      try {
+        // Clean up old data first
+        this.cleanupOldResources();
+        localStorage.setItem(`resources_${sessionId}`, JSON.stringify(this.completedResources[sessionId]));
+      } catch (e) {
+        console.warn('Could not persist to localStorage:', e);
+        // Resources are still available in memory
+      }
       
       return true;
     }

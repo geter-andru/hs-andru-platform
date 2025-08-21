@@ -1,0 +1,8 @@
+{
+  "agent": "hs-airtable-agent",
+  "state": "stopped",
+  "message": "Agent stopped",
+  "timestamp": "2025-08-21T03:22:37.400Z",
+  "pid": 69842,
+  "metadata": {}
+}

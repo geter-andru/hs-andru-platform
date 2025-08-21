@@ -17,6 +17,10 @@ const AgentCoordinator = require('./lib/AgentCoordinator.js');
 const AirtableClient = require('./lib/AirtableClient.js');
 const AuditEngine = require('./lib/AuditEngine.js');
 const OptimizationEngine = require('./lib/OptimizationEngine.js');
+const BackupEngine = require('./lib/BackupEngine.js');
+const FieldConsolidationEngine = require('./lib/FieldConsolidationEngine.js');
+const SafeFieldConsolidator = require('./lib/SafeFieldConsolidator.js');
+const EventDrivenAgentManager = require('./lib/EventDrivenAgentManager.js');
 
 class AirtableManagementAgent {
   constructor() {
@@ -25,8 +29,23 @@ class AirtableManagementAgent {
     this.airtableClient = new AirtableClient(config, this.coordinator);
     this.auditEngine = new AuditEngine(config, this.coordinator, this.airtableClient);
     this.optimizationEngine = new OptimizationEngine(config, this.coordinator, this.airtableClient, this.auditEngine);
+    this.backupEngine = new BackupEngine(config, this.coordinator);
+    this.fieldConsolidationEngine = new FieldConsolidationEngine(config, this.coordinator, this.airtableClient);
+    this.safeFieldConsolidator = new SafeFieldConsolidator(config, this.coordinator, this.airtableClient, this.backupEngine);
+    
+    // Event-driven manager
+    this.eventManager = new EventDrivenAgentManager({
+      coordinator: this.coordinator,
+      airtableClient: this.airtableClient,
+      auditEngine: this.auditEngine,
+      optimizationEngine: this.optimizationEngine,
+      backupEngine: this.backupEngine,
+      fieldConsolidationEngine: this.fieldConsolidationEngine,
+      safeFieldConsolidator: this.safeFieldConsolidator
+    });
     
     this.setupCommands();
+    this.setupEventDrivenCommands();
     this.setupErrorHandling();
   }
 
@@ -375,6 +394,189 @@ class AirtableManagementAgent {
             Object.values(performanceResults).filter(r => r.status === 'success').length;
           
           console.log(chalk.bold.blue(`\n📊 Average Response Time: ${avgTime.toFixed(0)}ms`));
+        });
+      });
+  }
+
+  setupEventDrivenCommands() {
+    const eventCmd = this.program
+      .command('events')
+      .description('Event-driven agent operations');
+
+    eventCmd
+      .command('start')
+      .description('Start event-driven monitoring')
+      .option('--no-webhooks', 'Disable webhook server')
+      .option('--port <port>', 'Webhook server port', '3001')
+      .action(async (options) => {
+        await this.executeWithSafety('Start Event Monitoring', async () => {
+          console.log(chalk.bold.blue('\n🚀 Starting Event-Driven Agent System\n'));
+          
+          await this.eventManager.start({
+            enableWebhooks: !options.noWebhooks,
+            webhookPort: options.port ? parseInt(options.port) : 3001
+          });
+          
+          console.log(chalk.green('✅ Event-driven system started'));
+          console.log(chalk.blue('📡 Monitoring for events...'));
+          
+          if (!options.noWebhooks) {
+            console.log(chalk.blue(`🌐 Webhook server running on port ${this.eventManager.webhookServer.port}`));
+            console.log(chalk.gray('Example: curl -X POST http://localhost:' + this.eventManager.webhookServer.port + '/trigger/audit'));
+          }
+          
+          console.log(chalk.gray('Press Ctrl+C to stop'));
+          
+          // Keep the process running
+          process.stdin.resume();
+        });
+      });
+
+    eventCmd
+      .command('stop')
+      .description('Stop event-driven monitoring')
+      .action(async () => {
+        await this.executeWithSafety('Stop Event Monitoring', async () => {
+          console.log(chalk.bold.blue('\n🛑 Stopping Event-Driven Agent System\n'));
+          
+          await this.eventManager.stop();
+          
+          console.log(chalk.green('✅ Event-driven system stopped'));
+        });
+      });
+
+    eventCmd
+      .command('status')
+      .description('Show event system status')
+      .action(async () => {
+        await this.executeWithSafety('Event System Status', async () => {
+          console.log(chalk.bold.blue('\n📊 Event System Status\n'));
+          
+          const status = this.eventManager.getStatus();
+          
+          console.log(chalk.blue('Active Agents:'), status.activeAgents);
+          console.log(chalk.blue('Total Activations:'), status.agentStats.totalActivations);
+          console.log(chalk.blue('Successful Operations:'), status.agentStats.successfulOperations);
+          console.log(chalk.blue('Failed Operations:'), status.agentStats.failedOperations);
+          console.log(chalk.blue('Average Execution Time:'), `${Math.round(status.agentStats.averageExecutionTime)}ms`);
+          
+          // Webhook server status
+          if (status.webhookServerStatus) {
+            console.log(chalk.blue('\nWebhook Server:'));
+            console.log(chalk.blue('  Status:'), status.webhookServerStatus.isRunning ? 
+              chalk.green('Running') : chalk.gray('Stopped'));
+            if (status.webhookServerStatus.isRunning) {
+              console.log(chalk.blue('  Port:'), status.webhookServerStatus.port);
+              console.log(chalk.blue('  URL:'), `http://localhost:${status.webhookServerStatus.port}`);
+            }
+          }
+          
+          if (status.activeAgentList.length > 0) {
+            console.log(chalk.blue('\nCurrently Active:\n'));
+            status.activeAgentList.forEach(agent => {
+              console.log(`  ${chalk.yellow(agent.id)} - ${agent.type} (${agent.status}) - ${Math.round(agent.runtime)}ms`);
+            });
+          }
+          
+          console.log();
+        });
+      });
+
+    eventCmd
+      .command('trigger')
+      .description('Manually trigger an operation')
+      .argument('<operation>', 'Operation to trigger (audit, optimize, etc.)')
+      .option('--data <json>', 'Additional data as JSON')
+      .action(async (operation, options) => {
+        await this.executeWithSafety(`Manual Trigger: ${operation}`, async () => {
+          console.log(chalk.bold.blue(`\n🔧 Manually Triggering: ${operation}\n`));
+          
+          let data = {};
+          if (options.data) {
+            try {
+              data = JSON.parse(options.data);
+            } catch (error) {
+              console.log(chalk.red('❌ Invalid JSON data:', error.message));
+              return;
+            }
+          }
+          
+          const eventId = await this.eventManager.manualTrigger(operation, data);
+          
+          console.log(chalk.green(`✅ Operation triggered - Event ID: ${eventId}`));
+          console.log(chalk.blue('📊 Check status with: events status'));
+          console.log();
+        });
+      });
+
+    eventCmd
+      .command('test')
+      .description('Test event detection')
+      .option('--type <eventType>', 'Event type to test', 'performance_issue')
+      .action(async (options) => {
+        await this.executeWithSafety('Test Event Detection', async () => {
+          console.log(chalk.bold.blue(`\n🧪 Testing Event Detection: ${options.type}\n`));
+          
+          let testData = {};
+          
+          switch (options.type) {
+            case 'performance_issue':
+              testData = {
+                metrics: {
+                  responseTime: 5000,
+                  errorRate: 0.1,
+                  memoryUsage: 0.9
+                },
+                severity: 'critical'
+              };
+              break;
+              
+            case 'database_growth':
+              testData = {
+                changes: {
+                  tables: [{ table: 'Test Table', growthRate: 15 }],
+                  hasSignificantChanges: true
+                }
+              };
+              break;
+              
+            case 'scheduled_optimization':
+              testData = {
+                type: 'test',
+                operations: ['audit']
+              };
+              break;
+              
+            case 'backup_required':
+              testData = {
+                reason: 'Test backup requirement',
+                priority: 'medium',
+                tables: ['Customer Assets']
+              };
+              break;
+              
+            case 'field_consolidation_needed':
+              testData = {
+                analysis: 'Test field analysis',
+                opportunities: 5,
+                potentialSavings: { storage: '10MB', operations: '20%' }
+              };
+              break;
+              
+            case 'data_integrity_issue':
+              testData = {
+                issue: 'Test data integrity issue',
+                severity: 'medium',
+                affectedTables: ['Customer Assets', 'AI Resource Generations']
+              };
+              break;
+          }
+          
+          const eventId = await this.eventManager.eventDetector.manualTrigger(options.type, testData);
+          
+          console.log(chalk.green(`✅ Test event triggered - Event ID: ${eventId}`));
+          console.log(chalk.blue('📊 Check results with: events status'));
+          console.log();
         });
       });
   }

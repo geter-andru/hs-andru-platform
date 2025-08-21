@@ -77,14 +77,67 @@ const ResourceModal = ({ resource, onClose }) => (
       </div>
       
       <div className="flex-1 overflow-auto p-6">
-        {resource.content?.html ? (
-          <div 
-            className="prose prose-invert max-w-none"
-            dangerouslySetInnerHTML={{ __html: resource.content.html }} 
-          />
-        ) : resource.content?.text ? (
-          <div className="whitespace-pre-wrap text-gray-300 leading-relaxed">
-            {resource.content.text}
+        {resource.content ? (
+          <div className="space-y-6">
+            {/* Confidence Score */}
+            {resource.content.confidence_score && (
+              <div className="flex items-center gap-3 p-4 bg-gray-800 rounded-lg">
+                <div className="text-sm text-gray-400">Confidence Score:</div>
+                <div className="flex items-center gap-2">
+                  <div className="text-2xl font-bold text-white">{resource.content.confidence_score}/10</div>
+                  <div className="flex gap-1">
+                    {[...Array(10)].map((_, i) => (
+                      <div
+                        key={i}
+                        className={`w-2 h-8 rounded ${
+                          i < Math.floor(resource.content.confidence_score)
+                            ? 'bg-gradient-to-t from-yellow-500 to-orange-500'
+                            : 'bg-gray-700'
+                        }`}
+                      />
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+            
+            {/* Main Content */}
+            {resource.content.text && (
+              <div className="prose prose-invert max-w-none">
+                <div className="whitespace-pre-wrap text-gray-300 leading-relaxed">
+                  {resource.content.text}
+                </div>
+              </div>
+            )}
+            
+            {/* Structured Data */}
+            {resource.content.data && Object.keys(resource.content.data).length > 0 && (
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold text-white border-b border-gray-700 pb-2">
+                  Detailed Analysis
+                </h3>
+                {Object.entries(resource.content.data).map(([key, value]) => {
+                  if (!value) return null;
+                  const formattedKey = key
+                    .split('_')
+                    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                    .join(' ');
+                  
+                  return (
+                    <div key={key} className="space-y-2">
+                      <h4 className="text-sm font-medium text-blue-400">{formattedKey}:</h4>
+                      <div className="pl-4 text-gray-300 text-sm">
+                        {typeof value === 'string' || typeof value === 'number' ? (
+                          <p>{value}</p>
+                        ) : (
+                          <pre className="whitespace-pre-wrap">{JSON.stringify(value, null, 2)}</pre>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
         ) : (
           <div className="text-center py-12">
@@ -115,34 +168,84 @@ const CoreResourcesSection = ({ customerData }) => {
   const pendingGeneration = JSON.parse(localStorage.getItem('pendingSalesSageGeneration') || 'null');
   const isRecentlyGenerated = pendingGeneration && (Date.now() - pendingGeneration.timestamp < 300000); // 5 minutes
   
+  // Map the webhook response format to display format
+  const resources = customerData?.salesSageResources || {};
+  
   const salesSageResources = [
     {
       id: 'icp',
-      title: 'Ideal Customer Profile',
+      title: resources.icp_analysis?.title || 'Ideal Customer Profile',
       description: 'Systematic buyer understanding and targeting framework',
       icon: Target,
-      content: customerData?.salesSageResources?.icp
+      content: resources.icp_analysis ? {
+        text: resources.icp_analysis.content,
+        confidence_score: resources.icp_analysis.confidence_score,
+        data: {
+          company_size_range: resources.icp_analysis.company_size_range,
+          industry_verticals: resources.icp_analysis.industry_verticals,
+          annual_revenue_range: resources.icp_analysis.annual_revenue_range,
+          geographic_markets: resources.icp_analysis.geographic_markets,
+          technology_stack: resources.icp_analysis.technology_stack,
+          budget_range: resources.icp_analysis.budget_range,
+          decision_makers: resources.icp_analysis.decision_makers,
+          growth_stage: resources.icp_analysis.growth_stage
+        }
+      } : null
     },
     {
       id: 'persona',
-      title: 'Target Buyer Persona', 
+      title: resources.buyer_personas?.title || 'Target Buyer Persona', 
       description: 'Detailed buyer characteristics and behavior patterns',
       icon: User,
-      content: customerData?.salesSageResources?.persona
+      content: resources.buyer_personas ? {
+        text: resources.buyer_personas.content,
+        confidence_score: resources.buyer_personas.confidence_score,
+        data: {
+          persona_name: resources.buyer_personas.persona_name,
+          job_title: resources.buyer_personas.job_title,
+          pain_points: resources.buyer_personas.pain_points,
+          goals_and_objectives: resources.buyer_personas.goals_and_objectives,
+          decision_timeline: resources.buyer_personas.decision_timeline,
+          success_metrics: resources.buyer_personas.success_metrics
+        }
+      } : null
     },
     {
       id: 'empathy',
-      title: 'Customer Empathy Map',
+      title: resources.empathy_map?.title || 'Customer Empathy Map',
       description: 'Deep customer psychology and motivation insights',
       icon: Brain,
-      content: customerData?.salesSageResources?.empathyMap
+      content: resources.empathy_map ? {
+        text: resources.empathy_map.content,
+        confidence_score: resources.empathy_map.confidence_score,
+        data: {
+          what_they_think: resources.empathy_map.what_they_think,
+          what_they_feel: resources.empathy_map.what_they_feel,
+          what_they_see: resources.empathy_map.what_they_see,
+          what_they_do: resources.empathy_map.what_they_do,
+          what_they_hear: resources.empathy_map.what_they_hear,
+          pains_and_frustrations: resources.empathy_map.pains_and_frustrations,
+          gains_and_benefits: resources.empathy_map.gains_and_benefits
+        }
+      } : null
     },
     {
       id: 'potential',
-      title: 'Product Market Potential',
+      title: resources.product_assessment?.title || 'Product Market Potential',
       description: 'Market opportunity and competitive positioning analysis',
       icon: TrendingUp,
-      content: customerData?.salesSageResources?.productPotential
+      content: resources.product_assessment ? {
+        text: resources.product_assessment.content,
+        confidence_score: resources.product_assessment.confidence_score,
+        data: {
+          current_product_potential_score: resources.product_assessment.current_product_potential_score,
+          gaps_preventing_10: resources.product_assessment.gaps_preventing_10,
+          market_opportunity: resources.product_assessment.market_opportunity,
+          problems_solved_today: resources.product_assessment.problems_solved_today,
+          customer_conversion: resources.product_assessment.customer_conversion,
+          value_indicators: resources.product_assessment.value_indicators
+        }
+      } : null
     }
   ];
 
