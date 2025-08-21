@@ -1,3 +1,5 @@
+import airtableService from './airtableService';
+
 /**
  * Webhook Service for receiving Make.com completion notifications
  * Manages resource generation status and results storage
@@ -89,7 +91,7 @@ class WebhookService {
   /**
    * Complete generation process (called by webhook or timer)
    */
-  completeGeneration(sessionId, resources) {
+  async completeGeneration(sessionId, resources) {
     if (this.generationStatus[sessionId]) {
       this.generationStatus[sessionId].status = 'completed';
       this.generationStatus[sessionId].progress = 100;
@@ -106,6 +108,53 @@ class WebhookService {
       } catch (e) {
         console.warn('Could not persist to localStorage:', e);
         // Resources are still available in memory
+      }
+
+      // Sync generated resources to Airtable customer record
+      try {
+        const customerId = this.generationStatus[sessionId]?.customerId;
+        if (customerId && customerId !== 'CUST_DOTUN_01') { // Skip test customer
+          console.log('🔄 Syncing generated resources to Airtable for:', customerId);
+          const syncResult = await airtableService.syncGeneratedResourcesToAirtable(customerId, this.completedResources[sessionId]);
+          
+          if (syncResult.success) {
+            console.log('✅ Successfully synced to Airtable:', syncResult.updatedFields?.join(', '));
+            
+            // Store sync status in the session
+            this.generationStatus[sessionId].airtableSync = {
+              success: true,
+              syncedAt: Date.now(),
+              updatedFields: syncResult.updatedFields
+            };
+
+            // Trigger UserIntelligenceContext refresh via event
+            window.dispatchEvent(new CustomEvent('airtableDataUpdated', { 
+              detail: { 
+                customerId, 
+                updatedFields: syncResult.updatedFields,
+                sessionId 
+              } 
+            }));
+          } else {
+            console.warn('⚠️ Airtable sync failed:', syncResult.error);
+            this.generationStatus[sessionId].airtableSync = {
+              success: false,
+              error: syncResult.error,
+              attemptedAt: Date.now()
+            };
+          }
+        } else {
+          console.log('⏭️ Skipping Airtable sync for test/demo customer');
+        }
+      } catch (error) {
+        console.error('❌ Error during Airtable sync:', error);
+        if (this.generationStatus[sessionId]) {
+          this.generationStatus[sessionId].airtableSync = {
+            success: false,
+            error: error.message,
+            attemptedAt: Date.now()
+          };
+        }
       }
       
       return true;
@@ -198,8 +247,8 @@ class WebhookService {
    * In production, this would be an actual API endpoint
    */
   simulateWebhookCompletion(sessionId, delay = 120000) {
-    setTimeout(() => {
-      this.completeGeneration(sessionId, this.getMockResources());
+    setTimeout(async () => {
+      await this.completeGeneration(sessionId, this.getMockResources());
     }, delay);
   }
 
@@ -407,7 +456,7 @@ class WebhookService {
    * Manual completion for testing (if webhook fails)
    * Call this from browser console: webhookService.manualComplete()
    */
-  manualComplete(sessionId = null) {
+  async manualComplete(sessionId = null) {
     const currentSession = sessionId || localStorage.getItem('current_generation_id');
     if (!currentSession) {
       console.warn('No active session found');
@@ -416,7 +465,7 @@ class WebhookService {
 
     console.log('🔧 Manually completing resources for session:', currentSession);
     const resources = this.getMockResources();
-    this.completeGeneration(currentSession, resources);
+    await this.completeGeneration(currentSession, resources);
     console.log('✅ Mock resources generated and stored');
     console.log('🔄 Refresh the page to see them!');
     return true;
@@ -561,7 +610,7 @@ class WebhookService {
         try {
           const resources = await this.getResources(sessionId);
           if (resources) {
-            this.completeGeneration(sessionId, resources);
+            await this.completeGeneration(sessionId, resources);
             resolve(resources);
             return;
           }
@@ -586,7 +635,7 @@ class WebhookService {
           }
           
           const realisticResources = this.generateRealisticResources(productData);
-          this.completeGeneration(sessionId, realisticResources);
+          await this.completeGeneration(sessionId, realisticResources);
           resolve(realisticResources);
           return;
         }
@@ -603,9 +652,9 @@ class WebhookService {
    * Alternative: Force completion with realistic resources
    * This can be called when Make.com webhook completes but Netlify functions fail
    */
-  forceCompleteWithRealisticData(sessionId, productData) {
+  async forceCompleteWithRealisticData(sessionId, productData) {
     const realisticResources = this.generateRealisticResources(productData);
-    this.completeGeneration(sessionId, realisticResources);
+    await this.completeGeneration(sessionId, realisticResources);
     return realisticResources;
   }
 

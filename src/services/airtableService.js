@@ -353,6 +353,115 @@ export const airtableService = {
     }
   },
 
+  // Sync generated resources from localStorage to Airtable customer record
+  async syncGeneratedResourcesToAirtable(customerId, generatedResources) {
+    try {
+      console.log('🔄 Syncing generated resources to Airtable for customer:', customerId);
+      
+      // Find customer record
+      const recordId = await this.getRecordIdByCustomerId(customerId);
+      if (!recordId) {
+        console.warn('Customer record not found for ID:', customerId);
+        return { success: false, error: 'Customer record not found' };
+      }
+
+      // Prepare fields to update based on generated resources
+      const fieldsToUpdate = {};
+
+      // Sync ICP Analysis
+      if (generatedResources.icp_analysis?.content) {
+        const icpData = {
+          title: "Ideal Customer Profile Analysis",
+          content: generatedResources.icp_analysis.content,
+          confidence_score: generatedResources.icp_analysis.confidence_score || 85,
+          generation_date: new Date().toISOString().split('T')[0],
+          word_count: generatedResources.icp_analysis.content.length,
+          status: 'generated',
+          generation_method: generatedResources.icp_analysis.generation_method || 'template_enhanced_realistic'
+        };
+        fieldsToUpdate['Detailed ICP Analysis'] = JSON.stringify(icpData);
+        console.log('📊 Syncing ICP Analysis:', icpData.word_count, 'characters');
+      }
+
+      // Sync Target Buyer Personas
+      if (generatedResources.buyer_personas?.content) {
+        const personaData = {
+          title: "Target Buyer Personas",
+          content: generatedResources.buyer_personas.content,
+          confidence_score: generatedResources.buyer_personas.confidence_score || 85,
+          generation_date: new Date().toISOString().split('T')[0],
+          word_count: generatedResources.buyer_personas.content.length,
+          status: 'generated',
+          generation_method: generatedResources.buyer_personas.generation_method || 'template_enhanced_realistic'
+        };
+        fieldsToUpdate['Target Buyer Personas'] = JSON.stringify(personaData);
+        console.log('👥 Syncing Buyer Personas:', personaData.word_count, 'characters');
+      }
+
+      // Sync Empathy Map
+      if (generatedResources.empathy_map?.content) {
+        const empathyData = {
+          title: "Customer Empathy Map",
+          content: generatedResources.empathy_map.content,
+          confidence_score: generatedResources.empathy_map.confidence_score || 85,
+          generation_date: new Date().toISOString().split('T')[0],
+          word_count: generatedResources.empathy_map.content.length,
+          status: 'generated',
+          generation_method: generatedResources.empathy_map.generation_method || 'template_enhanced_realistic'
+        };
+        // Note: Need to create Empathy Map field in Airtable if it doesn't exist
+        fieldsToUpdate['Empathy Map Content'] = JSON.stringify(empathyData);
+        console.log('🧠 Syncing Empathy Map:', empathyData.word_count, 'characters');
+      }
+
+      // Sync Product Market Assessment
+      if (generatedResources.product_market_assessment?.content) {
+        const assessmentData = {
+          title: "Product Market Assessment",
+          content: generatedResources.product_market_assessment.content,
+          confidence_score: generatedResources.product_market_assessment.confidence_score || 85,
+          generation_date: new Date().toISOString().split('T')[0],
+          word_count: generatedResources.product_market_assessment.content.length,
+          status: 'generated',
+          generation_method: generatedResources.product_market_assessment.generation_method || 'template_enhanced_realistic'
+        };
+        // Note: Need to create Product Assessment field in Airtable if it doesn't exist
+        fieldsToUpdate['Product Assessment Content'] = JSON.stringify(assessmentData);
+        console.log('📈 Syncing Product Assessment:', assessmentData.word_count, 'characters');
+      }
+
+      // Update Last Accessed to mark recent activity
+      fieldsToUpdate['Last Accessed'] = new Date().toISOString();
+
+      // Only update if we have fields to update
+      if (Object.keys(fieldsToUpdate).length > 1) { // > 1 because Last Accessed is always included
+        const response = await airtableClient.patch('/Customer Assets', {
+          records: [{
+            id: recordId,
+            fields: fieldsToUpdate
+          }]
+        });
+
+        console.log('✅ Successfully synced generated resources to Airtable');
+        console.log('📝 Updated fields:', Object.keys(fieldsToUpdate).join(', '));
+        
+        return { 
+          success: true, 
+          recordId, 
+          updatedFields: Object.keys(fieldsToUpdate),
+          response: response.data 
+        };
+      } else {
+        console.log('⚠️ No generated resources to sync');
+        return { success: false, error: 'No generated resources found' };
+      }
+
+    } catch (error) {
+      console.error('❌ Error syncing generated resources to Airtable:', error);
+      return { success: false, error: error.message };
+    }
+  },
+
   // Save user progress/state
   async saveUserProgress(customerId, toolName, progressData) {
     try {
