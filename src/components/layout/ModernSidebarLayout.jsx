@@ -41,15 +41,8 @@ const ModernSidebarLayout = ({ children, customerId, activeRoute = 'dashboard' }
       label: 'Dashboard',
       icon: Home,
       route: '/customer/' + customerId + '/simplified/dashboard',
-      description: 'Revenue Intelligence Overview'
-    },
-    {
-      id: 'dashboard-premium',
-      label: 'Premium Dashboard',
-      icon: BarChart3,
-      route: '/customer/' + customerId + '/simplified/dashboard-premium',
-      description: 'Advanced Analytics & Insights',
-      isPremium: true
+      description: 'Revenue Intelligence Overview',
+      isPremium: true // PRO icon moved here since dashboard has premium toggle
     },
     {
       id: 'icp',
@@ -234,8 +227,9 @@ const ModernSidebarLayout = ({ children, customerId, activeRoute = 'dashboard' }
           </div>
 
           {/* Navigation Items */}
-          <nav className="py-4 space-y-1">
-            {navigationItems.map((item) => {
+          <nav className="py-4 space-y-4">
+            {/* Dashboard - standalone */}
+            {navigationItems.filter(item => item.id === 'dashboard').map((item) => {
               const Icon = item.icon;
               const isActive = activeRoute === item.id;
               
@@ -274,6 +268,57 @@ const ModernSidebarLayout = ({ children, customerId, activeRoute = 'dashboard' }
                 </motion.a>
               );
             })}
+            
+            {/* Customer Intelligence Tools section */}
+            {!sidebarCollapsed && (
+              <div className="px-4">
+                <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">
+                  Customer Intelligence Tools
+                </h3>
+              </div>
+            )}
+            
+            <div className={sidebarCollapsed ? '' : 'space-y-1'}>
+              {navigationItems.filter(item => item.id !== 'dashboard').map((item) => {
+                const Icon = item.icon;
+                const isActive = activeRoute === item.id;
+                
+                return (
+                  <motion.a
+                    key={item.id}
+                    href={item.route}
+                    className={`
+                      mx-2 px-3 py-2.5 rounded-lg flex items-center space-x-3 transition-all duration-200
+                      ${isActive 
+                        ? 'bg-purple-600/20 border border-purple-500/30 text-purple-300' 
+                        : 'text-gray-300 hover:bg-gray-700/50 hover:text-white'
+                      }
+                      ${sidebarCollapsed ? 'justify-center' : ''}
+                    `}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    <Icon className={`w-5 h-5 ${isActive ? 'text-purple-400' : 'text-gray-400'}`} />
+                    
+                    {!sidebarCollapsed && (
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center space-x-2">
+                          <span className="text-sm font-medium truncate">{item.label}</span>
+                          {item.isPremium && (
+                            <span className="px-1.5 py-0.5 text-xs bg-gradient-to-r from-purple-500 to-blue-500 rounded text-white font-medium">
+                              PRO
+                            </span>
+                          )}
+                        </div>
+                        <div className="text-xs text-gray-500 truncate mt-0.5">
+                          {item.description}
+                        </div>
+                      </div>
+                    )}
+                  </motion.a>
+                );
+              })}
+            </div>
           </nav>
 
           {/* Milestone Tracker Section - positioned right after navigation */}

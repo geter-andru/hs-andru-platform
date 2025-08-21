@@ -13,6 +13,7 @@ import SeriesAContextWidget from './cards/SeriesAContextWidget';
 import ModernCard, { ModernGridContainer, ModernCardHeader, ModernCardContent, ModernMetricCard } from '../layout/ModernCard';
 import ModernCircularProgress, { ModernProgressGroup } from '../ui/ModernCircularProgress';
 import { motion } from 'framer-motion';
+import { ToggleLeft, ToggleRight, Crown, BarChart3 } from 'lucide-react';
 
 /**
  * SimplifiedDashboardPremium - $150/month quality revenue intelligence dashboard
@@ -161,9 +162,38 @@ const SimplifiedDashboardPremium = ({ customerId }) => {
               title="Revenue Intelligence Overview" 
               subtitle={`${customerId} • Competency Dashboard`}
               action={
-                <div className="flex items-center space-x-2 text-sm text-purple-400">
-                  <span className="w-2 h-2 bg-purple-500 rounded-full animate-pulse"></span>
-                  <span>Live</span>
+                <div className="flex items-center gap-4">
+                  {/* Live Indicator */}
+                  <div className="flex items-center space-x-2 text-sm text-purple-400">
+                    <span className="w-2 h-2 bg-purple-500 rounded-full animate-pulse"></span>
+                    <span>Live</span>
+                  </div>
+                  
+                  {/* Premium to Standard Toggle */}
+                  <div className="bg-gray-800 border border-gray-700 rounded-lg p-2">
+                    <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-2">
+                        <BarChart3 className="w-4 h-4 text-blue-400" />
+                        <span className="text-sm text-white">Standard</span>
+                      </div>
+                      <button
+                        onClick={() => navigate(`/customer/${customerId}/simplified/dashboard`)}
+                        className="text-gray-400 hover:text-white transition-colors"
+                        title="Switch to Standard Dashboard"
+                      >
+                        <ToggleRight className="w-5 h-5 text-purple-500" />
+                      </button>
+                      
+                      <div className="flex items-center gap-2">
+                        <Crown className="w-4 h-4 text-purple-400" />
+                        <span className="text-sm text-white">Premium</span>
+                      </div>
+                    </div>
+                    
+                    <div className="text-xs text-gray-500 mt-1 text-center">
+                      Dashboard View
+                    </div>
+                  </div>
                 </div>
               }
             />

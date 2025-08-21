@@ -20,7 +20,6 @@ import ICPFrameworkDisplay from '../tools/ICPFrameworkDisplay';
 import TechnicalTranslationWidget from './cards/TechnicalTranslationWidget';
 import StakeholderArsenalWidget from './cards/StakeholderArsenalWidget';
 import ProductInputSection from './cards/ProductInputSection';
-import CoreResourcesSection from './cards/SalesSageResourcesSection';
 import CoreResourcesLoadingScreen from './cards/CoreResourcesLoadingScreen';
 import webhookService from '../../services/webhookService';
 
@@ -31,7 +30,7 @@ const SimplifiedICP = ({ customerId }) => {
   const [ratingResult, setRatingResult] = useState(null);
   const [isRating, setIsRating] = useState(false);
   const [icpFramework, setIcpFramework] = useState(null);
-  const [activeSection, setActiveSection] = useState('framework');
+  const [activeSection, setActiveSection] = useState('generate');
   const [productData, setProductData] = useState(null);
   const [isGeneratingResources, setIsGeneratingResources] = useState(false);
   const [generationSessionId, setGenerationSessionId] = useState(null);
@@ -334,6 +333,19 @@ const SimplifiedICP = ({ customerId }) => {
         <div className="flex gap-2 mb-6 flex-wrap">
           <button
             onClick={() => {
+              setActiveSection('generate');
+              trackClick('view_generate');
+            }}
+            className={`px-4 py-2 rounded-lg font-medium transition-all ${
+              activeSection === 'generate'
+                ? 'bg-blue-600 text-white'
+                : 'bg-gray-900 text-gray-400 hover:text-white'
+            }`}
+          >
+            Generate Resources
+          </button>
+          <button
+            onClick={() => {
               setActiveSection('framework');
               trackClick('view_framework');
             }}
@@ -344,19 +356,6 @@ const SimplifiedICP = ({ customerId }) => {
             }`}
           >
             Scoring Framework
-          </button>
-          <button
-            onClick={() => {
-              setActiveSection('personas');
-              trackClick('view_personas');
-            }}
-            className={`px-4 py-2 rounded-lg font-medium transition-all ${
-              activeSection === 'personas'
-                ? 'bg-blue-600 text-white'
-                : 'bg-gray-900 text-gray-400 hover:text-white'
-            }`}
-          >
-            Buyer Personas
           </button>
           <button
             onClick={() => {
@@ -373,16 +372,16 @@ const SimplifiedICP = ({ customerId }) => {
           </button>
           <button
             onClick={() => {
-              setActiveSection('generate');
-              trackClick('view_generate');
+              setActiveSection('personas');
+              trackClick('view_personas');
             }}
             className={`px-4 py-2 rounded-lg font-medium transition-all ${
-              activeSection === 'generate'
+              activeSection === 'personas'
                 ? 'bg-blue-600 text-white'
                 : 'bg-gray-900 text-gray-400 hover:text-white'
             }`}
           >
-            Generate Resources
+            Buyer Personas
           </button>
         </div>
 
@@ -640,12 +639,7 @@ const SimplifiedICP = ({ customerId }) => {
                   resourceGenerationCount: (usage?.resourceGenerationCount || 0) + 1
                 });
               }}
-            />
-            
-            {/* Core Resources Section */}
-            <CoreResourcesSection 
-              customerData={customerData}
-            />
+/>
             
           </div>
         )}

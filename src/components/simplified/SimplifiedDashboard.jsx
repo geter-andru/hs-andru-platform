@@ -15,7 +15,10 @@ import {
   CheckCircle,
   Activity,
   Star,
-  Trophy
+  Trophy,
+  ToggleLeft,
+  ToggleRight,
+  Crown
 } from 'lucide-react';
 import { useUserIntelligence } from '../../contexts/simplified/UserIntelligenceContext';
 import { useBehavioralTracking, useSkillAssessment, useProgressiveFeatures } from '../../hooks';
@@ -299,10 +302,42 @@ const SimplifiedDashboard = ({ customerId }) => {
   return (
     <div className="min-h-screen bg-black">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
+        {/* Header with Premium Toggle */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-white mb-2">Revenue Intelligence Hub</h1>
-          <p className="text-gray-400">Systematic business development platform for technical founders</p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold text-white mb-2">Revenue Intelligence Hub</h1>
+              <p className="text-gray-400">Systematic business development platform for technical founders</p>
+            </div>
+            
+            {/* Premium Dashboard Toggle */}
+            <div className="flex items-center gap-4">
+              <div className="bg-gray-900 border border-gray-800 rounded-lg p-3">
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2">
+                    <BarChart3 className="w-4 h-4 text-blue-400" />
+                    <span className="text-sm text-white">Standard</span>
+                  </div>
+                  <button
+                    onClick={() => navigate(`/customer/${customerId}/simplified/dashboard-premium`)}
+                    className="text-gray-400 hover:text-white transition-colors"
+                    title="Switch to Premium Dashboard"
+                  >
+                    <ToggleLeft className="w-5 h-5" />
+                  </button>
+                  
+                  <div className="flex items-center gap-2">
+                    <Crown className="w-4 h-4 text-purple-400" />
+                    <span className="text-sm text-white">Premium</span>
+                  </div>
+                </div>
+                
+                <div className="text-xs text-gray-500 mt-1 text-center">
+                  Dashboard View
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Milestone Context Card */}

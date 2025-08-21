@@ -3,7 +3,6 @@ import { Routes, Route, useParams, useSearchParams, Navigate, useLocation } from
 import { authService } from '../services/authService';
 import { FeatureFlagProvider } from '../contexts/FeatureFlagContext';
 import { UserIntelligenceProvider } from '../contexts/simplified/UserIntelligenceContext';
-import PlatformSwitcher from '../components/platform-switcher/PlatformSwitcher';
 import ModernSidebarLayout from '../components/layout/ModernSidebarLayout';
 import SimplifiedDashboard from '../components/simplified/SimplifiedDashboard';
 import SimplifiedDashboardPremium from '../components/simplified/SimplifiedDashboardPremium';
@@ -106,11 +105,6 @@ const SimplifiedPlatform = () => {
       <FeatureFlagProvider customerId={customerId}>
         <UserIntelligenceProvider customerId={customerId}>
           <div className="relative">
-            {/* Platform Switcher - positioned over modern layout */}
-            <div className="fixed top-4 right-4 z-50">
-              <PlatformSwitcher customerId={customerId} />
-            </div>
-            
             {/* Modern Sidebar Layout wrapping all routes */}
             <ModernSidebarLayout customerId={customerId} activeRoute={getActiveRoute()}>
               <Routes>

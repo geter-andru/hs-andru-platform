@@ -33,179 +33,373 @@ const SimplifiedResourceLibrary = ({ customerId }) => {
   const [completedTasks, setCompletedTasks] = useState([]);
   const [taskDrivenRecs, setTaskDrivenRecs] = useState([]);
 
-  // Resource database organized by tier and category
+  // Resource database organized by tier and category - 35 comprehensive business resources
   const resourceDatabase = useMemo(() => ({
     foundation: {
-      'ICP Intelligence': [
+      'Core Business Resources': [
         {
-          id: 'icp-basics-1',
-          title: 'Basic Buyer Personas Template',
-          description: 'Simple framework for identifying and documenting buyer personas',
+          id: 'core-negative-persona',
+          title: 'Negative Buyer Persona',
+          description: 'Profile of who should NOT buy your product',
           type: 'template',
-          duration: '30 min',
-          popularity: 95,
-          tags: ['personas', 'targeting', 'fundamentals'],
-          content: 'Comprehensive template with stakeholder mapping...'
-        },
-        {
-          id: 'icp-basics-2',
-          title: 'Technical Translation 101',
-          description: 'Convert technical features into business benefits',
-          type: 'guide',
-          duration: '45 min',
-          popularity: 88,
-          tags: ['communication', 'value-prop', 'technical'],
-          content: 'Step-by-step guide for technical founders...'
-        },
-        {
-          id: 'icp-basics-3',
-          title: 'Customer Interview Scripts',
-          description: 'Ready-to-use interview scripts for buyer research',
-          type: 'script',
-          duration: '20 min',
-          popularity: 92,
-          tags: ['research', 'validation', 'interviews'],
-          content: 'Proven interview questions and frameworks...'
-        }
-      ],
-      'Value Communication': [
-        {
-          id: 'value-basics-1',
-          title: 'ROI Calculator Template',
-          description: 'Simple ROI calculation framework for early-stage companies',
-          type: 'calculator',
           duration: '25 min',
-          popularity: 89,
-          tags: ['roi', 'financials', 'business-case'],
-          content: 'Excel template with automated calculations...'
+          popularity: 92,
+          tags: ['personas', 'targeting', 'qualification'],
+          content: 'Detailed framework for identifying poor-fit customers...',
+          placeholder: true,
+          comingSoonLabel: 'Negative Buyer Persona'
         },
         {
-          id: 'value-basics-2',
-          title: 'Founder Sales Scripts',
-          description: 'Email and call scripts tailored for technical founders',
-          type: 'script',
+          id: 'core-value-messaging',
+          title: 'Value Messaging Overview',
+          description: 'Core value propositions and messaging framework',
+          type: 'framework',
           duration: '35 min',
-          popularity: 85,
-          tags: ['sales', 'communication', 'outreach'],
-          content: 'Proven scripts with technical founder voice...'
-        }
-      ],
-      'Implementation': [
-        {
-          id: 'impl-basics-1',
-          title: 'PMF Assessment Tools',
-          description: 'Systematic approach to measuring product-market fit',
-          type: 'assessment',
-          duration: '40 min',
-          popularity: 87,
-          tags: ['pmf', 'metrics', 'validation'],
-          content: 'Comprehensive PMF measurement framework...'
-        }
-      ]
-    },
-    growth: {
-      'ICP Intelligence': [
-        {
-          id: 'icp-growth-1',
-          title: 'Enterprise Persona Mapping',
-          description: 'Advanced personas for complex enterprise sales',
-          type: 'framework',
-          duration: '60 min',
-          popularity: 91,
-          tags: ['enterprise', 'stakeholders', 'complex-sales'],
-          content: 'Multi-stakeholder mapping with influence analysis...'
+          popularity: 95,
+          tags: ['messaging', 'value-prop', 'positioning'],
+          content: 'Complete messaging framework and positioning guide...',
+          placeholder: true,
+          comingSoonLabel: 'Value Messaging Overview'
         },
         {
-          id: 'icp-growth-2',
-          title: 'Competitive Analysis Framework',
-          description: 'Systematic competitive positioning and intelligence',
-          type: 'framework',
-          duration: '50 min',
-          popularity: 88,
-          tags: ['competitive', 'positioning', 'market'],
-          content: 'Complete competitive intelligence system...'
+          id: 'core-moment-in-life',
+          title: 'Moment in Life Description',
+          description: 'Specific trigger moments when customers need your solution',
+          type: 'analysis',
+          duration: '30 min',
+          popularity: 89,
+          tags: ['triggers', 'timing', 'moments'],
+          content: 'Framework for identifying customer trigger moments...',
+          placeholder: true,
+          comingSoonLabel: 'Moment in Life Description'
         }
       ],
-      'Value Communication': [
+      'Advanced Sales Resources': [
         {
-          id: 'value-growth-1',
-          title: 'Multi-Stakeholder Business Cases',
-          description: 'Business cases tailored for different stakeholder perspectives',
-          type: 'template',
+          id: 'advanced-buyer-ux',
+          title: 'Buyer-Centric UX Considerations & Tips',
+          description: 'User experience optimization from buyer\'s perspective',
+          type: 'guide',
+          duration: '40 min',
+          popularity: 91,
+          tags: ['ux', 'buyer-centric', 'optimization'],
+          content: 'Complete UX optimization guide for buyers...',
+          placeholder: true,
+          comingSoonLabel: 'Buyer-Centric UX Tips'
+        },
+        {
+          id: 'advanced-product-usage',
+          title: 'Product Usage Assessment',
+          description: 'Analysis of how customers adopt and use your product',
+          type: 'assessment',
+          duration: '35 min',
+          popularity: 88,
+          tags: ['adoption', 'usage', 'analytics'],
+          content: 'Framework for analyzing product adoption patterns...',
+          placeholder: true,
+          comingSoonLabel: 'Product Usage Assessment'
+        },
+        {
+          id: 'advanced-day-in-life',
+          title: '"Day in the Life" Description',
+          description: 'Detailed daily workflow with your product integrated',
+          type: 'framework',
           duration: '45 min',
           popularity: 93,
-          tags: ['business-case', 'stakeholders', 'enterprise'],
-          content: 'Templates for CFO, CTO, and COO perspectives...'
+          tags: ['workflow', 'integration', 'daily-use'],
+          content: 'Daily workflow mapping with product integration...',
+          placeholder: true,
+          comingSoonLabel: 'Day in the Life'
         },
         {
-          id: 'value-growth-2',
-          title: 'Advanced ROI Modeling',
-          description: 'Sophisticated financial models for enterprise deals',
-          type: 'model',
-          duration: '70 min',
-          popularity: 86,
-          tags: ['roi', 'financial-modeling', 'enterprise'],
-          content: 'Advanced Excel models with scenario planning...'
-        }
-      ],
-      'Implementation': [
-        {
-          id: 'impl-growth-1',
-          title: 'Sales Team Training Materials',
-          description: 'Comprehensive training for scaling sales operations',
-          type: 'training',
-          duration: '90 min',
-          popularity: 84,
-          tags: ['training', 'team', 'scaling'],
-          content: 'Complete sales enablement curriculum...'
-        }
-      ]
-    },
-    expansion: {
-      'ICP Intelligence': [
-        {
-          id: 'icp-expansion-1',
-          title: 'Strategic Market Intelligence',
-          description: 'Advanced market analysis for strategic positioning',
+          id: 'advanced-month-in-life',
+          title: 'Month in the Life Description',
+          description: 'Long-term usage patterns and relationship evolution',
           type: 'framework',
-          duration: '80 min',
-          popularity: 89,
-          tags: ['market-intel', 'strategy', 'positioning'],
-          content: 'Strategic market mapping and analysis...'
-        }
-      ],
-      'Value Communication': [
-        {
-          id: 'value-expansion-1',
-          title: 'Executive Communication Mastery',
-          description: 'Board-level presentation frameworks and techniques',
-          type: 'guide',
-          duration: '60 min',
-          popularity: 95,
-          tags: ['executive', 'board', 'communication'],
-          content: 'C-suite communication strategies and templates...'
+          duration: '50 min',
+          popularity: 87,
+          tags: ['long-term', 'evolution', 'patterns'],
+          content: 'Long-term customer relationship mapping...',
+          placeholder: true,
+          comingSoonLabel: 'Month in the Life'
         },
         {
-          id: 'value-expansion-2',
-          title: 'Series B Preparation Kit',
-          description: 'Revenue operations optimization for next funding round',
-          type: 'kit',
-          duration: '120 min',
-          popularity: 87,
-          tags: ['series-b', 'fundraising', 'revenue-ops'],
-          content: 'Complete revenue operations audit and optimization...'
+          id: 'advanced-service-blueprint',
+          title: 'Service Blueprinting Description',
+          description: 'Complete service delivery process mapping',
+          type: 'blueprint',
+          duration: '60 min',
+          popularity: 85,
+          tags: ['service', 'process', 'delivery'],
+          content: 'Comprehensive service delivery mapping...',
+          placeholder: true,
+          comingSoonLabel: 'Service Blueprinting'
+        },
+        {
+          id: 'advanced-jobs-to-be-done',
+          title: '"Jobs to be Done" Description',
+          description: 'Framework for understanding customer job requirements',
+          type: 'framework',
+          duration: '40 min',
+          popularity: 94,
+          tags: ['jtbd', 'requirements', 'jobs'],
+          content: 'Complete Jobs to be Done framework...',
+          placeholder: true,
+          comingSoonLabel: 'Jobs to be Done'
+        },
+        {
+          id: 'advanced-compelling-events',
+          title: 'Compelling Events Generation',
+          description: 'Events that trigger urgent need for your solution',
+          type: 'generator',
+          duration: '30 min',
+          popularity: 90,
+          tags: ['events', 'triggers', 'urgency'],
+          content: 'Framework for identifying compelling events...',
+          placeholder: true,
+          comingSoonLabel: 'Compelling Events'
+        },
+        {
+          id: 'advanced-user-journey',
+          title: 'User Journey Mapping',
+          description: 'Complete customer journey from awareness to advocacy',
+          type: 'map',
+          duration: '55 min',
+          popularity: 92,
+          tags: ['journey', 'customer-path', 'advocacy'],
+          content: 'End-to-end customer journey mapping...',
+          placeholder: true,
+          comingSoonLabel: 'User Journey Mapping'
+        },
+        {
+          id: 'advanced-scenario-planning',
+          title: 'Scenario Planning',
+          description: 'Multiple business outcome scenarios and preparations',
+          type: 'planning',
+          duration: '65 min',
+          popularity: 86,
+          tags: ['scenarios', 'planning', 'outcomes'],
+          content: 'Strategic scenario planning framework...',
+          placeholder: true,
+          comingSoonLabel: 'Scenario Planning'
+        },
+        {
+          id: 'advanced-persona-prototyping',
+          title: 'Persona-Based Prototyping',
+          description: 'Product development approach based on user personas',
+          type: 'methodology',
+          duration: '50 min',
+          popularity: 88,
+          tags: ['prototyping', 'personas', 'development'],
+          content: 'Persona-driven product development approach...',
+          placeholder: true,
+          comingSoonLabel: 'Persona-Based Prototyping'
+        },
+        {
+          id: 'advanced-backstage-optimization',
+          title: 'Backstage Process Optimization',
+          description: 'Internal operations improvement for better customer delivery',
+          type: 'optimization',
+          duration: '45 min',
+          popularity: 84,
+          tags: ['operations', 'internal', 'optimization'],
+          content: 'Internal process optimization for customer success...',
+          placeholder: true,
+          comingSoonLabel: 'Backstage Optimization'
+        },
+        {
+          id: 'advanced-failure-analysis',
+          title: 'Service Failure Mode and Effects Analysis',
+          description: 'Risk analysis and failure prevention strategies',
+          type: 'analysis',
+          duration: '40 min',
+          popularity: 82,
+          tags: ['failure', 'risk', 'prevention'],
+          content: 'Comprehensive failure mode analysis...',
+          placeholder: true,
+          comingSoonLabel: 'Failure Mode Analysis'
+        },
+        {
+          id: 'advanced-sales-deck',
+          title: 'Sales Slide Deck',
+          description: 'Complete presentation structure for sales conversations',
+          type: 'deck',
+          duration: '35 min',
+          popularity: 95,
+          tags: ['sales', 'presentation', 'deck'],
+          content: 'Professional sales presentation framework...',
+          placeholder: true,
+          comingSoonLabel: 'Sales Slide Deck'
+        },
+        {
+          id: 'advanced-sales-tasks',
+          title: 'Advanced Sales Tasks',
+          description: 'Comprehensive sales methodology optimization',
+          type: 'methodology',
+          duration: '50 min',
+          popularity: 89,
+          tags: ['sales', 'tasks', 'methodology'],
+          content: 'Advanced sales task optimization framework...',
+          placeholder: true,
+          comingSoonLabel: 'Advanced Sales Tasks'
         }
       ],
-      'Implementation': [
+      'Strategic & Assessment Resources': [
         {
-          id: 'impl-expansion-1',
-          title: 'Market Expansion Strategy',
-          description: 'Systematic approach to new market penetration',
-          type: 'strategy',
-          duration: '100 min',
-          popularity: 82,
-          tags: ['expansion', 'market-entry', 'strategy'],
-          content: 'Market expansion playbook with risk assessment...'
+          id: 'strategic-value-stats',
+          title: 'Product Value Statistics Generation',
+          description: 'Quantitative analysis and performance metrics',
+          type: 'analytics',
+          duration: '45 min',
+          popularity: 88,
+          tags: ['statistics', 'metrics', 'value'],
+          content: 'Framework for generating product value statistics...',
+          placeholder: true,
+          comingSoonLabel: 'Value Statistics Generation'
+        },
+        {
+          id: 'strategic-non-ideal-customer',
+          title: 'Non-Ideal Customer Profile (Optional)',
+          description: 'Detailed profile of poor-fit customers to avoid',
+          type: 'profile',
+          duration: '30 min',
+          popularity: 85,
+          tags: ['anti-persona', 'qualification', 'filtering'],
+          content: 'Framework for identifying customers to avoid...',
+          placeholder: true,
+          comingSoonLabel: 'Non-Ideal Customer Profile'
+        },
+        {
+          id: 'strategic-problem-validation',
+          title: 'Mock "Problem Validation Survey"',
+          description: 'Survey design for validating market problems',
+          type: 'survey',
+          duration: '40 min',
+          popularity: 89,
+          tags: ['validation', 'survey', 'problems'],
+          content: 'Complete problem validation survey design...',
+          placeholder: true,
+          comingSoonLabel: 'Problem Validation Survey'
+        },
+        {
+          id: 'strategic-service-prototype',
+          title: 'Detailed Service Prototype',
+          description: 'Comprehensive service design and delivery model',
+          type: 'prototype',
+          duration: '70 min',
+          popularity: 87,
+          tags: ['service', 'prototype', 'design'],
+          content: 'End-to-end service prototype framework...',
+          placeholder: true,
+          comingSoonLabel: 'Service Prototype'
+        },
+        {
+          id: 'strategic-buying-committee',
+          title: 'Buying Committee Analysis',
+          description: 'Stakeholder mapping and influence analysis for B2B sales',
+          type: 'analysis',
+          duration: '50 min',
+          popularity: 91,
+          tags: ['stakeholders', 'b2b', 'committee'],
+          content: 'B2B buying committee analysis framework...',
+          placeholder: true,
+          comingSoonLabel: 'Buying Committee Analysis'
+        },
+        {
+          id: 'strategic-selling-dialogue',
+          title: 'Mock Selling Dialogue',
+          description: 'Sample sales conversations and objection handling',
+          type: 'script',
+          duration: '35 min',
+          popularity: 93,
+          tags: ['dialogue', 'objections', 'sales'],
+          content: 'Professional selling dialogue templates...',
+          placeholder: true,
+          comingSoonLabel: 'Mock Selling Dialogue'
+        },
+        {
+          id: 'strategic-willingness-to-pay',
+          title: 'Willingness to Pay Assessment',
+          description: 'Pricing strategy and value perception analysis',
+          type: 'assessment',
+          duration: '45 min',
+          popularity: 86,
+          tags: ['pricing', 'value', 'willingness'],
+          content: 'Comprehensive pricing strategy assessment...',
+          placeholder: true,
+          comingSoonLabel: 'Willingness to Pay'
+        },
+        {
+          id: 'strategic-head-of-sales',
+          title: 'Ideal Head of Sales Profile',
+          description: 'Hiring profile for sales leadership positions',
+          type: 'profile',
+          duration: '40 min',
+          popularity: 84,
+          tags: ['hiring', 'sales', 'leadership'],
+          content: 'Sales leadership hiring framework...',
+          placeholder: true,
+          comingSoonLabel: 'Head of Sales Profile'
+        },
+        {
+          id: 'strategic-pmf-readiness',
+          title: 'PMF Readiness Assessment',
+          description: 'Product-Market Fit evaluation and next steps',
+          type: 'assessment',
+          duration: '60 min',
+          popularity: 92,
+          tags: ['pmf', 'readiness', 'evaluation'],
+          content: 'Complete PMF readiness evaluation framework...',
+          placeholder: true,
+          comingSoonLabel: 'PMF Readiness Assessment'
+        },
+        {
+          id: 'strategic-technical-translator',
+          title: 'Technical to Sales Translator',
+          description: 'Bridge between technical features and business benefits',
+          type: 'translator',
+          duration: '35 min',
+          popularity: 90,
+          tags: ['technical', 'translation', 'benefits'],
+          content: 'Technical to business benefits translation...',
+          placeholder: true,
+          comingSoonLabel: 'Technical Translator'
+        },
+        {
+          id: 'strategic-systems-map',
+          title: 'Systems Interactions Map',
+          description: 'Technical integration and systems architecture planning',
+          type: 'map',
+          duration: '55 min',
+          popularity: 83,
+          tags: ['systems', 'integration', 'architecture'],
+          content: 'Systems integration mapping framework...',
+          placeholder: true,
+          comingSoonLabel: 'Systems Interactions Map'
+        },
+        {
+          id: 'strategic-investor-profile',
+          title: 'Ideal Investor Profile ⭐ New',
+          description: 'Perfect investor match analysis for fundraising',
+          type: 'profile',
+          duration: '50 min',
+          popularity: 95,
+          tags: ['investors', 'fundraising', 'matching'],
+          content: 'Investor targeting and matching framework...',
+          placeholder: true,
+          comingSoonLabel: 'Ideal Investor Profile'
+        },
+        {
+          id: 'strategic-investor-deck',
+          title: 'Ideal Investor Deck ⭐ New',
+          description: 'Complete investor pitch deck structure and content',
+          type: 'deck',
+          duration: '80 min',
+          popularity: 97,
+          tags: ['pitch', 'investors', 'deck'],
+          content: 'Professional investor pitch deck framework...',
+          placeholder: true,
+          comingSoonLabel: 'Ideal Investor Deck'
         }
       ]
     }
@@ -382,14 +576,245 @@ const SimplifiedResourceLibrary = ({ customerId }) => {
     return null;
   }, [resourceDatabase]);
 
+  // Get generated resources from localStorage
+  const getGeneratedResources = useMemo(() => {
+    // First check for resources stored directly from webhook service
+    const storedResources = localStorage.getItem('generatedResources');
+    if (storedResources) {
+      try {
+        const parsed = JSON.parse(storedResources);
+        // Convert to resource library format
+        const resources = [];
+        if (parsed.icp_analysis) {
+          resources.push({
+            id: 'gen-icp-1',
+            title: 'ICP Analysis Report',
+            description: 'AI-generated ideal customer profile analysis',
+            type: 'analysis',
+            duration: '15 min',
+            popularity: 100,
+            tags: ['icp', 'ai-generated', 'analysis'],
+            content: parsed.icp_analysis.content || 'Generated ICP analysis content',
+            confidence: parsed.icp_analysis.confidence_score || 85,
+            generated: true,
+            generatedAt: parsed.generatedAt || Date.now()
+          });
+        }
+        if (parsed.buyer_personas) {
+          resources.push({
+            id: 'gen-persona-1',
+            title: 'Buyer Personas',
+            description: 'Detailed buyer persona profiles',
+            type: 'personas',
+            duration: '10 min',
+            popularity: 98,
+            tags: ['personas', 'ai-generated', 'buyer'],
+            content: parsed.buyer_personas.content || 'Generated buyer personas',
+            confidence: parsed.buyer_personas.confidence_score || 88,
+            generated: true,
+            generatedAt: parsed.generatedAt || Date.now()
+          });
+        }
+        if (parsed.empathy_map) {
+          resources.push({
+            id: 'gen-empathy-1',
+            title: 'Customer Empathy Map',
+            description: 'Understanding customer psychology',
+            type: 'empathy',
+            duration: '12 min',
+            popularity: 95,
+            tags: ['empathy', 'ai-generated', 'psychology'],
+            content: parsed.empathy_map.content || 'Generated empathy map',
+            confidence: parsed.empathy_map.confidence_score || 87,
+            generated: true,
+            generatedAt: parsed.generatedAt || Date.now()
+          });
+        }
+        if (parsed.product_assessment) {
+          resources.push({
+            id: 'gen-assessment-1',
+            title: 'Product Market Assessment',
+            description: 'Market fit and opportunity analysis',
+            type: 'assessment',
+            duration: '20 min',
+            popularity: 96,
+            tags: ['product', 'ai-generated', 'market-fit'],
+            content: parsed.product_assessment.content || 'Generated product assessment',
+            confidence: parsed.product_assessment.confidence_score || 90,
+            generated: true,
+            generatedAt: parsed.generatedAt || Date.now()
+          });
+        }
+        return resources;
+      } catch (e) {
+        console.error('Error parsing generated resources:', e);
+      }
+    }
+    
+    // Also check for core resources from Sales Sage
+    const coreResources = localStorage.getItem('coreResources');
+    if (coreResources) {
+      try {
+        const parsed = JSON.parse(coreResources);
+        const resources = [];
+        
+        // Add each core resource if it exists
+        if (parsed.icpAnalysis) {
+          resources.push({
+            id: 'core-icp-1',
+            title: 'ICP Analysis',
+            description: parsed.icpAnalysis.description || 'Comprehensive ideal customer profile analysis',
+            type: 'framework',
+            duration: '20 min',
+            popularity: 100,
+            tags: ['icp', 'core-resource', 'analysis', 'sales-sage'],
+            content: parsed.icpAnalysis.content || parsed.icpAnalysis,
+            confidence: parsed.icpAnalysis.confidence || 90,
+            generated: true,
+            isCore: true,
+            generatedAt: parsed.generatedAt || Date.now()
+          });
+        }
+        
+        if (parsed.buyerPersonas) {
+          resources.push({
+            id: 'core-personas-1',
+            title: 'Buyer Personas',
+            description: parsed.buyerPersonas.description || 'Target buyer persona profiles and insights',
+            type: 'personas',
+            duration: '15 min',
+            popularity: 98,
+            tags: ['personas', 'core-resource', 'buyer', 'sales-sage'],
+            content: parsed.buyerPersonas.content || parsed.buyerPersonas,
+            confidence: parsed.buyerPersonas.confidence || 88,
+            generated: true,
+            isCore: true,
+            generatedAt: parsed.generatedAt || Date.now()
+          });
+        }
+        
+        if (parsed.empathyMap) {
+          resources.push({
+            id: 'core-empathy-1',
+            title: 'Empathy Map',
+            description: parsed.empathyMap.description || 'Deep customer psychology and motivation mapping',
+            type: 'empathy',
+            duration: '15 min',
+            popularity: 95,
+            tags: ['empathy', 'core-resource', 'psychology', 'sales-sage'],
+            content: parsed.empathyMap.content || parsed.empathyMap,
+            confidence: parsed.empathyMap.confidence || 87,
+            generated: true,
+            isCore: true,
+            generatedAt: parsed.generatedAt || Date.now()
+          });
+        }
+        
+        if (parsed.productAssessment) {
+          resources.push({
+            id: 'core-assessment-1',
+            title: 'Product Market Potential',
+            description: parsed.productAssessment.description || 'Product-market fit and opportunity assessment',
+            type: 'assessment',
+            duration: '25 min',
+            popularity: 96,
+            tags: ['product', 'core-resource', 'market-fit', 'sales-sage'],
+            content: parsed.productAssessment.content || parsed.productAssessment,
+            confidence: parsed.productAssessment.confidence || 92,
+            generated: true,
+            isCore: true,
+            generatedAt: parsed.generatedAt || Date.now()
+          });
+        }
+        
+        return resources;
+      } catch (e) {
+        console.error('Error parsing core resources:', e);
+      }
+    }
+    
+    return [];
+  }, []);
+
+  // Generate core resource placeholders when resources don't exist
+  const getCoreResourcePlaceholders = useMemo(() => {
+    const coreResourceTemplates = [
+      {
+        id: 'placeholder-target-persona',
+        title: 'Target Buyer Persona',
+        description: 'Detailed ideal customer personality and behavioral profile',
+        type: 'personas',
+        placeholder: true,
+        comingSoonLabel: 'Target Buyer Persona'
+      },
+      {
+        id: 'placeholder-icp',
+        title: 'Ideal Customer Profile (ICP)',
+        description: 'Company-level characteristics for B2B targeting',
+        type: 'analysis',
+        placeholder: true,
+        comingSoonLabel: 'Ideal Customer Profile'
+      },
+      {
+        id: 'placeholder-empathy',
+        title: 'Empathy Map',
+        description: 'Customer thoughts, feelings, and motivations visualization',
+        type: 'empathy',
+        placeholder: true,
+        comingSoonLabel: 'Empathy Map'
+      },
+      {
+        id: 'placeholder-assessment',
+        title: 'Product Potential Assessment',
+        description: 'Market opportunity and success probability analysis',
+        type: 'assessment',
+        placeholder: true,
+        comingSoonLabel: 'Product Potential Assessment'
+      }
+    ];
+    
+    const existingResources = getGeneratedResources;
+    const existingIds = existingResources.map(r => r.type);
+    
+    // Only show placeholders for resources that don't exist
+    const placeholders = coreResourceTemplates.filter(template => 
+      !existingIds.includes(template.type)
+    );
+    
+    return placeholders;
+  }, [getGeneratedResources]);
+
   // Filter resources based on current selections
   const filteredResources = useMemo(() => {
+    // Handle Core Resources category
+    if (selectedCategory === 'Core Resources') {
+      let resources = [...getGeneratedResources, ...getCoreResourcePlaceholders];
+      
+      // Apply search filter
+      if (searchTerm) {
+        resources = resources.filter(resource => 
+          (resource.title || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+          (resource.description || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+          (resource.tags || []).some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()))
+        );
+      }
+      
+      // Sort generated resources first, then placeholders
+      return resources.sort((a, b) => {
+        if (a.placeholder && !b.placeholder) return 1;
+        if (!a.placeholder && b.placeholder) return -1;
+        return (b.popularity || 0) - (a.popularity || 0);
+      });
+    }
+    
+    // Handle regular resource categories
     const tierToShow = selectedTier === 'current' ? milestone?.tier || 'foundation' : selectedTier;
     const tierResources = resourceDatabase[tierToShow] || resourceDatabase.foundation;
     
     let resources = [];
     
     if (selectedCategory === 'all') {
+      // Only show non-core resources in 'all' view since core resources have their own section
       Object.values(tierResources).forEach(categoryResources => {
         resources.push(...categoryResources);
       });
@@ -400,15 +825,22 @@ const SimplifiedResourceLibrary = ({ customerId }) => {
     // Apply search filter
     if (searchTerm) {
       resources = resources.filter(resource => 
-        resource.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        resource.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        resource.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()))
+        (resource.title || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (resource.description || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (resource.tags || []).some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()))
       );
     }
     
-    // Sort by popularity
-    return resources.sort((a, b) => b.popularity - a.popularity);
-  }, [resourceDatabase, selectedTier, selectedCategory, searchTerm, milestone]);
+    // Sort by placeholder status and popularity
+    return resources.sort((a, b) => {
+      // Generated/Core resources first
+      if ((a.generated || a.placeholder) && !(b.generated || b.placeholder)) return -1;
+      if (!(a.generated || a.placeholder) && (b.generated || b.placeholder)) return 1;
+      
+      // Within same type, sort by popularity
+      return (b.popularity || 0) - (a.popularity || 0);
+    });
+  }, [resourceDatabase, selectedTier, selectedCategory, searchTerm, milestone, getGeneratedResources, getCoreResourcePlaceholders]);
 
   // Track resource access
   const handleResourceAccess = useCallback((resource) => {
@@ -442,9 +874,10 @@ const SimplifiedResourceLibrary = ({ customerId }) => {
   // Category colors
   const getCategoryColor = (category) => {
     const colors = {
-      'ICP Intelligence': 'blue',
-      'Value Communication': 'green',
-      'Implementation': 'purple'
+      'Core Resources': 'yellow',
+      'Core Business Resources': 'blue',
+      'Advanced Sales Resources': 'green', 
+      'Strategic & Assessment Resources': 'purple'
     };
     return colors[category] || 'gray';
   };
@@ -568,9 +1001,10 @@ const SimplifiedResourceLibrary = ({ customerId }) => {
               className="px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:border-blue-500 focus:outline-none"
             >
               <option value="all">All Categories</option>
-              <option value="ICP Intelligence">ICP Intelligence</option>
-              <option value="Value Communication">Value Communication</option>
-              <option value="Implementation">Implementation</option>
+              <option value="Core Resources">Core Resources</option>
+              <option value="Core Business Resources">Core Business Resources</option>
+              <option value="Advanced Sales Resources">Advanced Sales Resources</option>
+              <option value="Strategic & Assessment Resources">Strategic & Assessment</option>
             </select>
 
             {/* Tier Filter */}
@@ -612,8 +1046,299 @@ const SimplifiedResourceLibrary = ({ customerId }) => {
           </div>
         </div>
 
-        {/* Resources Grid/List */}
-        {filteredResources.length > 0 ? (
+        {/* Core Resources Section - Always Visible */}
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-semibold text-white">Core Resources</h2>
+            <span className="text-sm text-gray-400">
+              {getGeneratedResources.length} of 4 generated
+            </span>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {[...getGeneratedResources, ...getCoreResourcePlaceholders].map((resource) => {
+              const ResourceIcon = getResourceIcon(resource.type);
+              
+              return (
+                <div key={resource.id} className={`
+                  relative bg-gray-900 border rounded-xl p-4 transition-colors
+                  ${resource.placeholder 
+                    ? 'border-gray-600 border-dashed hover:border-purple-500' 
+                    : 'border-gray-800 hover:border-gray-700'
+                  }
+                `}>
+                  {/* Blur overlay for placeholder content */}
+                  {resource.placeholder && (
+                    <div className="absolute inset-0 bg-gray-900/60 backdrop-blur-sm rounded-xl flex items-center justify-center z-10">
+                      <div className="text-center">
+                        <div className="bg-gradient-to-r from-purple-500 to-blue-500 text-white px-3 py-1.5 rounded-full text-xs font-medium mb-2">
+                          {resource.comingSoonLabel || 'Coming Soon'}
+                        </div>
+                        <p className="text-gray-300 text-xs">Generate with AI</p>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* Content - no blur for core resources so titles are visible */}
+                  <div>
+                  <div className="flex items-start justify-between mb-3">
+                    <div className={`p-2 rounded-lg ${
+                      resource.placeholder 
+                        ? 'bg-gray-700/50' 
+                        : 'bg-yellow-900/30'
+                    }`}>
+                      <ResourceIcon className={`w-4 h-4 ${
+                        resource.placeholder 
+                          ? 'text-gray-400' 
+                          : 'text-yellow-400'
+                      }`} />
+                    </div>
+                    {resource.confidence && (
+                      <span className="text-xs bg-green-900/30 text-green-400 px-2 py-1 rounded">
+                        {resource.confidence}%
+                      </span>
+                    )}
+                  </div>
+                  
+                  <h3 className={`font-medium mb-2 text-sm ${
+                    resource.placeholder ? 'text-gray-300' : 'text-white'
+                  }`}>
+                    {resource.title}
+                    {resource.placeholder && (
+                      <span className="ml-1 text-xs bg-gray-700 text-gray-400 px-1 py-0.5 rounded">
+                        Not Generated
+                      </span>
+                    )}
+                  </h3>
+                  
+                  <p className="text-gray-400 text-xs mb-3 line-clamp-2">
+                    {resource.placeholder 
+                      ? `${resource.description}. Generate using AI.`
+                      : resource.description
+                    }
+                  </p>
+                  
+                  {resource.placeholder ? (
+                    <button
+                      onClick={() => navigate(`/customer/${customerId}/simplified/icp`)}
+                      className="w-full py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors flex items-center justify-center gap-2 text-sm"
+                    >
+                      <ArrowRight className="w-3 h-3" />
+                      Generate
+                    </button>
+                  ) : (
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => handleResourceAccess(resource)}
+                        className="flex-1 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors flex items-center justify-center gap-2 text-sm"
+                      >
+                        <Eye className="w-3 h-3" />
+                        View
+                      </button>
+                      <button
+                        onClick={() => {
+                          handleResourceAccess(resource);
+                          navigator.clipboard.writeText(resource.content);
+                        }}
+                        className="px-3 py-2 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-lg transition-colors"
+                      >
+                        <Copy className="w-3 h-3" />
+                      </button>
+                    </div>
+                  )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Advanced Resources Section */}
+        <div className="mb-6">
+          <h2 className="text-xl font-semibold text-white mb-4">Advanced Resources</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+            {filteredResources.filter(resource => 
+              ['Advanced Sales Resources'].includes(
+                Object.keys(resourceDatabase[selectedTier === 'current' ? milestone?.tier || 'foundation' : selectedTier] || resourceDatabase.foundation).find(cat =>
+                  (resourceDatabase[selectedTier === 'current' ? milestone?.tier || 'foundation' : selectedTier] || resourceDatabase.foundation)[cat].includes(resource)
+                )
+              )
+            ).map((resource) => {
+              const ResourceIcon = getResourceIcon(resource.type);
+              const categoryColor = getCategoryColor(
+                Object.keys(resourceDatabase[selectedTier === 'current' ? milestone?.tier || 'foundation' : selectedTier] || resourceDatabase.foundation).find(cat =>
+                  (resourceDatabase[selectedTier === 'current' ? milestone?.tier || 'foundation' : selectedTier] || resourceDatabase.foundation)[cat].includes(resource)
+                )
+              );
+              
+              return (
+                <div key={resource.id} className="relative bg-gray-900 border border-gray-600 border-dashed rounded-xl p-6 hover:border-gray-500 transition-colors">
+                  {/* Coming Soon overlay for Advanced Resources */}
+                  <div className="absolute inset-0 bg-gray-900/60 backdrop-blur-sm rounded-xl flex items-center justify-center z-10">
+                    <div className="text-center">
+                      <div className="bg-gradient-to-r from-blue-500 to-green-500 text-white px-3 py-1.5 rounded-full text-xs font-medium mb-2">
+                        Coming Soon
+                      </div>
+                      <p className="text-gray-300 text-xs">Advanced Features</p>
+                    </div>
+                  </div>
+                  
+                  {/* Content with blur */}
+                  <div className="blur-sm">
+                  <div className="flex items-start justify-between mb-3">
+                    <div className={`p-2 rounded-lg bg-${categoryColor}-900/30`}>
+                      <ResourceIcon className={`w-5 h-5 text-${categoryColor}-400`} />
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Star className="w-4 h-4 text-yellow-400" />
+                      <span className="text-gray-400 text-sm">{resource.popularity}%</span>
+                    </div>
+                  </div>
+                  
+                  <h3 className="text-white font-semibold mb-2">{resource.title}</h3>
+                  <p className="text-gray-400 text-sm mb-3">{resource.description}</p>
+                  
+                  <div className="flex items-center gap-4 text-xs text-gray-500 mb-4">
+                    <div className="flex items-center gap-1">
+                      <Clock className="w-3 h-3" />
+                      {resource.duration}
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <span className="w-2 h-2 bg-gray-600 rounded-full"></span>
+                      {resource.type}
+                    </div>
+                  </div>
+                  
+                  <div className="flex gap-2 mb-4">
+                    {(resource.tags || []).slice(0, 3).map((tag) => (
+                      <span key={tag} className="px-2 py-1 bg-gray-800 text-gray-400 rounded text-xs">
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                  
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => handleResourceAccess(resource)}
+                      className="flex-1 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors flex items-center justify-center gap-2"
+                    >
+                      <Eye className="w-4 h-4" />
+                      View
+                    </button>
+                    <button
+                      onClick={() => {
+                        handleResourceAccess(resource);
+                        navigator.clipboard.writeText(resource.content);
+                      }}
+                      className="px-3 py-2 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-lg transition-colors"
+                    >
+                      <Copy className="w-4 h-4" />
+                    </button>
+                  </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Strategic Resources Section */}
+        <div className="mb-6">
+          <h2 className="text-xl font-semibold text-white mb-4">Strategic Resources</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {filteredResources.filter(resource => 
+              ['Strategic & Assessment Resources'].includes(
+                Object.keys(resourceDatabase[selectedTier === 'current' ? milestone?.tier || 'foundation' : selectedTier] || resourceDatabase.foundation).find(cat =>
+                  (resourceDatabase[selectedTier === 'current' ? milestone?.tier || 'foundation' : selectedTier] || resourceDatabase.foundation)[cat].includes(resource)
+                )
+              )
+            ).map((resource) => {
+              const ResourceIcon = getResourceIcon(resource.type);
+              const categoryColor = getCategoryColor(
+                Object.keys(resourceDatabase[selectedTier === 'current' ? milestone?.tier || 'foundation' : selectedTier] || resourceDatabase.foundation).find(cat =>
+                  (resourceDatabase[selectedTier === 'current' ? milestone?.tier || 'foundation' : selectedTier] || resourceDatabase.foundation)[cat].includes(resource)
+                )
+              );
+              
+              return (
+                <div key={resource.id} className="relative bg-gray-900 border border-gray-600 border-dashed rounded-xl p-6 hover:border-gray-500 transition-colors">
+                  {/* Coming Soon overlay for Strategic Resources */}
+                  <div className="absolute inset-0 bg-gray-900/60 backdrop-blur-sm rounded-xl flex items-center justify-center z-10">
+                    <div className="text-center">
+                      <div className="bg-gradient-to-r from-purple-500 to-orange-500 text-white px-3 py-1.5 rounded-full text-xs font-medium mb-2">
+                        Coming Soon
+                      </div>
+                      <p className="text-gray-300 text-xs">Strategic Features</p>
+                    </div>
+                  </div>
+                  
+                  {/* Content with blur */}
+                  <div className="blur-sm">
+                  <div className="flex items-start justify-between mb-3">
+                    <div className={`p-2 rounded-lg bg-${categoryColor}-900/30`}>
+                      <ResourceIcon className={`w-5 h-5 text-${categoryColor}-400`} />
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Star className="w-4 h-4 text-yellow-400" />
+                      <span className="text-gray-400 text-sm">{resource.popularity}%</span>
+                    </div>
+                  </div>
+                  
+                  <h3 className="text-white font-semibold mb-2">{resource.title}</h3>
+                  <p className="text-gray-400 text-sm mb-3">{resource.description}</p>
+                  
+                  <div className="flex items-center gap-4 text-xs text-gray-500 mb-4">
+                    <div className="flex items-center gap-1">
+                      <Clock className="w-3 h-3" />
+                      {resource.duration}
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <span className="w-2 h-2 bg-gray-600 rounded-full"></span>
+                      {resource.type}
+                    </div>
+                  </div>
+                  
+                  <div className="flex gap-2 mb-4">
+                    {(resource.tags || []).slice(0, 3).map((tag) => (
+                      <span key={tag} className="px-2 py-1 bg-gray-800 text-gray-400 rounded text-xs">
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                  
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => handleResourceAccess(resource)}
+                      className="flex-1 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors flex items-center justify-center gap-2"
+                    >
+                      <Eye className="w-4 h-4" />
+                      View
+                    </button>
+                    <button
+                      onClick={() => {
+                        handleResourceAccess(resource);
+                        navigator.clipboard.writeText(resource.content);
+                      }}
+                      className="px-3 py-2 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-lg transition-colors"
+                    >
+                      <Copy className="w-4 h-4" />
+                    </button>
+                  </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Fallback for unmatched resources */}
+        {filteredResources.length > 0 && filteredResources.filter(resource => 
+          !['Core Business Resources', 'Advanced Sales Resources', 'Strategic & Assessment Resources'].includes(
+            Object.keys(resourceDatabase[selectedTier === 'current' ? milestone?.tier || 'foundation' : selectedTier] || resourceDatabase.foundation).find(cat =>
+              (resourceDatabase[selectedTier === 'current' ? milestone?.tier || 'foundation' : selectedTier] || resourceDatabase.foundation)[cat].includes(resource)
+            )
+          )
+        ).length > 0 ? (
           <div className={viewMode === 'grid' 
             ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'
             : 'space-y-4'
@@ -628,8 +1353,8 @@ const SimplifiedResourceLibrary = ({ customerId }) => {
               
               return (
                 <div key={resource.id} className={viewMode === 'grid' 
-                  ? 'bg-gray-900 border border-gray-800 rounded-xl p-6 hover:border-gray-700 transition-colors'
-                  : 'bg-gray-900 border border-gray-800 rounded-lg p-4 flex items-center gap-4 hover:border-gray-700 transition-colors'
+                  ? `bg-gray-900 border ${resource.placeholder ? 'border-gray-600 border-dashed' : 'border-gray-800'} rounded-xl p-6 hover:border-gray-700 transition-colors`
+                  : `bg-gray-900 border ${resource.placeholder ? 'border-gray-600 border-dashed' : 'border-gray-800'} rounded-lg p-4 flex items-center gap-4 hover:border-gray-700 transition-colors`
                 }>
                   {viewMode === 'grid' ? (
                     <>
@@ -643,8 +1368,20 @@ const SimplifiedResourceLibrary = ({ customerId }) => {
                         </div>
                       </div>
                       
-                      <h3 className="text-white font-semibold mb-2">{resource.title}</h3>
-                      <p className="text-gray-400 text-sm mb-3">{resource.description}</p>
+                      <h3 className={`font-semibold mb-2 ${resource.placeholder ? 'text-gray-300' : 'text-white'}`}>
+                        {resource.title}
+                        {resource.placeholder && (
+                          <span className="ml-2 text-xs bg-gray-700 text-gray-300 px-2 py-1 rounded">
+                            Not Generated
+                          </span>
+                        )}
+                      </h3>
+                      <p className="text-gray-400 text-sm mb-3">
+                        {resource.placeholder 
+                          ? `${resource.description}. Click Generate to create this resource using AI.`
+                          : resource.description
+                        }
+                      </p>
                       
                       <div className="flex items-center gap-4 text-xs text-gray-500 mb-4">
                         <div className="flex items-center gap-1">
@@ -658,7 +1395,7 @@ const SimplifiedResourceLibrary = ({ customerId }) => {
                       </div>
                       
                       <div className="flex gap-2 mb-4">
-                        {resource.tags.slice(0, 3).map((tag) => (
+                        {(resource.tags || []).slice(0, 3).map((tag) => (
                           <span key={tag} className="px-2 py-1 bg-gray-800 text-gray-400 rounded text-xs">
                             {tag}
                           </span>
@@ -666,22 +1403,34 @@ const SimplifiedResourceLibrary = ({ customerId }) => {
                       </div>
                       
                       <div className="flex gap-2">
-                        <button
-                          onClick={() => handleResourceAccess(resource)}
-                          className="flex-1 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors flex items-center justify-center gap-2"
-                        >
-                          <Eye className="w-4 h-4" />
-                          View
-                        </button>
-                        <button
-                          onClick={() => {
-                            handleResourceAccess(resource);
-                            navigator.clipboard.writeText(resource.content);
-                          }}
-                          className="px-3 py-2 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-lg transition-colors"
-                        >
-                          <Copy className="w-4 h-4" />
-                        </button>
+                        {resource.placeholder ? (
+                          <button
+                            onClick={() => navigate(`/customer/${customerId}/simplified/icp`)}
+                            className="flex-1 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors flex items-center justify-center gap-2"
+                          >
+                            <ArrowRight className="w-4 h-4" />
+                            Generate
+                          </button>
+                        ) : (
+                          <>
+                            <button
+                              onClick={() => handleResourceAccess(resource)}
+                              className="flex-1 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors flex items-center justify-center gap-2"
+                            >
+                              <Eye className="w-4 h-4" />
+                              View
+                            </button>
+                            <button
+                              onClick={() => {
+                                handleResourceAccess(resource);
+                                navigator.clipboard.writeText(resource.content);
+                              }}
+                              className="px-3 py-2 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-lg transition-colors"
+                            >
+                              <Copy className="w-4 h-4" />
+                            </button>
+                          </>
+                        )}
                       </div>
                     </>
                   ) : (
@@ -703,7 +1452,7 @@ const SimplifiedResourceLibrary = ({ customerId }) => {
                           <span>{resource.duration}</span>
                           <span>{resource.type}</span>
                           <div className="flex gap-1">
-                            {resource.tags.slice(0, 2).map((tag) => (
+                            {(resource.tags || []).slice(0, 2).map((tag) => (
                               <span key={tag} className="px-1 py-0.5 bg-gray-800 rounded">
                                 {tag}
                               </span>
@@ -713,13 +1462,23 @@ const SimplifiedResourceLibrary = ({ customerId }) => {
                       </div>
                       
                       <div className="flex gap-2 flex-shrink-0">
-                        <button
-                          onClick={() => handleResourceAccess(resource)}
-                          className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors flex items-center gap-2"
-                        >
-                          <Eye className="w-4 h-4" />
-                          View
-                        </button>
+                        {resource.placeholder ? (
+                          <button
+                            onClick={() => navigate(`/customer/${customerId}/simplified/icp`)}
+                            className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors flex items-center gap-2"
+                          >
+                            <ArrowRight className="w-4 h-4" />
+                            Generate
+                          </button>
+                        ) : (
+                          <button
+                            onClick={() => handleResourceAccess(resource)}
+                            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors flex items-center gap-2"
+                          >
+                            <Eye className="w-4 h-4" />
+                            View
+                          </button>
+                        )}
                       </div>
                     </>
                   )}
