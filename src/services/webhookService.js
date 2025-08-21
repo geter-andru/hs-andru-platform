@@ -882,31 +882,6 @@ class WebhookService {
         title: "Ideal Customer Profile Analysis",
         confidence_score: 8.8,
         generation_date: new Date().toISOString(),
-        content: `**Ideal Customer Profile for ${productName}**
-
-${description} addresses key market needs in the ${businessType} space. Based on our analysis, your ideal customers exhibit the following characteristics:
-
-**Company Size Range:** ${template.companySize}
-
-**Industry Verticals:** ${template.industryVerticals}
-
-**Annual Revenue Range:** ${template.annualRevenue}
-
-**Geographic Markets:** ${template.geographicMarkets}
-
-**Technology Stack:** ${template.technologyStack}
-
-**Budget Range:** ${template.budgetRange}
-
-**Decision Makers:** ${template.decisionMakers}
-
-**Key Pain Points:** ${template.painPoints}
-
-**Primary Goals:** ${template.goals}
-
-**Decision Timeline:** Typically 3-9 months depending on complexity and stakeholder alignment
-
-**Success Indicators:** Companies actively seeking solutions to address ${template.painPoints.split(',')[0].trim()} and ${template.goals.split(',')[0].trim()}`,
         company_size_range: template.companySize,
         industry_verticals: template.industryVerticals,
         annual_revenue_range: template.annualRevenue,
@@ -921,32 +896,6 @@ ${description} addresses key market needs in the ${businessType} space. Based on
         title: "Target Buyer Personas",
         confidence_score: 9.2,
         generation_date: new Date().toISOString(),
-        content: `**Primary Buyer Persona for ${productName}**
-
-**Decision Maker Profile:** ${template.decisionMakers.split(',')[0].trim()}
-
-**Role & Responsibilities:** Senior leadership responsible for ${category === 'technology' ? 'technology strategy and implementation' : category === 'sales' ? 'revenue generation and sales operations' : 'operational efficiency and process optimization'}
-
-**Core Pain Points:**
-- ${template.painPoints.split(',')[0].trim()}
-- ${template.painPoints.split(',')[1]?.trim() || 'Resource allocation challenges'}
-- ${template.painPoints.split(',')[2]?.trim() || 'Competitive market pressure'}
-
-**Primary Goals & Objectives:**
-- ${template.goals.split(',')[0].trim()}
-- ${template.goals.split(',')[1]?.trim() || 'Drive measurable business outcomes'}
-- ${template.goals.split(',')[2]?.trim() || 'Optimize team performance'}
-
-**Decision Criteria:**
-- ROI and measurable business impact
-- Implementation complexity and timeline
-- Integration with existing systems
-- Vendor reliability and support quality
-- Scalability and future-proofing
-
-**Budget Authority:** ${template.budgetRange}
-
-**Buying Process:** Typically involves 3-6 stakeholders with ${category === 'technology' ? 'technical evaluation and POC' : category === 'sales' ? 'pilot program and performance metrics' : 'operational assessment and compliance review'}`,
         persona_name: template.decisionMakers.split(',')[0].trim(),
         job_title: template.decisionMakers.split(',')[0].trim(),
         pain_points: template.painPoints,
@@ -959,7 +908,6 @@ ${description} addresses key market needs in the ${businessType} space. Based on
         title: "Customer Empathy Map",
         confidence_score: 8.9,
         generation_date: new Date().toISOString(),
-        content: `**What They Think:**\n"We need a solution that actually works and integrates well with our existing systems"\n\n**What They Feel:**\n- Pressure to deliver results quickly\n- Concerned about implementation complexity\n- Excited about potential improvements\n\n**What They See:**\n- Competitive pressure in their market\n- Team struggling with current tools\n- Management expecting better outcomes\n\n**What They Do:**\n- Research solutions extensively\n- Consult with technical teams\n- Evaluate multiple vendors\n- Seek proof of concept opportunities\n\n**Pain Points:**\n- Limited time for evaluation\n- Integration complexity concerns\n- Budget approval processes\n\n**Gains:**\n- Improved operational efficiency\n- Better team productivity\n- Competitive advantage`,
         what_they_think: "We need a solution that actually works and integrates well with our existing systems",
         what_they_feel: "Pressure to deliver results quickly, concerned about implementation complexity",
         what_they_see: "Competitive pressure in their market, team struggling with current tools",
@@ -973,7 +921,6 @@ ${description} addresses key market needs in the ${businessType} space. Based on
         title: "Product Market Fit Assessment",
         confidence_score: 9.0,
         generation_date: new Date().toISOString(),
-        content: `**Market Fit Analysis for ${productName}**\n\n**Current Product Potential Score: 8.2/10**\n\n**Strengths:**\n- Addresses clear market need\n- Differentiated approach to common problem\n- Strong value proposition for target segment\n\n**Market Opportunity:**\nYour product addresses a significant pain point in the ${businessType} market. The growing demand for ${description.toLowerCase()} solutions creates a substantial opportunity.\n\n**Path to 10/10:**\n- Enhanced integration capabilities\n- Expanded feature set for enterprise needs\n- Stronger competitive differentiation\n\n**Customer Conversion Strategy:**\n1. Lead with problem-solution fit demonstration\n2. Provide proof of concept opportunities\n3. Focus on measurable business outcomes\n4. Ensure smooth implementation experience`,
         current_product_potential_score: 8.2,
         gaps_preventing_10: "Enhanced integration capabilities, expanded enterprise features, stronger competitive differentiation",
         market_opportunity: `Significant ${businessType} market opportunity driven by demand for ${description.toLowerCase()} solutions`,
