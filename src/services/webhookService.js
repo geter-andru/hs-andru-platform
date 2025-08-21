@@ -143,7 +143,35 @@ class WebhookService {
         const isStale = storedData._timestamp && (Date.now() - storedData._timestamp) > 300000; // 5 minutes
         const source = storedData._source || 'unknown';
         
-        console.log(`📋 Found localStorage resources (source: ${source}, stale: ${isStale})`);
+        // Enhanced payload analysis for debugging differences
+        const payloadAnalysis = {
+          source,
+          isStale,
+          timestamp: storedData._timestamp,
+          contentSizes: {},
+          contentQuality: {},
+          totalSize: stored.length
+        };
+
+        // Analyze resource content sizes and quality
+        if (storedData.icp_analysis?.content) {
+          payloadAnalysis.contentSizes.icp = storedData.icp_analysis.content.length;
+          payloadAnalysis.contentQuality.icpIsRich = storedData.icp_analysis.content.length > 5000;
+        }
+        if (storedData.buyer_personas?.content) {
+          payloadAnalysis.contentSizes.personas = storedData.buyer_personas.content.length;
+          payloadAnalysis.contentQuality.personaIsRich = storedData.buyer_personas.content.length > 3000;
+        }
+        if (storedData.empathy_map?.content) {
+          payloadAnalysis.contentSizes.empathy = storedData.empathy_map.content.length;
+          payloadAnalysis.contentQuality.empathyIsRich = storedData.empathy_map.content.length > 3000;
+        }
+        if (storedData.product_assessment?.content) {
+          payloadAnalysis.contentSizes.assessment = storedData.product_assessment.content.length;
+          payloadAnalysis.contentQuality.assessmentIsRich = storedData.product_assessment.content.length > 3000;
+        }
+
+        console.log(`📋 Found localStorage resources:`, payloadAnalysis);
         
         if (!isStale || !storedData._timestamp) {
           // Remove metadata before returning

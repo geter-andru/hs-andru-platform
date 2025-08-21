@@ -54,15 +54,44 @@ exports.handler = async (event, context) => {
     const sessionId = data.session_id || event.headers['x-session-id'];
     const customerId = data.customer_id || event.headers['x-customer-id'];
 
-    console.log('🔔 WEBHOOK RECEIVED - Core Resources:', { 
+    // Enhanced payload analysis for debugging environment differences
+    const payloadAnalysis = {
       sessionId, 
       customerId, 
       timestamp: new Date().toISOString(),
       dataKeys: Object.keys(data),
       hasResourcesCollection: !!data.resourcesCollection,
       bodyLength: event.body?.length || 0,
-      hasRichContent: event.body?.length > 10000
-    });
+      hasRichContent: event.body?.length > 10000,
+      // Detailed field analysis
+      fieldSizes: {},
+      contentQuality: {},
+      environmentIndicators: {
+        userAgent: event.headers['user-agent'],
+        origin: event.headers.origin,
+        contentType: event.headers['content-type']
+      }
+    };
+
+    // Analyze individual resource field sizes for debugging
+    if (data.icpData) {
+      payloadAnalysis.fieldSizes.icpData = data.icpData.length;
+      payloadAnalysis.contentQuality.icpIsRich = data.icpData.length > 5000;
+    }
+    if (data.personaData) {
+      payloadAnalysis.fieldSizes.personaData = data.personaData.length;
+      payloadAnalysis.contentQuality.personaIsRich = data.personaData.length > 3000;
+    }
+    if (data.empathyData) {
+      payloadAnalysis.fieldSizes.empathyData = data.empathyData.length;
+      payloadAnalysis.contentQuality.empathyIsRich = data.empathyData.length > 3000;
+    }
+    if (data.assessmentData) {
+      payloadAnalysis.fieldSizes.assessmentData = data.assessmentData.length;
+      payloadAnalysis.contentQuality.assessmentIsRich = data.assessmentData.length > 3000;
+    }
+
+    console.log('🔔 WEBHOOK RECEIVED - Core Resources:', payloadAnalysis);
 
     // Validate required fields
     if (!sessionId) {
