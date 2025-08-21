@@ -188,13 +188,13 @@ const CoreResourcesLoadingScreen = ({ sessionId, onComplete }) => {
     // Initial update
     updateProgress();
     
-    // Update every 3 seconds for resource checking + 1 second for progress animation
+    // Update every 6 seconds for resource checking to reduce webhook endpoint pressure
     const interval = setInterval(async () => {
       const shouldContinue = await updateProgress();
       if (!shouldContinue) {
         clearInterval(interval);
       }
-    }, 3000); // Reduced polling frequency to be less aggressive on webhook endpoints
+    }, 6000); // Reduced polling frequency to 6 seconds to be less aggressive on webhook endpoints
     
     return () => clearInterval(interval);
   }, [sessionId, onComplete]);
