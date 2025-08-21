@@ -95,10 +95,37 @@ exports.handler = async (event, context) => {
         // Current Make.com format - parse JSON strings
         console.log('Using individual resource fields format');
         try {
-          icpData = data.icpData ? JSON.parse(data.icpData) : null;
-          personaData = data.personaData ? JSON.parse(data.personaData) : null;
-          empathyData = data.empathyData ? JSON.parse(data.empathyData) : null;
-          assessmentData = data.assessmentData ? JSON.parse(data.assessmentData) : null;
+          // Helper function to safely parse JSON that might be Base64 encoded
+          const safeParse = (field, fieldName) => {
+            if (!field) return null;
+            
+            try {
+              // Check if it's Base64 encoded
+              if (field.match(/^[A-Za-z0-9+/]+=*$/)) {
+                console.log(`Decoding Base64 for ${fieldName}`);
+                const decoded = Buffer.from(field, 'base64').toString('utf-8');
+                return JSON.parse(decoded);
+              }
+              // Otherwise try normal JSON parse
+              return JSON.parse(field);
+            } catch (error) {
+              console.error(`Failed to parse ${fieldName}:`, error.message);
+              // Try to clean up common JSON issues
+              try {
+                // Remove literal \n and replace with escaped version
+                const cleaned = field.replace(/\n/g, '\\n').replace(/\r/g, '\\r').replace(/\t/g, '\\t');
+                return JSON.parse(cleaned);
+              } catch (cleanError) {
+                console.error(`Also failed after cleaning ${fieldName}:`, cleanError.message);
+                return null;
+              }
+            }
+          };
+          
+          icpData = safeParse(data.icpData, 'icpData');
+          personaData = safeParse(data.personaData, 'personaData');
+          empathyData = safeParse(data.empathyData, 'empathyData');
+          assessmentData = safeParse(data.assessmentData, 'assessmentData');
           
           console.log('Parsed resource data:', {
             hasIcp: !!icpData,
