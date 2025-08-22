@@ -462,6 +462,127 @@ export const airtableService = {
     }
   },
 
+  // Look up customer by email for Google authentication
+  async getCustomerByEmail(email) {
+    try {
+      if (!email) {
+        throw new Error('Email is required');
+      }
+
+      console.log(`Looking up customer by email: ${email}`);
+      
+      // Search for customer by email
+      const sanitizedEmail = email.replace(/'/g, "''").replace(/\\/g, "\\\\");
+      const response = await airtableClient.get('/Customer Assets', {
+        params: {
+          filterByFormula: `{Email} = '${sanitizedEmail}'`,
+          maxRecords: 5
+        }
+      });
+
+      if (response.data.records.length === 0) {
+        console.log(`No customer found with email: ${email}`);
+        return null;
+      }
+
+      // Return the first matching customer
+      const record = response.data.records[0];
+      const customerData = {
+        id: record.id,
+        customerId: record.fields['Customer ID'],
+        customerName: record.fields['Customer Name'],
+        email: record.fields['Email'],
+        accessToken: record.fields['Access Token'],
+        icpContent: this.parseJsonField(record.fields['ICP Content']),
+        costCalculatorContent: this.parseJsonField(record.fields['Cost Calculator Content']),
+        businessCaseContent: this.parseJsonField(record.fields['Business Case Content']),
+        workflowProgress: this.parseJsonField(record.fields['Workflow Progress']) || this.getDefaultWorkflowProgress(),
+        userPreferences: this.parseJsonField(record.fields['User Preferences']) || this.getDefaultUserPreferences(),
+        usageAnalytics: this.parseJsonField(record.fields['Usage Analytics']) || this.getDefaultUsageAnalytics(),
+        competencyProgress: this.parseJsonField(record.fields['Competency Progress']) || this.getDefaultCompetencyProgress(),
+        toolAccessStatus: this.parseJsonField(record.fields['Tool Access Status']) || this.getDefaultToolAccessStatus(),
+        professionalMilestones: this.parseJsonField(record.fields['Professional Milestones']) || this.getDefaultProfessionalMilestones(),
+        dailyObjectives: this.parseJsonField(record.fields['Daily Objectives']) || this.getDefaultDailyObjectives(),
+        detailedIcpAnalysis: this.parseJsonField(record.fields['Detailed ICP Analysis']),
+        targetBuyerPersonas: this.parseJsonField(record.fields['Target Buyer Personas']),
+        assessmentData: this.parseAssessmentFields(record.fields),
+        createdAt: record.fields['Created At'],
+        lastAccessed: record.fields['Last Accessed']
+      };
+
+      console.log(`Found customer: ${customerData.customerId} - ${customerData.customerName}`);
+      return customerData;
+
+    } catch (error) {
+      console.error('Error looking up customer by email:', error);
+      throw error;
+    }
+  },
+
+  // Create new customer record for Google sign-ups
+  async createCustomerFromGoogle(googleUser) {
+    try {
+      console.log(`Creating new customer for Google user: ${googleUser.email}`);
+      
+      // Generate new customer ID
+      const timestamp = Date.now().toString().slice(-6);
+      const customerId = `CUST_${timestamp}`;
+      
+      // Create customer record
+      const response = await airtableClient.post('/Customer Assets', {
+        records: [{
+          fields: {
+            'Customer ID': customerId,
+            'Customer Name': googleUser.name || googleUser.email.split('@')[0],
+            'Email': googleUser.email,
+            'Access Token': `google-auth-${timestamp}`,
+            'Created At': new Date().toISOString(),
+            'Last Accessed': new Date().toISOString(),
+            'Workflow Progress': JSON.stringify(this.getDefaultWorkflowProgress()),
+            'User Preferences': JSON.stringify(this.getDefaultUserPreferences()),
+            'Usage Analytics': JSON.stringify(this.getDefaultUsageAnalytics()),
+            'Competency Progress': JSON.stringify(this.getDefaultCompetencyProgress()),
+            'Tool Access Status': JSON.stringify(this.getDefaultToolAccessStatus()),
+            'Professional Milestones': JSON.stringify(this.getDefaultProfessionalMilestones()),
+            'Daily Objectives': JSON.stringify(this.getDefaultDailyObjectives())
+          }
+        }]
+      });
+
+      const record = response.data.records[0];
+      const customerData = {
+        id: record.id,
+        customerId: record.fields['Customer ID'],
+        customerName: record.fields['Customer Name'],
+        email: record.fields['Email'],
+        accessToken: record.fields['Access Token'],
+        icpContent: null,
+        costCalculatorContent: null,
+        businessCaseContent: null,
+        workflowProgress: this.getDefaultWorkflowProgress(),
+        userPreferences: this.getDefaultUserPreferences(),
+        usageAnalytics: this.getDefaultUsageAnalytics(),
+        competencyProgress: this.getDefaultCompetencyProgress(),
+        toolAccessStatus: this.getDefaultToolAccessStatus(),
+        professionalMilestones: this.getDefaultProfessionalMilestones(),
+        dailyObjectives: this.getDefaultDailyObjectives(),
+        detailedIcpAnalysis: null,
+        targetBuyerPersonas: null,
+        assessmentData: this.getDefaultAssessmentData(),
+        createdAt: record.fields['Created At'],
+        lastAccessed: record.fields['Last Accessed'],
+        isNewUser: true
+      };
+
+      console.log(`Created new customer: ${customerData.customerId} - ${customerData.customerName}`);
+      return customerData;
+
+    } catch (error) {
+      console.error('Error creating customer from Google user:', error);
+      throw error;
+    }
+  },
+
   // Save user progress/state
   async saveUserProgress(customerId, toolName, progressData) {
     try {

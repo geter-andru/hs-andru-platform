@@ -1,7 +1,81 @@
 import { airtableService } from './airtableService';
 
 export const authService = {
-  // Validate customer credentials (including admin)
+  // Validate Google authentication session
+  async validateGoogleSession(sessionData) {
+    try {
+      if (!sessionData || !sessionData.user || !sessionData.isAuthenticated) {
+        return {
+          valid: false,
+          error: 'Invalid session data'
+        };
+      }
+
+      const { user, customerData } = sessionData;
+
+      // Validate Google token is still valid (basic check)
+      if (!user.email || !user.googleId) {
+        return {
+          valid: false,
+          error: 'Invalid Google user data'
+        };
+      }
+
+      return {
+        valid: true,
+        user,
+        customerData,
+        authMethod: 'google'
+      };
+    } catch (error) {
+      return {
+        valid: false,
+        error: error.message
+      };
+    }
+  },
+
+  // Get current authentication state
+  getCurrentAuth() {
+    try {
+      const sessionData = sessionStorage.getItem('authSession');
+      if (!sessionData) {
+        return { isAuthenticated: false };
+      }
+
+      const parsed = JSON.parse(sessionData);
+      
+      // Check if session is expired (24 hours)
+      const loginTime = new Date(parsed.loginTime);
+      const now = new Date();
+      const hoursDiff = (now - loginTime) / (1000 * 60 * 60);
+      
+      if (hoursDiff > 24) {
+        this.signOut();
+        return { isAuthenticated: false };
+      }
+
+      return {
+        isAuthenticated: true,
+        ...parsed
+      };
+    } catch (error) {
+      console.error('Error getting current auth:', error);
+      return { isAuthenticated: false };
+    }
+  },
+
+  // Sign out user
+  signOut() {
+    sessionStorage.removeItem('authSession');
+    
+    // Sign out from Google if available
+    if (window.google?.accounts?.id) {
+      window.google.accounts.id.disableAutoSelect();
+    }
+  },
+
+  // Validate customer credentials (including admin) - Legacy method for backward compatibility
   async validateCredentials(customerId, accessToken) {
     try {
       if (!customerId || !accessToken) {
