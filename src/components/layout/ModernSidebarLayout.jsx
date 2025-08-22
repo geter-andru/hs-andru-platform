@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import QuickActionsGrid from '../simplified/cards/QuickActionsGrid';
 import MilestoneTrackerWidget from '../simplified/cards/MilestoneTrackerWidget';
+import { airtableService } from '../../services/airtableService';
 
 /**
  * ModernSidebarLayout - Professional SaaS interface with fixed sidebar navigation
@@ -33,17 +34,54 @@ import MilestoneTrackerWidget from '../simplified/cards/MilestoneTrackerWidget';
 const ModernSidebarLayout = ({ children, customerId, activeRoute = 'dashboard' }) => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [customerData, setCustomerData] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  // Get user first name from customer ID
-  const getUserFirstName = (customerId) => {
-    const userMap = {
+  // Fetch customer data from Airtable
+  useEffect(() => {
+    const fetchCustomerData = async () => {
+      if (!customerId) {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        // Get customer data from Customer Assets table
+        const data = await airtableService.getCustomerAssets(customerId);
+        setCustomerData(data);
+      } catch (error) {
+        console.error('Error fetching customer data:', error);
+        // Fallback to default if fetch fails
+        setCustomerData(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCustomerData();
+  }, [customerId]);
+
+  // Extract first name from full customer name
+  const getFirstName = (fullName) => {
+    if (!fullName) return 'User';
+    return fullName.split(' ')[0];
+  };
+
+  // Get user first name (from Airtable or fallback)
+  const getUserFirstName = () => {
+    if (customerData?.customerName) {
+      return getFirstName(customerData.customerName);
+    }
+    
+    // Fallback to hardcoded names if Airtable data unavailable
+    const fallbackMap = {
       'CUST_1': 'Alex',
       'CUST_2': 'Sarah',
       'CUST_3': 'Marcus',
       'CUST_4': 'Admin',
       'CUST_5': 'Emma'
     };
-    return userMap[customerId] || 'User';
+    return fallbackMap[customerId] || 'User';
   };
 
   // Dynamic greeting that rotates based on time and customer ID
@@ -57,7 +95,7 @@ const ModernSidebarLayout = ({ children, customerId, activeRoute = 'dashboard' }
     return greetings[greetingIndex];
   };
 
-  const firstName = getUserFirstName(customerId);
+  const firstName = getUserFirstName();
   const greeting = getDynamicGreeting(customerId);
 
   // Navigation items with modern iconography
@@ -134,7 +172,11 @@ const ModernSidebarLayout = ({ children, customerId, activeRoute = 'dashboard' }
               <BarChart3 className="w-5 h-5 text-white" />
             </div>
             <div>
-              <div className="text-sm font-semibold text-white">{greeting} {firstName}!</div>
+              {loading ? (
+                <div className="animate-pulse bg-gray-700 h-4 w-20 rounded mb-1"></div>
+              ) : (
+                <div className="text-sm font-semibold text-white">{greeting} {firstName}!</div>
+              )}
               <div className="text-xs text-gray-400">H&S Revenue</div>
             </div>
           </div>
@@ -415,7 +457,13 @@ const ModernSidebarLayout = ({ children, customerId, activeRoute = 'dashboard' }
             {/* Personalized Greeting */}
             <div className="flex items-center space-x-4">
               <div>
-                <h1 className="text-lg font-semibold text-white">{greeting} {firstName}!</h1>
+                {loading ? (
+                  <div className="flex items-center space-x-2">
+                    <div className="animate-pulse bg-gray-700 h-5 w-24 rounded"></div>
+                  </div>
+                ) : (
+                  <h1 className="text-lg font-semibold text-white">{greeting} {firstName}!</h1>
+                )}
                 <p className="text-xs text-gray-400">Revenue Intelligence Dashboard</p>
               </div>
             </div>
