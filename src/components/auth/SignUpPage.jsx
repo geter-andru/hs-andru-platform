@@ -5,6 +5,18 @@ import { useNavigate } from 'react-router-dom';
 const SignUpPage = ({ onSignInSuccess, onSignInError }) => {
   const navigate = useNavigate();
 
+  // Check if user is returning (has visited before)
+  React.useEffect(() => {
+    const isReturningUser = localStorage.getItem('platform_visited') === 'true';
+    if (isReturningUser) {
+      // Returning users go straight to login
+      navigate('/login');
+    } else {
+      // Mark that user has visited
+      localStorage.setItem('platform_visited', 'true');
+    }
+  }, [navigate]);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-16">
@@ -44,13 +56,24 @@ const SignUpPage = ({ onSignInSuccess, onSignInError }) => {
             </div>
           </div>
 
-          <button
-            onClick={() => navigate('/login')}
-            className="inline-flex items-center gap-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-xl font-semibold text-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200 transform hover:scale-105 shadow-xl"
-          >
-            <span>Start Your Revenue Assessment</span>
-            <ArrowRight className="w-5 h-5" />
-          </button>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+            <a
+              href="https://andru-ai.com"
+              className="inline-flex items-center gap-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-xl font-semibold text-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200 transform hover:scale-105 shadow-xl"
+            >
+              <span>Start Your Revenue Assessment</span>
+              <ArrowRight className="w-5 h-5" />
+            </a>
+            
+            <div className="text-gray-400">or</div>
+            
+            <button
+              onClick={() => navigate('/login')}
+              className="inline-flex items-center gap-2 bg-gray-800 border border-gray-700 text-gray-300 px-6 py-3 rounded-xl font-semibold hover:bg-gray-700 hover:text-white transition-all duration-200"
+            >
+              <span>Sign In</span>
+            </button>
+          </div>
         </div>
 
       </div>
