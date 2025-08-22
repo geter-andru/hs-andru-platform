@@ -34,19 +34,31 @@ const ModernSidebarLayout = ({ children, customerId, activeRoute = 'dashboard' }
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  // Get user name from customer ID
-  const getUserName = (customerId) => {
+  // Get user first name from customer ID
+  const getUserFirstName = (customerId) => {
     const userMap = {
-      'CUST_1': 'Alex Thompson',
-      'CUST_2': 'Sarah Chen',
-      'CUST_3': 'Marcus Rodriguez',
-      'CUST_4': 'Admin User',
-      'CUST_5': 'Emma Wilson'
+      'CUST_1': 'Alex',
+      'CUST_2': 'Sarah',
+      'CUST_3': 'Marcus',
+      'CUST_4': 'Admin',
+      'CUST_5': 'Emma'
     };
     return userMap[customerId] || 'User';
   };
 
-  const userName = getUserName(customerId);
+  // Dynamic greeting that rotates based on time and customer ID
+  const getDynamicGreeting = (customerId) => {
+    const greetings = ['Hey there', 'Hi', 'Nice to see you again'];
+    const hour = new Date().getHours();
+    const customerIndex = customerId ? parseInt(customerId.replace('CUST_', '')) : 1;
+    
+    // Create a semi-random index based on hour and customer ID for variety
+    const greetingIndex = (hour + customerIndex) % greetings.length;
+    return greetings[greetingIndex];
+  };
+
+  const firstName = getUserFirstName(customerId);
+  const greeting = getDynamicGreeting(customerId);
 
   // Navigation items with modern iconography
   const navigationItems = [
@@ -122,7 +134,7 @@ const ModernSidebarLayout = ({ children, customerId, activeRoute = 'dashboard' }
               <BarChart3 className="w-5 h-5 text-white" />
             </div>
             <div>
-              <div className="text-sm font-semibold text-white">Hi {userName}!</div>
+              <div className="text-sm font-semibold text-white">{greeting} {firstName}!</div>
               <div className="text-xs text-gray-400">H&S Revenue</div>
             </div>
           </div>
@@ -403,7 +415,7 @@ const ModernSidebarLayout = ({ children, customerId, activeRoute = 'dashboard' }
             {/* Personalized Greeting */}
             <div className="flex items-center space-x-4">
               <div>
-                <h1 className="text-lg font-semibold text-white">Hi {userName}!</h1>
+                <h1 className="text-lg font-semibold text-white">{greeting} {firstName}!</h1>
                 <p className="text-xs text-gray-400">Revenue Intelligence Dashboard</p>
               </div>
             </div>
