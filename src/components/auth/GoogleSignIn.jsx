@@ -1,54 +1,56 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { LogIn, Shield, Check } from 'lucide-react';
 
 const GoogleSignIn = ({ onSignInSuccess, onSignInError }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [googleLoaded, setGoogleLoaded] = useState(false);
 
-  // Load Google Identity Services
-  useEffect(() => {
-    const loadGoogleScript = () => {
-      if (window.google?.accounts) {
-        initializeGoogle();
-        return;
+  // Look up customer by email in Airtable
+  const lookupCustomerByEmail = async (email) => {
+    try {
+      // Import airtableService
+      const { airtableService } = await import('../../services/airtableService');
+      
+      // Search for customer by email
+      const customerData = await airtableService.getCustomerByEmail(email);
+      
+      if (customerData) {
+        return customerData;
       }
 
-      const script = document.createElement('script');
-      script.src = 'https://accounts.google.com/gsi/client';
-      script.async = true;
-      script.defer = true;
-      script.onload = initializeGoogle;
-      document.head.appendChild(script);
-    };
+      // If no customer found, create a new customer record
+      return await createNewCustomer(email);
+      
+    } catch (error) {
+      console.error('Customer lookup error:', error);
+      // Return null if lookup fails - user can still sign in
+      return null;
+    }
+  };
 
-    const initializeGoogle = () => {
-      if (!window.google?.accounts) {
-        console.error('Google Identity Services failed to load');
-        return;
-      }
-
-      try {
-        window.google.accounts.id.initialize({
-          client_id: process.env.REACT_APP_GOOGLE_CLIENT_ID,
-          callback: handleCredentialResponse,
-          auto_select: false,
-          cancel_on_tap_outside: true,
-        });
-
-        setGoogleLoaded(true);
-      } catch (error) {
-        console.error('Failed to initialize Google Sign-In:', error);
-        if (onSignInError) {
-          onSignInError('Failed to initialize Google Sign-In');
-        }
-      }
-    };
-
-    loadGoogleScript();
-  }, []);
+  // Create new customer record for first-time Google sign-ins
+  const createNewCustomer = async (email) => {
+    try {
+      // Import airtableService
+      const { airtableService } = await import('../../services/airtableService');
+      
+      // Create new customer using airtableService
+      const googleUser = {
+        email,
+        name: email.split('@')[0], // Use email prefix as default name
+      };
+      
+      return await airtableService.createCustomerFromGoogle(googleUser);
+      
+    } catch (error) {
+      console.error('Failed to create new customer:', error);
+      return null;
+    }
+  };
 
   // Handle Google credential response
-  const handleCredentialResponse = async (response) => {
+  const handleCredentialResponse = useCallback(async (response) => {
+    console.log('GoogleSignIn: Handling credential response...');
     setIsLoading(true);
 
     try {
@@ -100,66 +102,148 @@ const GoogleSignIn = ({ onSignInSuccess, onSignInError }) => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [onSignInSuccess, onSignInError]);
 
-  // Look up customer by email in Airtable
-  const lookupCustomerByEmail = async (email) => {
-    try {
-      // Import airtableService
-      const { airtableService } = await import('../../services/airtableService');
-      
-      // Search for customer by email
-      const customerData = await airtableService.getCustomerByEmail(email);
-      
-      if (customerData) {
-        return customerData;
+  // Load Google Identity Services
+  useEffect(() => {
+    console.log('GoogleSignIn: Loading Google Services...');
+    console.log('GoogleSignIn: Client ID:', process.env.REACT_APP_GOOGLE_CLIENT_ID);
+    
+    const loadGoogleScript = () => {
+      if (window.google?.accounts) {
+        console.log('GoogleSignIn: Google already loaded, initializing...');
+        initializeGoogle();
+        return;
       }
 
-      // If no customer found, create a new customer record
-      return await createNewCustomer(email);
-      
-    } catch (error) {
-      console.error('Customer lookup error:', error);
-      // Return null if lookup fails - user can still sign in
-      return null;
-    }
-  };
-
-  // Create new customer record for first-time Google sign-ins
-  const createNewCustomer = async (email) => {
-    try {
-      // Import airtableService
-      const { airtableService } = await import('../../services/airtableService');
-      
-      // Create new customer using airtableService
-      const googleUser = {
-        email,
-        name: email.split('@')[0], // Use email prefix as default name
+      console.log('GoogleSignIn: Loading Google script...');
+      const script = document.createElement('script');
+      script.src = 'https://accounts.google.com/gsi/client';
+      script.async = true;
+      script.defer = true;
+      script.onload = initializeGoogle;
+      script.onerror = () => {
+        console.error('GoogleSignIn: Failed to load Google script');
+        if (onSignInError) {
+          onSignInError('Failed to load Google Sign-In script');
+        }
       };
-      
-      return await airtableService.createCustomerFromGoogle(googleUser);
-      
-    } catch (error) {
-      console.error('Failed to create new customer:', error);
-      return null;
-    }
-  };
+      document.head.appendChild(script);
+    };
+
+    const initializeGoogle = () => {
+      console.log('GoogleSignIn: Initializing Google Services...');
+      if (!window.google?.accounts) {
+        console.error('GoogleSignIn: Google Identity Services failed to load');
+        return;
+      }
+
+      try {
+        // Initialize Google Identity Services
+        window.google.accounts.id.initialize({
+          client_id: process.env.REACT_APP_GOOGLE_CLIENT_ID,
+          callback: handleCredentialResponse,
+          auto_select: false,
+          cancel_on_tap_outside: true,
+          use_fedcm_for_prompt: false, // Disable FedCM to avoid browser issues
+        });
+
+        // Render the Google button directly for better reliability
+        const buttonContainer = document.getElementById('google-signin-button');
+        if (buttonContainer) {
+          console.log('GoogleSignIn: Rendering Google native button...');
+          window.google.accounts.id.renderButton(buttonContainer, {
+            theme: 'outline',
+            size: 'large',
+            type: 'standard',
+            shape: 'rectangular',
+            text: 'signin_with',
+            logo_alignment: 'left',
+            width: '100%'
+          });
+        }
+
+        console.log('GoogleSignIn: Google initialized successfully');
+        setGoogleLoaded(true);
+      } catch (error) {
+        console.error('GoogleSignIn: Failed to initialize Google Sign-In:', error);
+        if (onSignInError) {
+          onSignInError('Failed to initialize Google Sign-In');
+        }
+      }
+    };
+
+    loadGoogleScript();
+  }, [handleCredentialResponse, onSignInError]);
 
   // Trigger Google Sign-In popup
   const handleSignIn = () => {
-    if (!googleLoaded || !window.google?.accounts) {
-      console.error('Google Sign-In not loaded');
+    console.log('=== GOOGLE SIGN-IN DEBUG ===');
+    console.log('GoogleSignIn: Sign-in button clicked');
+    console.log('GoogleSignIn: Google loaded:', googleLoaded);
+    console.log('GoogleSignIn: Google available:', !!window.google?.accounts);
+    console.log('GoogleSignIn: Client ID from env:', process.env.REACT_APP_GOOGLE_CLIENT_ID);
+    console.log('GoogleSignIn: Window.google object:', window.google);
+    
+    if (!googleLoaded) {
+      console.error('GoogleSignIn: Google not loaded yet');
+      alert('Google Sign-In is still loading. Please wait a moment and try again.');
+      return;
+    }
+
+    if (!window.google?.accounts) {
+      console.error('GoogleSignIn: Google accounts API not available');
+      alert('Google Sign-In service is not available. Please refresh the page.');
+      if (onSignInError) {
+        onSignInError('Google Sign-In not ready. Please refresh the page.');
+      }
       return;
     }
 
     try {
+      console.log('GoogleSignIn: Attempting to show prompt...');
+      
+      // Try the renderButton approach as backup
+      const buttonContainer = document.getElementById('google-signin-button');
+      if (buttonContainer) {
+        console.log('GoogleSignIn: Rendering Google button...');
+        window.google.accounts.id.renderButton(buttonContainer, {
+          theme: 'outline',
+          size: 'large',
+          width: '100%'
+        });
+      }
+      
+      // Also try the prompt approach
       window.google.accounts.id.prompt((notification) => {
-        if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
-          console.log('Google Sign-In popup was not displayed or skipped');
+        console.log('GoogleSignIn: Prompt notification:', notification);
+        console.log('GoogleSignIn: Notification type:', {
+          isDisplayed: notification.isDisplayed?.(),
+          isNotDisplayed: notification.isNotDisplayed?.(),
+          isSkippedMoment: notification.isSkippedMoment?.(),
+          isDismissedMoment: notification.isDismissedMoment?.(),
+          getMomentType: notification.getMomentType?.()
+        });
+        
+        if (notification.isNotDisplayed?.() || notification.isSkippedMoment?.()) {
+          console.log('GoogleSignIn: Popup was not displayed or skipped - trying alternative approach');
+          // Fallback: try to manually trigger sign-in
+          if (window.google?.accounts?.oauth2) {
+            console.log('GoogleSignIn: Trying OAuth2 flow...');
+            const client = window.google.accounts.oauth2.initTokenClient({
+              client_id: process.env.REACT_APP_GOOGLE_CLIENT_ID,
+              scope: 'email profile',
+              callback: (response) => {
+                console.log('GoogleSignIn: OAuth2 response:', response);
+              }
+            });
+            client.requestAccessToken();
+          }
         }
       });
     } catch (error) {
-      console.error('Failed to show Google Sign-In:', error);
+      console.error('GoogleSignIn: Failed to show Google Sign-In:', error);
+      alert(`Google Sign-In error: ${error.message}`);
       if (onSignInError) {
         onSignInError('Failed to show Google Sign-In popup');
       }
@@ -168,6 +252,26 @@ const GoogleSignIn = ({ onSignInSuccess, onSignInError }) => {
 
   return (
     <div className="space-y-4">
+      {/* Debug Info */}
+      <div className="text-xs text-gray-500 p-2 bg-gray-100 rounded">
+        <div>Client ID: {process.env.REACT_APP_GOOGLE_CLIENT_ID ? 'Configured' : 'Missing'}</div>
+        <div>Google Loaded: {googleLoaded ? 'Yes' : 'No'}</div>
+        <div>Google Available: {window.google?.accounts ? 'Yes' : 'No'}</div>
+      </div>
+
+      {/* Test Environment Button */}
+      <button
+        onClick={() => {
+          console.log('=== ENVIRONMENT TEST ===');
+          console.log('REACT_APP_GOOGLE_CLIENT_ID:', process.env.REACT_APP_GOOGLE_CLIENT_ID);
+          console.log('All env vars:', Object.keys(process.env).filter(key => key.startsWith('REACT_APP')));
+          alert(`Client ID: ${process.env.REACT_APP_GOOGLE_CLIENT_ID || 'NOT FOUND'}`);
+        }}
+        className="w-full bg-gray-200 text-gray-800 px-4 py-2 rounded text-sm"
+      >
+        Test Environment Variables
+      </button>
+
       <button
         onClick={handleSignIn}
         disabled={!googleLoaded || isLoading}
@@ -205,6 +309,9 @@ const GoogleSignIn = ({ onSignInSuccess, onSignInError }) => {
           <span>No passwords to remember</span>
         </div>
       </div>
+
+      {/* Alternative Google Button Container */}
+      <div id="google-signin-button" className="w-full"></div>
 
       <div className="text-xs text-gray-500 text-center border-t pt-3 mt-4">
         <p>For sales demos, admin access is still available via direct URL</p>

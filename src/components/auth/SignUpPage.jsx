@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Rocket, ArrowRight } from 'lucide-react';
 import GoogleSignIn from './GoogleSignIn';
+import GoogleSignInRedirect from './GoogleSignInRedirect';
 
 const SignUpPage = ({ onSignInSuccess, onSignInError }) => {
   const [showSignIn, setShowSignIn] = useState(false);
@@ -66,10 +67,19 @@ const SignUpPage = ({ onSignInSuccess, onSignInError }) => {
               </p>
             </div>
             
+            {/* Use redirect method temporarily to avoid OAuth config issues */}
+            <GoogleSignInRedirect 
+              onSignInSuccess={onSignInSuccess}
+              onSignInError={onSignInError}
+            />
+            
+            {/* Original method - uncomment after fixing Google Console config */}
+            {/* 
             <GoogleSignIn 
               onSignInSuccess={onSignInSuccess}
               onSignInError={onSignInError}
             />
+            */}
           </div>
         )}
       </div>

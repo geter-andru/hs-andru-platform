@@ -15,8 +15,136 @@ const AuthenticatedApp = () => {
 
   // Check for existing authentication on app load
   useEffect(() => {
-    const checkAuthState = () => {
+    const checkAuthState = async () => {
       try {
+        // Check for OAuth callback (when user returns from Google)
+        const urlParams = new URLSearchParams(window.location.search);
+        const code = urlParams.get('code');
+        const state = urlParams.get('state');
+        
+        if (code && state) {
+          console.log('OAuth callback detected, processing...');
+          
+          // Verify state matches what we stored
+          const storedState = sessionStorage.getItem('googleOAuthState');
+          if (state !== storedState) {
+            console.error('OAuth state mismatch');
+            setAuthError('Authentication failed: Invalid state');
+            setAuthState({
+              isAuthenticated: false,
+              user: null,
+              customerData: null,
+              loading: false
+            });
+            return;
+          }
+          
+          try {
+            // For local development, skip the Netlify function and create a mock user
+            // In production, this would go through the Netlify function
+            console.log('Processing OAuth callback with code:', code);
+            
+            let data;
+            
+            // Check if we're in local development
+            if (window.location.hostname === 'localhost') {
+              console.log('Local development detected - using mock authentication');
+              
+              // Create a mock successful response for local development
+              // In production, the Netlify function would validate the code with Google
+              data = {
+                success: true,
+                user: {
+                  googleId: 'mock_google_id_' + Date.now(),
+                  email: 'demo@example.com', // This would come from Google in production
+                  name: 'Demo User',
+                  firstName: 'Demo',
+                  lastName: 'User',
+                  picture: null,
+                  emailVerified: true
+                },
+                idToken: 'mock_token_for_development'
+              };
+              
+              // Show a message that this is development mode
+              console.log('📝 Development Mode: Using mock authentication');
+              console.log('📝 In production, this would validate with Google OAuth');
+              
+              // Add a temporary notice for the user
+              setTimeout(() => {
+                alert('🔧 Development Mode: Google OAuth simulation\n\nYou\'ve been logged in with a demo account.\n\nIn production, your actual Google account would be used.');
+              }, 1000);
+              
+            } else {
+              // Production: use Netlify function
+              const response = await fetch('/.netlify/functions/google-auth', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                  code, 
+                  redirectUri: window.location.origin 
+                })
+              });
+              
+              data = await response.json();
+            }
+            
+            if (data.success) {
+              // Generate a randomized customer ID unique to our platform
+              const generateCustomerId = () => {
+                const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+                let result = 'dru'; // Start with 'dru' for Andru platform
+                for (let i = 0; i < 14; i++) { // 14 characters to make 17 total (dru + 14)
+                  result += chars.charAt(Math.floor(Math.random() * chars.length));
+                }
+                return result;
+              };
+
+              const randomCustomerId = generateCustomerId();
+              console.log('🆔 Generated Customer ID:', randomCustomerId);
+              
+              // Create mock customer data for development
+              const mockCustomerData = {
+                customerId: randomCustomerId,
+                customer_id: randomCustomerId,
+                customerName: data.user.name || 'Demo User',
+                customer_name: data.user.name || 'Demo User',
+                email: data.user.email,
+                company: 'Demo Company',
+                isNewUser: true, // Since this is a new Google sign-in
+                demoMode: true,
+                id: randomCustomerId // Airtable record ID format
+              };
+              
+              // Create session data similar to the original flow
+              const sessionData = {
+                user: data.user,
+                customerData: window.location.hostname === 'localhost' ? mockCustomerData : null,
+                isAuthenticated: true,
+                authMethod: 'google',
+                loginTime: new Date().toISOString(),
+                token: data.idToken
+              };
+              
+              sessionStorage.setItem('authSession', JSON.stringify(sessionData));
+              sessionStorage.removeItem('googleOAuthState');
+              
+              // Clean up URL
+              window.history.replaceState({}, document.title, window.location.pathname);
+              
+              handleSignInSuccess(sessionData);
+              return;
+            } else {
+              throw new Error(data.error || 'Authentication failed');
+            }
+          } catch (error) {
+            console.error('OAuth callback error:', error);
+            setAuthError(error.message);
+            window.history.replaceState({}, document.title, window.location.pathname);
+          }
+        }
+        
+        // Normal auth state check
         const currentAuth = authService.getCurrentAuth();
         
         if (currentAuth.isAuthenticated) {
@@ -51,18 +179,41 @@ const AuthenticatedApp = () => {
 
   // Handle successful Google sign-in
   const handleSignInSuccess = (sessionData) => {
+    // Generate fallback customer ID if needed
+    const generateCustomerId = () => {
+      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+      let result = 'dru'; // Start with 'dru' for Andru platform
+      for (let i = 0; i < 14; i++) { // 14 characters to make 17 total
+        result += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+      return result;
+    };
+
+    // Ensure we have customer data for routing
+    const customerData = sessionData.customerData || {
+      customerId: generateCustomerId(),
+      customer_id: generateCustomerId(),
+      customerName: sessionData.user?.name || 'Demo User',
+      customer_name: sessionData.user?.name || 'Demo User',
+      email: sessionData.user?.email || 'demo@example.com',
+      company: 'Demo Company',
+      demoMode: true,
+      isNewUser: true
+    };
+    
     setAuthState({
       isAuthenticated: true,
       user: sessionData.user,
-      customerData: sessionData.customerData,
+      customerData: customerData,
       loading: false
     });
     setAuthError(null);
     
-    console.log('User signed in successfully:', sessionData.user.email);
+    console.log('User signed in successfully:', sessionData.user?.email);
+    console.log('Customer ID:', customerData.customerId);
     
     // Optional: Navigate to dashboard or show welcome message
-    if (sessionData.customerData?.isNewUser) {
+    if (customerData?.isNewUser) {
       console.log('New user detected - could show onboarding');
     }
   };
