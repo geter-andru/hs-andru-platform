@@ -42,28 +42,32 @@ const ModernSidebarLayout = ({ children, customerId, activeRoute = 'dashboard' }
       icon: Home,
       route: '/customer/' + customerId + '/simplified/dashboard',
       description: 'Revenue Intelligence Overview',
-      isPremium: true // PRO icon moved here since dashboard has premium toggle
+      isPremium: true, // PRO icon moved here since dashboard has premium toggle
+      iconColor: 'text-purple-400' // Colored icon
     },
     {
       id: 'icp',
       label: 'ICP Analysis',
       icon: Target,
       route: '/customer/' + customerId + '/simplified/icp',
-      description: 'Ideal Customer Profiling'
+      description: 'Ideal Customer Profiling',
+      iconColor: 'text-blue-400' // Colored icon
     },
     {
       id: 'financial',
       label: 'Financial Impact',
       icon: Calculator,
       route: '/customer/' + customerId + '/simplified/financial',
-      description: 'ROI & Cost Analysis'
+      description: 'ROI & Cost Analysis',
+      iconColor: 'text-gray-400' // Uncolored (locked feature)
     },
     {
       id: 'resources',
       label: 'Resource Library',
       icon: FileText,
       route: '/customer/' + customerId + '/simplified/resources',
-      description: 'Templates & Documentation'
+      description: 'Templates & Documentation',
+      iconColor: 'text-green-400' // Colored icon
     }
   ];
 
@@ -153,7 +157,7 @@ const ModernSidebarLayout = ({ children, customerId, activeRoute = 'dashboard' }
                         `}
                       >
                         <div className="flex items-center space-x-3">
-                          <Icon className={`w-5 h-5 ${isActive ? 'text-purple-400' : 'text-gray-400'}`} />
+                          <Icon className={`w-5 h-5 ${isActive ? 'text-purple-400' : item.iconColor || 'text-gray-400'}`} />
                           <div>
                             <div className="flex items-center space-x-2">
                               <span className="font-medium">{item.label}</span>
@@ -248,7 +252,7 @@ const ModernSidebarLayout = ({ children, customerId, activeRoute = 'dashboard' }
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                 >
-                  <Icon className={`w-5 h-5 ${isActive ? 'text-purple-400' : 'text-gray-400'}`} />
+                  <Icon className={`w-5 h-5 ${isActive ? 'text-purple-400' : item.iconColor || 'text-gray-400'}`} />
                   
                   {!sidebarCollapsed && (
                     <div className="flex-1 min-w-0">
@@ -298,7 +302,7 @@ const ModernSidebarLayout = ({ children, customerId, activeRoute = 'dashboard' }
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                   >
-                    <Icon className={`w-5 h-5 ${isActive ? 'text-purple-400' : 'text-gray-400'}`} />
+                    <Icon className={`w-5 h-5 ${isActive ? 'text-purple-400' : item.iconColor || 'text-gray-400'}`} />
                     
                     {!sidebarCollapsed && (
                       <div className="flex-1 min-w-0">
