@@ -32,16 +32,18 @@ function App() {
       <Router>
         <div className="App">
           <Routes>
-            {/* Customer Routes - Default to Simplified Platform */}
-            <Route path="/customer/:customerId/simplified/*" element={<SimplifiedPlatform />} />
-            <Route path="/customer/:customerId" element={<SimplifiedPlatform />} />
-            
-            {/* Full Revenue Intelligence Infrastructure Routes */}
-            <Route path="/customer/:customerId/full/*" element={<CustomerDashboard />} />
+            {/* Customer Routes - Default to Standard Platform */}
             <Route path="/customer/:customerId/dashboard/*" element={<CustomerDashboard />} />
+            <Route path="/customer/:customerId" element={<CustomerDashboard />} />
             
-            {/* Root Route - Simplified Platform */}
-            <Route path="/" element={<SimplifiedPlatform />} />
+            {/* Simplified Platform Routes (for admin toggle) */}
+            <Route path="/customer/:customerId/simplified/*" element={<SimplifiedPlatform />} />
+            
+            {/* Legacy Full Routes (redirect to dashboard) */}
+            <Route path="/customer/:customerId/full/*" element={<CustomerDashboard />} />
+            
+            {/* Root Route - Standard Platform */}
+            <Route path="/" element={<CustomerDashboard />} />
             
             {/* Test Routes */}
             <Route path="/test" element={<Phase1Test />} />
@@ -58,8 +60,8 @@ function App() {
             <Route path="/test-phase5" element={<Phase5SystemTest />} />
             <Route path="/test-sarah-journey" element={<SarahChenUserJourneyTest />} />
             
-            {/* Default - redirect to simplified platform */}
-            <Route path="*" element={<SimplifiedPlatform />} />
+            {/* Default - redirect to standard platform */}
+            <Route path="*" element={<CustomerDashboard />} />
           </Routes>
         </div>
       </Router>

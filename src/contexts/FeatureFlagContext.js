@@ -5,12 +5,12 @@ const FeatureFlagContext = createContext();
 
 // Feature flag configurations
 const DEFAULT_FLAGS = {
-  simplifiedPlatform: false,
+  simplifiedPlatform: false, // Standard platform as default
   enableSimplifiedDashboard: false,
   enableSimplifiedICP: false,
   enableSimplifiedFinancial: false,
   enableSimplifiedResources: false,
-  showPlatformSwitcher: true,
+  showPlatformSwitcher: false, // Hide platform switcher by default
   enableMilestoneDetection: true,
   enableUsageTracking: true,
   enableStealthGamification: true
@@ -43,27 +43,16 @@ export const FeatureFlagProvider = ({ children, customerId }) => {
           setFlags(prev => ({ ...prev, ...parsedFlags }));
         }
 
-        // For MVP, enable simplified platform for specific customers
-        const simplifiedUsers = ['CUST_02', 'CUST_03']; // Test users
-        
-        if (simplifiedUsers.includes(customerId)) {
-          setFlags(prev => ({
-            ...prev,
-            simplifiedPlatform: true,
-            enableSimplifiedDashboard: true,
-            enableSimplifiedICP: true,
-            enableSimplifiedFinancial: true,
-            enableSimplifiedResources: true
-          }));
-        }
-
-        // Admin users (CUST_4) can access both platforms
+        // Admin users (CUST_4) get platform switcher access
         if (customerId === 'CUST_4') {
           setFlags(prev => ({
             ...prev,
             showPlatformSwitcher: true
           }));
         }
+        
+        // All other users default to standard platform (no toggle access)
+        // Standard platform is already the default (simplifiedPlatform: false)
 
       } catch (error) {
         console.error('Error loading feature flags:', error);
