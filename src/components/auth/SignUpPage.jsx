@@ -1,21 +1,46 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Rocket, ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { profileService } from '../../services/profileService';
 
 const SignUpPage = ({ onSignInSuccess, onSignInError }) => {
   const navigate = useNavigate();
+  const [checkingStatus, setCheckingStatus] = useState(false);
 
-  // Check if user is returning (has visited before)
-  React.useEffect(() => {
-    const isReturningUser = localStorage.getItem('platform_visited') === 'true';
-    if (isReturningUser) {
-      // Returning users go straight to login
-      navigate('/login');
-    } else {
-      // Mark that user has visited
-      localStorage.setItem('platform_visited', 'true');
-    }
+  useEffect(() => {
+    // Check if user has a stored email from previous waitlist signup
+    const checkStoredWaitlistStatus = async () => {
+      const storedEmail = localStorage.getItem('waitlist_email');
+      if (storedEmail) {
+        setCheckingStatus(true);
+        try {
+          const { status, isApproved } = await profileService.checkWaitlistStatus(storedEmail);
+          if (isApproved) {
+            // User is approved, redirect to login
+            console.log('Waitlist approved user detected, redirecting to login');
+            navigate('/login');
+          }
+        } catch (error) {
+          console.error('Error checking waitlist status:', error);
+        } finally {
+          setCheckingStatus(false);
+        }
+      }
+    };
+
+    checkStoredWaitlistStatus();
   }, [navigate]);
+
+  if (checkingStatus) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+          <p className="text-gray-400">Checking access status...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900">
