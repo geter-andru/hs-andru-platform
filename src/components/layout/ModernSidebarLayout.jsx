@@ -34,6 +34,20 @@ const ModernSidebarLayout = ({ children, customerId, activeRoute = 'dashboard' }
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
+  // Get user name from customer ID
+  const getUserName = (customerId) => {
+    const userMap = {
+      'CUST_1': 'Alex Thompson',
+      'CUST_2': 'Sarah Chen',
+      'CUST_3': 'Marcus Rodriguez',
+      'CUST_4': 'Admin User',
+      'CUST_5': 'Emma Wilson'
+    };
+    return userMap[customerId] || 'User';
+  };
+
+  const userName = getUserName(customerId);
+
   // Navigation items with modern iconography
   const navigationItems = [
     {
@@ -107,7 +121,10 @@ const ModernSidebarLayout = ({ children, customerId, activeRoute = 'dashboard' }
             <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-blue-600 rounded-lg flex items-center justify-center">
               <BarChart3 className="w-5 h-5 text-white" />
             </div>
-            <span className="text-lg font-semibold text-white">H&S Revenue</span>
+            <div>
+              <div className="text-sm font-semibold text-white">Hi {userName}!</div>
+              <div className="text-xs text-gray-400">H&S Revenue</div>
+            </div>
           </div>
 
           <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-blue-600 rounded-full flex items-center justify-center">
@@ -383,9 +400,17 @@ const ModernSidebarLayout = ({ children, customerId, activeRoute = 'dashboard' }
         <div className="flex flex-col min-h-screen">
           {/* Clean Header - 60px height */}
           <header className="h-16 bg-[#1a1a1a] border-b border-gray-800 flex items-center justify-between px-6">
+            {/* Personalized Greeting */}
+            <div className="flex items-center space-x-4">
+              <div>
+                <h1 className="text-lg font-semibold text-white">Hi {userName}!</h1>
+                <p className="text-xs text-gray-400">Revenue Intelligence Dashboard</p>
+              </div>
+            </div>
+
             {/* Search and Quick Actions */}
-            <div className="flex items-center space-x-4 flex-1">
-              <div className="relative max-w-md flex-1">
+            <div className="flex items-center space-x-4 flex-1 justify-center">
+              <div className="relative max-w-md">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
                 <input
                   type="text"
