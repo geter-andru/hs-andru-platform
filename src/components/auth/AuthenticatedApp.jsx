@@ -82,7 +82,7 @@ const AuthenticatedApp = () => {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ 
                   code, 
-                  redirectUri: window.location.origin 
+                  redirectUri: window.location.href.split('?')[0] // Current page URL without query params
                 })
               });
               

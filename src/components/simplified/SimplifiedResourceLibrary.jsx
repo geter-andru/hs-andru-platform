@@ -1294,19 +1294,18 @@ const SimplifiedResourceLibrary = ({ customerId }) => {
               );
               
               return (
-                <div key={resource.id} className="relative bg-gray-900 border border-gray-600 border-dashed rounded-xl p-6 hover:border-gray-500 transition-colors">
-                  {/* Coming Soon overlay for Advanced Resources */}
-                  <div className="absolute inset-0 bg-gray-900/60 backdrop-blur-sm rounded-xl flex items-center justify-center z-10">
+                <div key={resource.id} className="relative border border-gray-600 border-dashed rounded-xl p-6 hover:border-gray-500 transition-colors">
+                  {/* Coming Soon overlay for Advanced Resources - Outside grayscale */}
+                  <div className="absolute inset-0 rounded-xl flex items-center justify-center z-10">
                     <div className="text-center">
-                      <h3 className="text-white text-sm font-semibold mb-2">{resource.title}</h3>
-                      <div className="bg-gradient-to-r from-blue-500 to-green-500 text-white px-3 py-1.5 rounded-full text-xs font-medium">
+                      <div className="text-blue-400 text-4xl font-medium">
                         Coming Soon
                       </div>
                     </div>
                   </div>
                   
-                  {/* Content with blur */}
-                  <div className="blur-sm">
+                  {/* Content with grayscale */}
+                  <div className="opacity-40 grayscale">
                   <div className="flex items-start justify-between mb-3">
                     <div className={`p-2 rounded-lg bg-${categoryColor}-900/30`}>
                       <ResourceIcon className={`w-5 h-5 text-${categoryColor}-400`} />
@@ -1383,19 +1382,18 @@ const SimplifiedResourceLibrary = ({ customerId }) => {
               );
               
               return (
-                <div key={resource.id} className="relative bg-gray-900 border border-gray-600 border-dashed rounded-xl p-6 hover:border-gray-500 transition-colors">
-                  {/* Coming Soon overlay for Strategic Resources */}
-                  <div className="absolute inset-0 bg-gray-900/60 backdrop-blur-sm rounded-xl flex items-center justify-center z-10">
+                <div key={resource.id} className="relative border border-gray-600 border-dashed rounded-xl p-6 hover:border-gray-500 transition-colors">
+                  {/* Coming Soon overlay for Strategic Resources - Outside grayscale */}
+                  <div className="absolute inset-0 rounded-xl flex items-center justify-center z-10">
                     <div className="text-center">
-                      <h3 className="text-white text-sm font-semibold mb-2">{resource.title}</h3>
-                      <div className="bg-gradient-to-r from-purple-500 to-orange-500 text-white px-3 py-1.5 rounded-full text-xs font-medium">
+                      <div className="text-purple-400 text-4xl font-medium">
                         Coming Soon
                       </div>
                     </div>
                   </div>
                   
-                  {/* Content with blur */}
-                  <div className="blur-sm">
+                  {/* Content with grayscale */}
+                  <div className="opacity-40 grayscale">
                   <div className="flex items-start justify-between mb-3">
                     <div className={`p-2 rounded-lg bg-${categoryColor}-900/30`}>
                       <ResourceIcon className={`w-5 h-5 text-${categoryColor}-400`} />

@@ -6,6 +6,7 @@ import { UserIntelligenceProvider } from '../contexts/simplified/UserIntelligenc
 import ModernSidebarLayout from '../components/layout/ModernSidebarLayout';
 import SimplifiedDashboard from '../components/simplified/SimplifiedDashboard';
 import SimplifiedDashboardPremium from '../components/simplified/SimplifiedDashboardPremium';
+import RevenueIntelligenceDashboard from '../components/dashboard/RevenueIntelligenceDashboard';
 import SimplifiedICP from '../components/simplified/SimplifiedICP';
 import SimplifiedFinancialImpact from '../components/simplified/SimplifiedFinancialImpact';
 import SimplifiedResourceLibrary from '../components/simplified/SimplifiedResourceLibrary';
@@ -110,7 +111,7 @@ const SimplifiedPlatform = () => {
             <ModernSidebarLayout customerId={customerId} activeRoute={getActiveRoute()}>
               <Routes>
                 <Route path="dashboard" element={<SimplifiedDashboard customerId={customerId} />} />
-                <Route path="dashboard-premium" element={<SimplifiedDashboardPremium customerId={customerId} />} />
+                <Route path="dashboard-premium" element={<RevenueIntelligenceDashboard customerId={customerId} variant="premium" />} />
                 <Route path="icp" element={<SimplifiedICP customerId={customerId} />} />
                 <Route path="financial" element={<SimplifiedFinancialImpact customerId={customerId} />} />
                 <Route path="resources" element={<SimplifiedResourceLibrary customerId={customerId} />} />

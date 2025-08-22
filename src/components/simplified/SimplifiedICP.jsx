@@ -3,17 +3,18 @@ import { useNavigate } from 'react-router-dom';
 import { 
   Target,
   Users,
-  Building2,
-  TrendingUp,
   AlertCircle,
   CheckCircle,
-  Download,
   ChevronRight,
   Info,
   Lightbulb,
   ArrowRight,
   Star,
-  Zap
+  Zap,
+  ExternalLink,
+  Rocket,
+  Copy,
+  FileDown
 } from 'lucide-react';
 import { useUserIntelligence } from '../../contexts/simplified/UserIntelligenceContext';
 import ICPFrameworkDisplay from '../tools/ICPFrameworkDisplay';
@@ -21,6 +22,8 @@ import TechnicalTranslationWidget from './cards/TechnicalTranslationWidget';
 import StakeholderArsenalWidget from './cards/StakeholderArsenalWidget';
 import ProductInputSection from './cards/ProductInputSection';
 import CoreResourcesLoadingScreen from './cards/CoreResourcesLoadingScreen';
+import SmartExportInterface from '../export/SmartExportInterface';
+import { ExportEngineService } from '../../services/ExportEngineService';
 import webhookService from '../../services/webhookService';
 
 const SimplifiedICP = ({ customerId }) => {
@@ -37,6 +40,9 @@ const SimplifiedICP = ({ customerId }) => {
   const [customerData, setCustomerData] = useState({
     salesSageResources: null // Will be populated when resources are generated
   });
+  const [showExportInterface, setShowExportInterface] = useState(false);
+  const [exportData, setExportData] = useState(null);
+  const [copiedFormat, setCopiedFormat] = useState(null);
   
   // Usage tracking refs
   const startTimeRef = useRef(Date.now());
@@ -189,6 +195,21 @@ const SimplifiedICP = ({ customerId }) => {
       setRatingResult(result);
       setIsRating(false);
       
+      // Prepare export data for Sarah Chen
+      setExportData({
+        icpData: {
+          buyerPersona: {
+            demographics: `${companyName} - ${result.recommendation} ICP match`,
+            painPoints: result.insights.map(i => i.message),
+            decisionMaking: 'Technical founder decision-making process'
+          },
+          icpScore: result.overallScore,
+          criteria: result.criteria
+        },
+        assessmentData: result,
+        companyName: companyName
+      });
+      
       // Update usage
       updateUsage({
         lastICPRating: Date.now(),
@@ -230,6 +251,62 @@ const SimplifiedICP = ({ customerId }) => {
     });
     
     return insights;
+  };
+
+  // Quick AI Prompts Generator for Sarah Chen
+  const generateQuickAIPrompts = async (exportData) => {
+    const { icpData, companyName } = exportData;
+    
+    return {
+      prospectResearchPrompt: `You are a sales research specialist for a Series A technical founder.
+
+COMPANY TO RESEARCH: ${companyName}
+
+ICP ANALYSIS RESULTS:
+- ICP Score: ${icpData.icpScore}/100
+- Key Criteria Scores: ${icpData.criteria.map(c => `${c.name}: ${c.score}%`).join(', ')}
+- Priority Level: ${icpData.icpScore >= 85 ? 'High Priority' : icpData.icpScore >= 70 ? 'Medium Priority' : 'Low Priority'}
+
+RESEARCH TASKS:
+1. Validate ICP fit by researching their current tech stack and growth stage
+2. Identify 2-3 specific pain points they likely have based on our analysis
+3. Find the technical decision-maker (CTO/VP Engineering) and their background
+4. Suggest 3 talking points that would resonate with technical founders
+
+DESIRED OUTPUT FORMAT:
+- Quick Executive Summary (2-3 sentences)
+- Key Stakeholders (name, role, LinkedIn)
+- Pain Points (specific to their situation)
+- Recommended Approach (technical founder to technical founder)
+
+Company URL/Domain: [INSERT COMPANY DOMAIN]
+Industry Context: [INSERT INDUSTRY]`,
+
+      valuePropositionPrompt: `You are helping a Series A technical founder create value props for ${companyName}.
+
+CONTEXT:
+Our ICP analysis shows ${companyName} scored ${icpData.icpScore}% fit.
+This makes them a ${icpData.icpScore >= 85 ? 'HIGH' : icpData.icpScore >= 70 ? 'MEDIUM' : 'LOW'} priority prospect.
+
+CREATE TECHNICAL VALUE PROPS:
+1. Problem/Solution fit based on ICP scoring
+2. Technical benefits that matter to their engineering team  
+3. Business impact metrics relevant to their growth stage
+4. Implementation approach (technical founder perspective)
+
+Make it conversational for founder-to-founder discussions.`
+    };
+  };
+
+  // Clipboard utility
+  const copyToClipboard = async (text) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      return true;
+    } catch (err) {
+      console.error('Failed to copy text: ', err);
+      return false;
+    }
   };
 
   // Sample buyer personas based on milestone tier
@@ -590,29 +667,101 @@ const SimplifiedICP = ({ customerId }) => {
                     </div>
                   </div>
                   
-                  {/* Actions */}
-                  <div className="flex gap-3">
-                    <button
-                      onClick={() => {
-                        setRatingResult(null);
-                        setCompanyName('');
-                        trackClick('rate_another');
-                      }}
-                      className="flex-1 py-2 bg-gray-800 hover:bg-gray-700 text-white rounded-lg transition-colors"
-                    >
-                      Rate Another
-                    </button>
-                    <button
-                      onClick={() => {
-                        updateUsage({ lastICPExport: Date.now() });
-                        trackClick('export_analysis');
-                        alert('Analysis exported!');
-                      }}
-                      className="flex-1 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors flex items-center justify-center gap-2"
-                    >
-                      <Download className="w-4 h-4" />
-                      Export Analysis
-                    </button>
+                  {/* Sarah Chen: Immediate Export Actions */}
+                  <div className="space-y-4">
+                    {/* Quick Export Options - Technical Founder Optimized */}
+                    <div className="bg-gradient-to-r from-blue-900/30 to-purple-900/30 border border-blue-500/30 rounded-lg p-4">
+                      <div className="flex items-center gap-2 mb-3">
+                        <Rocket className="w-4 h-4 text-blue-400" />
+                        <h4 className="text-white font-medium">Next Steps: Apply This Intelligence</h4>
+                      </div>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                        {/* Claude/AI Prompts */}
+                        <button
+                          onClick={async () => {
+                            if (exportData) {
+                              const aiPrompts = await generateQuickAIPrompts(exportData);
+                              await copyToClipboard(aiPrompts.prospectResearchPrompt);
+                              setCopiedFormat('claude');
+                              setTimeout(() => setCopiedFormat(null), 2000);
+                              trackClick('quick_export_claude');
+                            }
+                          }}
+                          className="p-3 bg-gray-800 hover:bg-gray-700 border border-gray-600 hover:border-blue-500 rounded-lg text-left transition-all group"
+                        >
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="text-lg">🤖</span>
+                            <span className="text-white text-sm font-medium">Claude Prompt</span>
+                            {copiedFormat === 'claude' ? (
+                              <CheckCircle className="w-3 h-3 text-green-400" />
+                            ) : (
+                              <Copy className="w-3 h-3 text-gray-400 group-hover:text-blue-400" />
+                            )}
+                          </div>
+                          <p className="text-gray-400 text-xs">Research prospects using this ICP analysis</p>
+                        </button>
+
+                        {/* CRM Integration */}
+                        <button
+                          onClick={() => {
+                            setShowExportInterface(true);
+                            trackClick('quick_export_crm');
+                          }}
+                          className="p-3 bg-gray-800 hover:bg-gray-700 border border-gray-600 hover:border-green-500 rounded-lg text-left transition-all group"
+                        >
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="text-lg">📊</span>
+                            <span className="text-white text-sm font-medium">CRM Setup</span>
+                            <ExternalLink className="w-3 h-3 text-gray-400 group-hover:text-green-400" />
+                          </div>
+                          <p className="text-gray-400 text-xs">HubSpot/Salesforce scoring fields</p>
+                        </button>
+
+                        {/* Sales Automation */}
+                        <button
+                          onClick={() => {
+                            setShowExportInterface(true);
+                            trackClick('quick_export_sales');
+                          }}
+                          className="p-3 bg-gray-800 hover:bg-gray-700 border border-gray-600 hover:border-purple-500 rounded-lg text-left transition-all group"
+                        >
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="text-lg">🎯</span>
+                            <span className="text-white text-sm font-medium">Sales Sequences</span>
+                            <ExternalLink className="w-3 h-3 text-gray-400 group-hover:text-purple-400" />
+                          </div>
+                          <p className="text-gray-400 text-xs">Outreach/SalesLoft templates</p>
+                        </button>
+                      </div>
+                      
+                      <div className="flex items-center gap-3 mt-4 pt-3 border-t border-gray-700">
+                        <button
+                          onClick={() => setShowExportInterface(true)}
+                          className="text-blue-400 hover:text-blue-300 text-sm flex items-center gap-1"
+                        >
+                          <FileDown className="w-3 h-3" />
+                          View All Export Options
+                        </button>
+                        <span className="text-gray-500 text-xs">•</span>
+                        <span className="text-gray-400 text-xs">Score: {ratingResult.overallScore}% ICP match</span>
+                      </div>
+                    </div>
+
+                    {/* Standard Actions */}
+                    <div className="flex gap-3">
+                      <button
+                        onClick={() => {
+                          setRatingResult(null);
+                          setCompanyName('');
+                          setExportData(null);
+                          trackClick('rate_another');
+                        }}
+                        className="flex-1 py-2 bg-gray-800 hover:bg-gray-700 text-white rounded-lg transition-colors"
+                      >
+                        Rate Another
+                      </button>
+                    </div>
                   </div>
                 </div>
               )}
@@ -702,6 +851,60 @@ const SimplifiedICP = ({ customerId }) => {
             setGenerationSessionId(null);
           }}
         />
+      )}
+
+      {/* Smart Export Interface Modal */}
+      {showExportInterface && exportData && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-gray-900 border border-gray-800 rounded-xl max-w-6xl max-h-[90vh] overflow-auto w-full">
+            <div className="sticky top-0 bg-gray-900 border-b border-gray-800 px-6 py-4 flex items-center justify-between">
+              <div>
+                <h2 className="text-xl font-bold text-white">Export ICP Intelligence</h2>
+                <p className="text-gray-400 text-sm">Transform your analysis into actionable tools</p>
+              </div>
+              <button
+                onClick={() => setShowExportInterface(false)}
+                className="text-gray-400 hover:text-white transition-colors"
+              >
+                <span className="sr-only">Close</span>
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            
+            <div className="p-6">
+              <SmartExportInterface
+                sourceData={exportData}
+                contentType="icp-analysis"
+                userTools={['claude', 'chatgpt', 'hubspot', 'salesforce', 'outreach', 'salesloft']}
+                onExport={(exportResults) => {
+                  console.log('Export completed:', exportResults);
+                  // Handle export results - could download files, show copy dialogs, etc.
+                  exportResults.forEach(result => {
+                    if (result.formatInfo.fileType === 'text') {
+                      // For text formats, copy to clipboard
+                      copyToClipboard(JSON.stringify(result.data, null, 2));
+                    } else {
+                      // For other formats, could trigger download
+                      console.log(`Exporting ${result.filename}:`, result.data);
+                    }
+                  });
+                  
+                  // Track export usage
+                  updateUsage({ 
+                    lastICPExport: Date.now(),
+                    exportFormatsUsed: exportResults.length
+                  });
+                  trackClick('full_export_completed');
+                  
+                  setShowExportInterface(false);
+                }}
+                className="border-0"
+              />
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
