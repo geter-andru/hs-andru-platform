@@ -306,7 +306,7 @@ const AuthenticatedApp = () => {
           path="/admin" 
           element={
             <Navigate 
-              to="/customer/druAdminDemo2025/simplified/dashboard?token=admin-demo-token-2025"
+              to="/customer/dru78DR9789SDF862/simplified/dashboard?token=admin-demo-token-2025"
               replace 
             />
           } 

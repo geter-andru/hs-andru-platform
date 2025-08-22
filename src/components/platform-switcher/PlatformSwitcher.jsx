@@ -129,7 +129,7 @@ const PlatformSwitcher = ({ customerId }) => {
             </div>
 
             {/* Admin Panel - Only for admin users */}
-            {(customerId === 'druAdminDemo2025' || customerId === 'CUST_4') && (
+            {(customerId === 'dru78DR9789SDF862' || customerId === 'CUST_4') && (
               <div className="border-t border-gray-700 p-4">
                 <div className="text-xs font-medium text-purple-400 mb-2">Admin Controls</div>
                 <div className="space-y-2 text-xs">

@@ -6,7 +6,7 @@ export const mockCustomerData = {
     name: "Alex Chen",
     company: "TechFlow Analytics", 
     email: "alex@techflow.com",
-    customerId: "druTestUser00001",
+    customerId: "dru9K2L7M8N4P5Q6",
     competencyLevel: "Customer Analysis Developing",
     isAdmin: false
   },
@@ -16,7 +16,7 @@ export const mockCustomerData = {
     name: "Admin User",
     company: "Demo Company",
     email: "admin@demo.com", 
-    customerId: "druAdminDemo2025",
+    customerId: "dru78DR9789SDF862",
     competencyLevel: "Revenue Intelligence Master",
     isAdmin: true
   },
@@ -399,7 +399,7 @@ export const mockAdminData = {
     name: "Admin User",
     company: "Demo Company",
     email: "admin@demo.com", 
-    customerId: "druAdminDemo2025",
+    customerId: "dru78DR9789SDF862",
     competencyLevel: "Revenue Intelligence Master",
     isAdmin: true
   },
@@ -733,9 +733,9 @@ export const mockAdminData = {
 // Function to get mock data by customer ID
 export const getMockDataByCustomerId = (customerId) => {
   switch (customerId) {
-    case 'druAdminDemo2025':
+    case 'dru78DR9789SDF862':
       return mockAdminData;
-    case 'druTestUser00001':
+    case 'dru9K2L7M8N4P5Q6':
     default:
       return mockCustomerData;
   }

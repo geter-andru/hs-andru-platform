@@ -80,8 +80,8 @@ const ModernSidebarLayout = ({ children, customerId, activeRoute = 'dashboard' }
       'CUST_3': 'Marcus',
       'CUST_4': 'Admin',
       'CUST_5': 'Emma',
-      'druAdminDemo2025': 'Admin',
-      'druTestUser00001': 'Alex'
+      'dru78DR9789SDF862': 'Admin',
+      'dru9K2L7M8N4P5Q6': 'Alex'
     };
     return fallbackMap[customerId] || 'User';
   };

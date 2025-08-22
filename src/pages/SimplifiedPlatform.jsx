@@ -87,7 +87,7 @@ const SimplifiedPlatform = () => {
           <h1 className="text-2xl font-bold text-white mb-2">Access Error</h1>
           <p className="text-gray-400 mb-4">{error}</p>
           <a 
-            href="/customer/druAdminDemo2025?token=admin-demo-token-2025"
+            href="/customer/dru78DR9789SDF862?token=admin-demo-token-2025"
             className="inline-block px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
           >
             Try Admin Demo

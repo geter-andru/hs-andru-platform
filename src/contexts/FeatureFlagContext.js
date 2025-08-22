@@ -45,7 +45,7 @@ export const FeatureFlagProvider = ({ children, customerId }) => {
         }
 
         // Admin users get platform switcher access and financial features
-        if (customerId === 'druAdminDemo2025' || customerId === 'CUST_4') {
+        if (customerId === 'dru78DR9789SDF862' || customerId === 'CUST_4') {
           setFlags(prev => ({
             ...prev,
             showPlatformSwitcher: true,

@@ -2856,7 +2856,7 @@ export const airtableService = {
 
   // Create default assessment for customers without detailed data
   createDefaultAssessment(customerData) {
-    const isAdmin = customerData.customer_id === 'druAdminDemo2025' || customerData.customer_id === 'CUST_4';
+    const isAdmin = customerData.customer_id === 'dru78DR9789SDF862' || customerData.customer_id === 'CUST_4';
     
     if (isAdmin) {
       return {
@@ -2909,7 +2909,7 @@ export const airtableService = {
   // Helper functions for assessment creation
   assessPerformanceFromData(customerData) {
     // Simple heuristic based on available data
-    if (customerData.customer_id === 'druAdminDemo2025' || customerData.customer_id === 'CUST_4') {
+    if (customerData.customer_id === 'dru78DR9789SDF862' || customerData.customer_id === 'CUST_4') {
       return { level: 'Good', isHighPriority: false, score: 75 };
     }
     
@@ -2924,7 +2924,7 @@ export const airtableService = {
     const challenges = [];
     
     // Default challenges based on customer type
-    if (customerData.customer_id === 'druAdminDemo2025' || customerData.customer_id === 'CUST_4') {
+    if (customerData.customer_id === 'dru78DR9789SDF862' || customerData.customer_id === 'CUST_4') {
       challenges.push('Competitive Positioning Challenge');
     } else {
       challenges.push('Buyer Conversations Challenge', 'Technical Translation Challenge');
@@ -2956,7 +2956,7 @@ export const airtableService = {
   },
 
   calculateRevenueOpportunity(performance, customerData) {
-    const baseOpportunity = (customerData.customer_id === 'druAdminDemo2025' || customerData.customer_id === 'CUST_4') ? 1200000 : 750000;
+    const baseOpportunity = (customerData.customer_id === 'dru78DR9789SDF862' || customerData.customer_id === 'CUST_4') ? 1200000 : 750000;
     const multiplier = performance.score / 50; // Scale based on performance
     
     return {
