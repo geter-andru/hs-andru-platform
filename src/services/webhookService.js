@@ -1,4 +1,4 @@
-import airtableService from './airtableService';
+import { airtableService } from './airtableService';
 
 /**
  * Webhook Service for receiving Make.com completion notifications
@@ -113,8 +113,11 @@ class WebhookService {
       // Sync generated resources to Airtable customer record
       try {
         const customerId = this.generationStatus[sessionId]?.customerId;
+        console.log('🔍 Checking Airtable sync for session:', sessionId, 'customer:', customerId);
+        
         if (customerId && customerId !== 'CUST_DOTUN_01') { // Skip test customer
           console.log('🔄 Syncing generated resources to Airtable for:', customerId);
+          console.log('📦 Resources to sync:', Object.keys(this.completedResources[sessionId] || {}));
           const syncResult = await airtableService.syncGeneratedResourcesToAirtable(customerId, this.completedResources[sessionId]);
           
           if (syncResult.success) {
@@ -651,10 +654,30 @@ class WebhookService {
   /**
    * Alternative: Force completion with realistic resources
    * This can be called when Make.com webhook completes but Netlify functions fail
+   * Ensures Airtable sync happens for fallback data
    */
   async forceCompleteWithRealisticData(sessionId, productData) {
+    console.log('🎯 Forcing completion with realistic data for session:', sessionId);
+    
+    // Ensure generation status exists with customer ID
+    if (!this.generationStatus[sessionId]) {
+      console.warn('⚠️ Generation status not found for session, creating minimal status');
+      this.generationStatus[sessionId] = {
+        customerId: productData.customerId || 'CUST_UNKNOWN',
+        status: 'processing',
+        startTime: Date.now()
+      };
+    }
+    
+    const customerId = this.generationStatus[sessionId]?.customerId;
+    console.log('👤 Customer ID for fallback sync:', customerId);
+    
     const realisticResources = this.generateRealisticResources(productData);
+    console.log('📦 Generated realistic resources with personalized content');
+    
     await this.completeGeneration(sessionId, realisticResources);
+    console.log('✅ Completed generation with realistic resources and Airtable sync');
+    
     return realisticResources;
   }
 

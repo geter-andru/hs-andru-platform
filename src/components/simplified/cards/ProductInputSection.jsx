@@ -70,11 +70,12 @@ const ProductInputSection = ({ customerId, onProductSubmit }) => {
         });
         
         // Start polling for completion from webhook server (fallback to realistic mock after 1 minute)
-        webhookService.pollForCompletion(sessionId, 30, 2000).then((resources) => {
+        webhookService.pollForCompletion(sessionId, 30, 2000).then(async (resources) => {
           // If we got mock resources due to timeout, use product-specific realistic data instead
           if (!resources.icp_analysis?.content?.includes(productData.productName)) {
-            const realisticResources = webhookService.generateRealisticResources(productData);
-            webhookService.completeGeneration(sessionId, realisticResources);
+            console.log('🔄 Make.com webhook timed out, using realistic fallback data with Airtable sync');
+            const productDataWithCustomer = { ...productData, customerId: customerId || 'CUST_DOTUN_01' };
+            await webhookService.forceCompleteWithRealisticData(sessionId, productDataWithCustomer);
           }
         });
         
