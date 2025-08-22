@@ -76,11 +76,12 @@ const ModernSidebarLayout = ({ children, customerId, activeRoute = 'dashboard' }
     // Fallback to hardcoded names if Airtable data unavailable
     const fallbackMap = {
       'CUST_1': 'Alex',
-      'CUST_2': 'Sarah',
+      'CUST_2': 'Sarah', 
       'CUST_3': 'Marcus',
+      'CUST_4': 'Admin',
+      'CUST_5': 'Emma',
       'druAdminDemo2025': 'Admin',
-      'druTestUser00001': 'Alex',
-      'CUST_5': 'Emma'
+      'druTestUser00001': 'Alex'
     };
     return fallbackMap[customerId] || 'User';
   };

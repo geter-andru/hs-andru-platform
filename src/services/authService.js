@@ -85,8 +85,8 @@ export const authService = {
         };
       }
 
-      // Check for admin credentials
-      if (customerId === 'druAdminDemo2025' && accessToken === 'admin-demo-token-2025') {
+      // Check for admin credentials (support both old and new formats)
+      if ((customerId === 'druAdminDemo2025' || customerId === 'CUST_4') && accessToken === 'admin-demo-token-2025') {
         const adminData = await this.loadAdminUser();
         return {
           valid: true,
@@ -94,8 +94,8 @@ export const authService = {
         };
       }
 
-      // Check for test customer credentials
-      if (customerId === 'druTestUser00001' && accessToken === 'test-token-123456') {
+      // Check for test customer credentials (support both old and new formats)
+      if ((customerId === 'druTestUser00001' || customerId === 'CUST_02' || customerId === 'CUST_2') && accessToken === 'test-token-123456') {
         const testData = await this.loadTestUser();
         return {
           valid: true,
