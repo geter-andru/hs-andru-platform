@@ -203,7 +203,7 @@ export const UserIntelligenceProvider = ({ children, customerId }) => {
       setUserIntelligence(prev => ({ ...prev, loading: true, error: null }));
       
       // For test environments and admin users ALWAYS use mock data
-      if (customerId.includes('TEST') || customerId === 'CUST_4' || customerId === 'CUST_02' || customerId === 'CUST_2') {
+      if (customerId.includes('TEST') || customerId === 'druAdminDemo2025' || customerId === 'druTestUser00001' || customerId === 'CUST_2') {
         console.log('✅ Test/Admin mode detected - using mock data for', customerId);
         setUserIntelligence({
           assessment: {
@@ -316,7 +316,7 @@ export const UserIntelligenceProvider = ({ children, customerId }) => {
       console.error('❌ Error details:', { customerId, errorMessage: error.message });
       
       // For test environments and admin users, fall back to mock data instead of showing error
-      if (customerId.includes('TEST') || customerId === 'CUST_4') {
+      if (customerId.includes('TEST') || customerId === 'druAdminDemo2025') {
         console.log('✅ Test/Admin mode fallback - using mock data due to error:', error.message);
         setUserIntelligence({
           assessment: {

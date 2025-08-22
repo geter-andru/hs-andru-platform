@@ -86,7 +86,7 @@ export const authService = {
       }
 
       // Check for admin credentials
-      if (customerId === 'CUST_4' && accessToken === 'admin-demo-token-2025') {
+      if (customerId === 'druAdminDemo2025' && accessToken === 'admin-demo-token-2025') {
         const adminData = await this.loadAdminUser();
         return {
           valid: true,
@@ -95,7 +95,7 @@ export const authService = {
       }
 
       // Check for test customer credentials
-      if (customerId === 'CUST_02' && accessToken === 'test-token-123456') {
+      if (customerId === 'druTestUser00001' && accessToken === 'test-token-123456') {
         const testData = await this.loadTestUser();
         return {
           valid: true,
@@ -122,8 +122,8 @@ export const authService = {
   async loadAdminUser() {
     // Return static admin data for reliable demo access
     return {
-      customerId: 'CUST_4',
-      customer_id: 'CUST_4',
+      customerId: 'druAdminDemo2025',
+      customer_id: 'druAdminDemo2025',
       customerName: 'Platform Administrator',
       customer_name: 'Platform Administrator',
       company: 'H&S Revenue Intelligence',
@@ -159,8 +159,8 @@ export const authService = {
   // Load test user data
   async loadTestUser() {
     return {
-      customerId: 'CUST_02',
-      customer_id: 'CUST_02',
+      customerId: 'druTestUser00001',
+      customer_id: 'druTestUser00001',
       customerName: 'Test Customer',
       customer_name: 'Test Customer',
       company: 'Test Company Inc.',
