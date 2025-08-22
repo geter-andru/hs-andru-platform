@@ -78,9 +78,9 @@ const ModernSidebarLayout = ({ children, customerId, activeRoute = 'dashboard' }
       'CUST_1': 'Alex',
       'CUST_2': 'Sarah', 
       'CUST_3': 'Marcus',
-      'CUST_4': 'Admin',
+      'CUST_4': 'Geter',
       'CUST_5': 'Emma',
-      'dru78DR9789SDF862': 'Admin',
+      'dru78DR9789SDF862': 'Geter',
       'dru9K2L7M8N4P5Q6': 'Alex'
     };
     return fallbackMap[customerId] || 'User';

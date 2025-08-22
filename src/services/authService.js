@@ -87,11 +87,22 @@ export const authService = {
 
       // Check for admin credentials (support both old and new formats)
       if ((customerId === 'dru78DR9789SDF862' || customerId === 'CUST_4') && accessToken === 'admin-demo-token-2025') {
-        const adminData = await this.loadAdminUser();
-        return {
-          valid: true,
-          customerData: adminData
-        };
+        try {
+          // Try to load from Airtable first to get actual customer name
+          const customerData = await airtableService.getCustomerAssets(customerId, accessToken);
+          return {
+            valid: true,
+            customerData
+          };
+        } catch (error) {
+          // Fall back to mock data if Airtable fails
+          console.log('Admin Airtable load failed, using mock data:', error.message);
+          const adminData = await this.loadAdminUser();
+          return {
+            valid: true,
+            customerData: adminData
+          };
+        }
       }
 
       // Check for test customer credentials (support both old and new formats)
@@ -124,8 +135,8 @@ export const authService = {
     return {
       customerId: 'dru78DR9789SDF862',
       customer_id: 'dru78DR9789SDF862',
-      customerName: 'Platform Administrator',
-      customer_name: 'Platform Administrator',
+      customerName: 'Geter',
+      customer_name: 'Geter',
       company: 'H&S Revenue Intelligence',
       email: 'admin@hs-platform.com',
       isAdmin: true,
