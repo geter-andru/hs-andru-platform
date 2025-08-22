@@ -4,6 +4,7 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import ContentDisplay, { Callout } from '../common/ContentDisplay';
 import { CardSkeleton } from '../common/LoadingSpinner';
 import AsyncErrorBoundary, { useAsyncError } from '../common/AsyncErrorBoundary';
+import FinancialAccessGate from '../common/FinancialAccessGate';
 import DashboardLayout from '../layout/DashboardLayout';
 import SidebarSection from '../layout/SidebarSection';
 import { MobileOptimizedInput, MobileOptimizedButton, MobileOptimizedCard } from '../layout/MobileOptimized';
@@ -674,10 +675,11 @@ Generated on: ${new Date().toLocaleDateString()}
   );
 
   return (
-    <DashboardLayout 
-      sidebarContent={sidebarContent} 
-      currentPhase="cost-calculator"
-    >
+    <FinancialAccessGate fallbackMessage="Cost of inaction calculator and financial impact analysis are available for premium users">
+      <DashboardLayout 
+        sidebarContent={sidebarContent} 
+        currentPhase="cost-calculator"
+      >
       <div className="space-y-8">
         {/* Financial Impact Visualization Header */}
         <div>
@@ -908,6 +910,7 @@ Generated on: ${new Date().toLocaleDateString()}
         disabled={isNavigating}
       />
     </DashboardLayout>
+    </FinancialAccessGate>
   );
 };
 

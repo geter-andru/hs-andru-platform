@@ -11,6 +11,7 @@ const DEFAULT_FLAGS = {
   enableSimplifiedFinancial: false,
   enableSimplifiedResources: false,
   showPlatformSwitcher: false, // Hide platform switcher by default
+  enableFinancialFeatures: false, // Financial features locked by default
   enableMilestoneDetection: true,
   enableUsageTracking: true,
   enableStealthGamification: true
@@ -43,16 +44,18 @@ export const FeatureFlagProvider = ({ children, customerId }) => {
           setFlags(prev => ({ ...prev, ...parsedFlags }));
         }
 
-        // Admin users (CUST_4) get platform switcher access
+        // Admin users (CUST_4) get platform switcher access and financial features
         if (customerId === 'CUST_4') {
           setFlags(prev => ({
             ...prev,
-            showPlatformSwitcher: true
+            showPlatformSwitcher: true,
+            enableFinancialFeatures: true
           }));
         }
         
-        // All other users default to standard platform (no toggle access)
+        // All other users default to standard platform (no toggle access, no financial features)
         // Standard platform is already the default (simplifiedPlatform: false)
+        // Financial features are locked by default (enableFinancialFeatures: false)
 
       } catch (error) {
         console.error('Error loading feature flags:', error);

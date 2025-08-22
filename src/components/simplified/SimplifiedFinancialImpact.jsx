@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { useUserIntelligence } from '../../contexts/simplified/UserIntelligenceContext';
+import FinancialAccessGate from '../common/FinancialAccessGate';
 
 const SimplifiedFinancialImpact = ({ customerId }) => {
   const navigate = useNavigate();
@@ -259,8 +260,9 @@ const SimplifiedFinancialImpact = ({ customerId }) => {
   }, [milestone]);
 
   return (
-    <div className="min-h-screen bg-black">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <FinancialAccessGate fallbackMessage="Financial impact calculations and business case building are available for premium users">
+      <div className="min-h-screen bg-black">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">
           <button
@@ -576,8 +578,9 @@ const SimplifiedFinancialImpact = ({ customerId }) => {
             </div>
           </div>
         </div>
+        </div>
       </div>
-    </div>
+    </FinancialAccessGate>
   );
 };
 
