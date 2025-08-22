@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
 import { Rocket, ArrowRight } from 'lucide-react';
-import GoogleSignIn from './GoogleSignIn';
-import GoogleSignInRedirect from './GoogleSignInRedirect';
+import { useNavigate } from 'react-router-dom';
 
 const SignUpPage = ({ onSignInSuccess, onSignInError }) => {
-  const [showSignIn, setShowSignIn] = useState(false);
+  const navigate = useNavigate();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900">
@@ -45,43 +44,15 @@ const SignUpPage = ({ onSignInSuccess, onSignInError }) => {
             </div>
           </div>
 
-          {!showSignIn && (
-            <button
-              onClick={() => setShowSignIn(true)}
-              className="inline-flex items-center gap-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-xl font-semibold text-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200 transform hover:scale-105 shadow-xl"
-            >
-              <span>Start Your Revenue Assessment</span>
-              <ArrowRight className="w-5 h-5" />
-            </button>
-          )}
+          <button
+            onClick={() => navigate('/login')}
+            className="inline-flex items-center gap-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-xl font-semibold text-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200 transform hover:scale-105 shadow-xl"
+          >
+            <span>Start Your Revenue Assessment</span>
+            <ArrowRight className="w-5 h-5" />
+          </button>
         </div>
 
-        {showSignIn && (
-          <div className="max-w-md mx-auto mt-12 bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-2xl p-8">
-            <div className="text-center mb-6">
-              <h3 className="text-xl font-semibold text-white mb-2">
-                Access Your Revenue Intelligence Platform
-              </h3>
-              <p className="text-gray-400 text-sm">
-                Sign in with Google to continue your assessment and unlock personalized insights
-              </p>
-            </div>
-            
-            {/* Use redirect method temporarily to avoid OAuth config issues */}
-            <GoogleSignInRedirect 
-              onSignInSuccess={onSignInSuccess}
-              onSignInError={onSignInError}
-            />
-            
-            {/* Original method - uncomment after fixing Google Console config */}
-            {/* 
-            <GoogleSignIn 
-              onSignInSuccess={onSignInSuccess}
-              onSignInError={onSignInError}
-            />
-            */}
-          </div>
-        )}
       </div>
 
       <div className="border-t border-gray-800 py-8">
