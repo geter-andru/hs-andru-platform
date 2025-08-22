@@ -59,7 +59,7 @@ const SimplifiedPlatform = () => {
 
         setIsAuthenticated(true);
       } catch (error) {
-        console.error('Authentication error:', error);
+        console.error('❌ Authentication error:', error);
         setError(error.message);
       } finally {
         setIsLoading(false);

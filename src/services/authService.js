@@ -114,6 +114,15 @@ export const authService = {
         };
       }
 
+      // Check for Supabase authenticated users
+      if (customerId === 'SUPABASE_USER' && accessToken === 'supabase-auth') {
+        const supabaseData = await this.loadSupabaseUser();
+        return {
+          valid: true,
+          customerData: supabaseData
+        };
+      }
+
       // Try to load from Airtable for other customers
       const customerData = await airtableService.getCustomerAssets(customerId, accessToken);
       
@@ -196,6 +205,42 @@ export const authService = {
     };
   },
 
+  // Load Supabase user data
+  async loadSupabaseUser() {
+    return {
+      customerId: 'SUPABASE_USER',
+      customer_id: 'SUPABASE_USER',
+      customerName: 'Supabase User',
+      customer_name: 'Supabase User',
+      company: 'H&S Platform User',
+      email: 'user@platform.com',
+      isAdmin: false,
+      demoMode: false,
+      hasPersonalizedICP: true,
+      hasDetailedAnalysis: true,
+      supabaseAuth: true,
+      // Include sample content for Supabase users
+      icp_content: JSON.stringify({
+        title: "Professional ICP Analysis",
+        description: "Your personalized customer profiling system",
+        segments: [
+          { name: "Enterprise SaaS Companies", score: 90, criteria: ["500+ employees", "$25M+ revenue", "Tech adoption"] },
+          { name: "Mid-Market Companies", score: 80, criteria: ["100-500 employees", "$5M-25M revenue", "Growth phase"] }
+        ]
+      }),
+      cost_calculator_content: JSON.stringify({
+        title: "Cost of Inaction Analysis",
+        scenarios: ["Conservative", "Realistic", "Aggressive"],
+        categories: ["Lost Revenue", "Operational Costs", "Competitive Position"]
+      }),
+      business_case_content: JSON.stringify({
+        title: "Business Case Framework",
+        templates: ["Pilot Program", "Full Implementation"],
+        frameworks: ["ROI Analysis", "Payback Calculation"]
+      })
+    };
+  },
+
   // Extract credentials from URL
   extractCredentials(location) {
     const urlParams = new URLSearchParams(location.search);
@@ -209,9 +254,6 @@ export const authService = {
 
   // Generate secure session
   generateSession(customerData, accessToken) {
-    if (process.env.NODE_ENV === 'development') {
-      console.log('AuthService - generateSession called with:', { customerData, accessToken });
-    }
     const sessionData = {
       customerId: customerData.customerId,
       customerName: customerData.customerName,
@@ -225,9 +267,6 @@ export const authService = {
       adminAccess: customerData.adminAccess || false
     };
 
-    if (process.env.NODE_ENV === 'development') {
-      console.log('AuthService - Session data created:', sessionData);
-    }
     // Store in sessionStorage (more secure than localStorage for tokens)
     sessionStorage.setItem('customerSession', JSON.stringify(sessionData));
     return sessionData;
@@ -237,26 +276,22 @@ export const authService = {
   getCurrentSession() {
     try {
       const sessionData = sessionStorage.getItem('customerSession');
-      console.log('AuthService - Session data from storage:', sessionData ? 'exists' : 'not found');
       if (!sessionData) return null;
 
       const session = JSON.parse(sessionData);
       
       // Check if session has the required version (force regeneration for old sessions)
       if (!session.version || session.version < 2) {
-        console.log('AuthService - Clearing old session version:', session.version);
         this.clearSession();
         return null;
       }
       
       // Check if session is expired
       if (Date.now() > session.expiresAt) {
-        console.log('AuthService - Session expired, clearing');
         this.clearSession();
         return null;
       }
 
-      console.log('AuthService - Returning valid session for:', session.customerId);
       return session;
     } catch (error) {
       console.error('Error reading session:', error);

@@ -17,6 +17,7 @@ import SarahChenWorkflowTestRunner from './components/test/SarahChenWorkflowTest
 import Phase4IntegrationTest from './components/test/Phase4IntegrationTest';
 import Phase5SystemTest from './components/test/Phase5SystemTest';
 import SarahChenUserJourneyTest from './components/test/SarahChenUserJourneyTest';
+import SupabaseAuth from './components/auth/SupabaseAuth';
 import testEnvironmentVariables from './utils/testEnv';
 
 function App() {
@@ -28,9 +29,12 @@ function App() {
     }
   }, []);
 
-  // Check if we're in test mode or legacy mode
+  // Check if we're in test mode, legacy mode, or auth routes
   const isTestRoute = window.location.pathname.startsWith('/test') || 
                      window.location.pathname.startsWith('/customer') ||
+                     window.location.pathname.startsWith('/auth') ||
+                     window.location.pathname.startsWith('/login') ||
+                     window.location.pathname.startsWith('/signup') ||
                      window.location.search.includes('token=');
 
   // Use legacy routing for test/admin routes, new auth for main app
@@ -49,6 +53,14 @@ function App() {
               
               {/* Legacy Full Routes (redirect to dashboard) */}
               <Route path="/customer/:customerId/full/*" element={<CustomerDashboard />} />
+              
+              {/* Auth Routes */}
+              <Route path="/auth" element={<SupabaseAuth />} />
+              <Route path="/login" element={<SupabaseAuth />} />
+              <Route path="/signup" element={<SupabaseAuth />} />
+              
+              {/* Dashboard Route - handles authenticated users */}
+              <Route path="/dashboard" element={<CustomerDashboard />} />
               
               {/* Test Routes */}
               <Route path="/test" element={<Phase1Test />} />
