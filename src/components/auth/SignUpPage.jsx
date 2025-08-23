@@ -19,12 +19,20 @@ const SignUpPage = ({ onSignInSuccess, onSignInError }) => {
             // User is approved, redirect to login
             console.log('Waitlist approved user detected, redirecting to login');
             navigate('/login');
+          } else {
+            // User is on waitlist but not approved yet - show normal page
+            console.log('User on waitlist but not yet approved');
           }
         } catch (error) {
           console.error('Error checking waitlist status:', error);
+          // On error, show normal page (graceful fallback)
         } finally {
           setCheckingStatus(false);
         }
+      } else {
+        // No stored email means new user - they should see the normal page
+        // which will redirect them to andru-ai.com for signup
+        console.log('New user detected - showing landing page with andru-ai.com redirect');
       }
     };
 
