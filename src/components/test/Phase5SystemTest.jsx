@@ -28,7 +28,7 @@ import {
 
 // Import all systems
 import behavioralIntelligenceService from '../../services/BehavioralIntelligenceService';
-import customerValueOrchestrator from '../../agents/CustomerValueOrchestrator';
+import customerValueOrchestrator from '../../agents/CustomerValueOrchestrator/CustomerValueOrchestrator';
 import { SkillAssessmentEngine } from '../../services/SkillAssessmentEngine';
 import { ProgressiveFeatureManager } from '../../services/ProgressiveFeatureManager';
 import valueOptimizationAnalytics from '../../services/valueOptimizationAnalytics';

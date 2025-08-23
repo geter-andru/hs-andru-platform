@@ -7,11 +7,11 @@
  * Phase 4 Enhancement: Behavioral Intelligence Integration and Predictive Optimization
  */
 
-import valueOptimizationAnalytics from '../services/valueOptimizationAnalytics';
-import behavioralIntelligenceService from '../services/BehavioralIntelligenceService';
-import { SkillAssessmentEngine } from '../services/SkillAssessmentEngine';
-import { ProgressiveFeatureManager } from '../services/ProgressiveFeatureManager';
-import { Task } from '../services/claudeCodeIntegration.js';
+import valueOptimizationAnalytics from '../../services/valueOptimizationAnalytics';
+import behavioralIntelligenceService from '../../services/BehavioralIntelligenceService';
+import { SkillAssessmentEngine } from '../../services/SkillAssessmentEngine';
+import { ProgressiveFeatureManager } from '../../services/ProgressiveFeatureManager';
+import { Task } from '../../services/claudeCodeIntegration.js';
 
 class CustomerValueOrchestrator {
   constructor() {
@@ -456,22 +456,22 @@ Focus on immediate improvements that can be implemented now to resolve the ident
       
       switch (agentType) {
         case 'prospectQualificationOptimizer':
-          const { default: ProspectQualificationOptimizer } = await import('./ProspectQualificationOptimizer');
+          const { default: ProspectQualificationOptimizer } = await import('./sub-agents/ProspectQualificationOptimizer');
           agent = ProspectQualificationOptimizer;
           break;
           
         case 'dealValueCalculatorOptimizer':
-          const { default: DealValueCalculatorOptimizer } = await import('./DealValueCalculatorOptimizer');
+          const { default: DealValueCalculatorOptimizer } = await import('./sub-agents/DealValueCalculatorOptimizer');
           agent = DealValueCalculatorOptimizer;
           break;
           
         case 'salesMaterialsOptimizer':
-          const { default: SalesMaterialsOptimizer } = await import('./SalesMaterialsOptimizer');
+          const { default: SalesMaterialsOptimizer } = await import('./sub-agents/SalesMaterialsOptimizer');
           agent = SalesMaterialsOptimizer;
           break;
           
         case 'dashboardOptimizer':
-          const { default: DashboardOptimizer } = await import('./DashboardOptimizer');
+          const { default: DashboardOptimizer } = await import('./sub-agents/DashboardOptimizer');
           agent = DashboardOptimizer;
           break;
           

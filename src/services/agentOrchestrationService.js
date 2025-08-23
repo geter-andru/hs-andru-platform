@@ -3,7 +3,7 @@
  * Integrates the Customer Value Orchestrator with the platform analytics
  */
 
-import customerValueOrchestrator from '../agents/CustomerValueOrchestrator';
+import customerValueOrchestrator from '../agents/CustomerValueOrchestrator/CustomerValueOrchestrator';
 import valueOptimizationAnalytics from './valueOptimizationAnalytics';
 
 class AgentOrchestrationService {

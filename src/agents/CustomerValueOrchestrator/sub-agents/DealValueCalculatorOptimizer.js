@@ -5,7 +5,7 @@
  * Focuses on CFO-ready outputs and urgency creation within 5 minutes
  */
 
-import { Task } from '../services/claudeCodeIntegration.js';
+import { Task } from '../../../services/claudeCodeIntegration.js';
 
 class DealValueCalculatorOptimizer {
   constructor() {

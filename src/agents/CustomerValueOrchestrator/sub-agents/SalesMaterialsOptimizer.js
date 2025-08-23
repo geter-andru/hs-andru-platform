@@ -5,7 +5,7 @@
  * Focuses on achieving 98% export success rate with investor-demo quality materials
  */
 
-import { Task } from '../services/claudeCodeIntegration.js';
+import { Task } from '../../../services/claudeCodeIntegration.js';
 
 class SalesMaterialsOptimizer {
   constructor() {

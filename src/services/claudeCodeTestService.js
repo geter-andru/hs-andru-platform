@@ -4,8 +4,8 @@
  */
 
 import claudeCodeTaskService, { Task } from './claudeCodeIntegration.js';
-import customerValueOrchestrator from '../agents/CustomerValueOrchestrator.js';
-import dashboardOptimizer from '../agents/DashboardOptimizer.js';
+import customerValueOrchestrator from '../agents/CustomerValueOrchestrator/CustomerValueOrchestrator.js';
+import dashboardOptimizer from '../agents/CustomerValueOrchestrator/sub-agents/DashboardOptimizer.js';
 
 class ClaudeCodeTestService {
   constructor() {

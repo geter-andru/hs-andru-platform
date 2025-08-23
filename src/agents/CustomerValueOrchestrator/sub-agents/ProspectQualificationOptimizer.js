@@ -5,7 +5,7 @@
  * Focuses on achieving 30-second value recognition and perfect qualification accuracy
  */
 
-import { Task } from '../services/claudeCodeIntegration.js';
+import { Task } from '../../../services/claudeCodeIntegration.js';
 
 class ProspectQualificationOptimizer {
   constructor() {

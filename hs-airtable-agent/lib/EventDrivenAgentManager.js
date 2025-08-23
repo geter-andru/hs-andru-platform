@@ -1,6 +1,7 @@
 /**
  * Event-Driven Agent Manager
  * Spawns and manages AirtableManagementAgent operations based on events
+ * Now uses extracted sub-agents from AirtableManagementOrchestrator
  */
 
 const EventBus = require('./EventBus');
@@ -8,6 +9,9 @@ const EventDetector = require('./EventDetector');
 const WebhookServer = require('./WebhookServer');
 const AgentCoordinator = require('./AgentCoordinator');
 const agentConfig = require('../config/agent.config');
+
+// Import extracted sub-agents (using dynamic import for ES6 modules)
+// These will be loaded asynchronously in the constructor
 
 class EventDrivenAgentManager {
     constructor(options = {}) {
@@ -22,6 +26,15 @@ class EventDrivenAgentManager {
         this.fieldConsolidationEngine = options.fieldConsolidationEngine;
         this.safeFieldConsolidator = options.safeFieldConsolidator;
         
+        // Initialize extracted sub-agents (loaded asynchronously)
+        this.auditAgent = null;
+        this.optimizationAgent = null;
+        this.maintenanceAgent = null;
+        this.backupAgent = null;
+        this.consolidationAgent = null;
+        this.manualAgent = null;
+        this.agentsLoaded = false;
+        
         this.activeAgents = new Map();
         this.agentStats = {
             totalActivations: 0,
@@ -31,6 +44,51 @@ class EventDrivenAgentManager {
         };
         
         this.setupEventHandlers();
+        
+        // Load agents asynchronously
+        this.loadAgents();
+    }
+
+    /**
+     * Load ES6 sub-agents dynamically
+     */
+    async loadAgents() {
+        try {
+            // Dynamically import ES6 modules
+            const { default: AuditAgent } = await import('../../src/agents/AirtableManagementOrchestrator/sub-agents/AuditAgent.js');
+            const { default: OptimizationAgent } = await import('../../src/agents/AirtableManagementOrchestrator/sub-agents/OptimizationAgent.js');
+            const { default: MaintenanceAgent } = await import('../../src/agents/AirtableManagementOrchestrator/sub-agents/MaintenanceAgent.js');
+            const { default: BackupAgent } = await import('../../src/agents/AirtableManagementOrchestrator/sub-agents/BackupAgent.js');
+            const { default: ConsolidationAgent } = await import('../../src/agents/AirtableManagementOrchestrator/sub-agents/ConsolidationAgent.js');
+            const { default: ManualAgent } = await import('../../src/agents/AirtableManagementOrchestrator/sub-agents/ManualAgent.js');
+
+            // Initialize sub-agents
+            this.auditAgent = new AuditAgent(this.auditEngine);
+            this.optimizationAgent = new OptimizationAgent(this.optimizationEngine, this.auditEngine);
+            this.maintenanceAgent = new MaintenanceAgent({
+                auditEngine: this.auditEngine,
+                optimizationEngine: this.optimizationEngine,
+                backupEngine: this.backupEngine,
+                fieldConsolidationEngine: this.fieldConsolidationEngine
+            });
+            this.backupAgent = new BackupAgent(this.backupEngine);
+            this.consolidationAgent = new ConsolidationAgent({
+                fieldConsolidationEngine: this.fieldConsolidationEngine,
+                safeFieldConsolidator: this.safeFieldConsolidator
+            });
+            this.manualAgent = new ManualAgent({
+                auditEngine: this.auditEngine,
+                optimizationEngine: this.optimizationEngine,
+                backupEngine: this.backupEngine,
+                fieldConsolidationEngine: this.fieldConsolidationEngine
+            });
+
+            this.agentsLoaded = true;
+            console.log('🔗 EventDrivenAgentManager: All sub-agents loaded successfully');
+        } catch (error) {
+            console.error('❌ Failed to load sub-agents:', error);
+            this.agentsLoaded = false;
+        }
     }
 
     /**
@@ -291,29 +349,41 @@ class EventDrivenAgentManager {
     }
 
     /**
-     * Execute the actual agent operation
+     * Execute the actual agent operation using extracted sub-agents
      */
     async executeAgentOperation(agentType, config) {
         const { operation, event } = config;
         
+        // Check if agents are loaded, if not, wait for them or use fallback
+        if (!this.agentsLoaded) {
+            console.log('⏳ Waiting for agents to load...');
+            await this.waitForAgentsToLoad();
+        }
+        
         switch (agentType) {
             case 'audit_agent':
-                return await this.executeAuditOperation(operation, event);
+                if (!this.auditAgent) throw new Error('AuditAgent not loaded');
+                return await this.auditAgent.execute(operation, event);
                 
             case 'optimization_agent':
-                return await this.executeOptimizationOperation(operation, event);
+                if (!this.optimizationAgent) throw new Error('OptimizationAgent not loaded');
+                return await this.optimizationAgent.execute(operation, event);
                 
             case 'maintenance_agent':
-                return await this.executeMaintenanceOperation(operation, event);
+                if (!this.maintenanceAgent) throw new Error('MaintenanceAgent not loaded');
+                return await this.maintenanceAgent.execute(operation, event);
                 
             case 'backup_agent':
-                return await this.executeBackupOperation(operation, event);
+                if (!this.backupAgent) throw new Error('BackupAgent not loaded');
+                return await this.backupAgent.execute(operation, event);
                 
             case 'consolidation_agent':
-                return await this.executeConsolidationOperation(operation, event);
+                if (!this.consolidationAgent) throw new Error('ConsolidationAgent not loaded');
+                return await this.consolidationAgent.execute(operation, event);
                 
             case 'manual_agent':
-                return await this.executeManualOperation(operation, event);
+                if (!this.manualAgent) throw new Error('ManualAgent not loaded');
+                return await this.manualAgent.execute(operation, event);
                 
             default:
                 throw new Error(`Unknown agent type: ${agentType}`);
@@ -321,197 +391,23 @@ class EventDrivenAgentManager {
     }
 
     /**
-     * Execute audit operations
+     * Wait for agents to load with timeout
      */
-    async executeAuditOperation(operation, event) {
-        if (!this.auditEngine) {
-            throw new Error('AuditEngine not available');
+    async waitForAgentsToLoad(timeoutMs = 5000) {
+        const startTime = Date.now();
+        while (!this.agentsLoaded && (Date.now() - startTime) < timeoutMs) {
+            await new Promise(resolve => setTimeout(resolve, 100));
         }
         
-        switch (operation) {
-            case 'performance_audit':
-                console.log('🔍 Running performance audit...');
-                return await this.auditEngine.performComprehensiveAudit();
-                
-            default:
-                console.log('🔍 Running general audit...');
-                return await this.auditEngine.performComprehensiveAudit();
+        if (!this.agentsLoaded) {
+            throw new Error('Timeout waiting for agents to load');
         }
     }
 
-    /**
-     * Execute optimization operations
-     */
-    async executeOptimizationOperation(operation, event) {
-        if (!this.optimizationEngine) {
-            throw new Error('OptimizationEngine not available');
-        }
-        
-        // First get audit results, then run optimization
-        console.log('⚡ Running optimization analysis...');
-        
-        let auditResults;
-        if (this.auditEngine) {
-            auditResults = await this.auditEngine.performComprehensiveAudit();
-        }
-        
-        return await this.optimizationEngine.analyzeOptimizationOpportunities(auditResults);
-    }
 
-    /**
-     * Execute maintenance operations
-     */
-    async executeMaintenanceOperation(operation, event) {
-        const operations = event.data.operations || ['audit'];
-        const results = {};
-        
-        console.log(`🔧 Running maintenance operations: ${operations.join(', ')}`);
-        
-        for (const op of operations) {
-            try {
-                switch (op) {
-                    case 'audit':
-                        if (this.auditEngine) {
-                            results.audit = await this.auditEngine.performComprehensiveAudit();
-                        }
-                        break;
-                        
-                    case 'optimize':
-                        if (this.optimizationEngine && this.auditEngine) {
-                            const auditResults = await this.auditEngine.performComprehensiveAudit();
-                            results.optimize = await this.optimizationEngine.analyzeOptimizationOpportunities(auditResults);
-                        }
-                        break;
-                        
-                    case 'health_check':
-                        results.health_check = await this.performHealthCheck();
-                        break;
-                        
-                    case 'backup':
-                        if (this.backupEngine) {
-                            results.backup = await this.backupEngine.createComprehensiveBackup({
-                                reason: 'Scheduled maintenance backup'
-                            });
-                        }
-                        break;
-                        
-                    case 'consolidate_fields':
-                        if (this.fieldConsolidationEngine) {
-                            results.consolidate_fields = await this.fieldConsolidationEngine.analyzeFieldConsolidation();
-                        }
-                        break;
-                        
-                    default:
-                        console.warn(`Unknown maintenance operation: ${op}`);
-                }
-            } catch (error) {
-                console.error(`Error in ${op}:`, error);
-                results[op] = { error: error.message };
-            }
-        }
-        
-        return results;
-    }
 
-    /**
-     * Execute manual operations
-     */
-    async executeManualOperation(operation, event) {
-        console.log(`🔧 Running manual operation: ${operation}`);
-        
-        // Route to appropriate engine based on operation
-        if (operation.includes('audit') && this.auditEngine) {
-            return await this.auditEngine.performComprehensiveAudit();
-        } else if (operation.includes('optimize') && this.optimizationEngine && this.auditEngine) {
-            const auditResults = await this.auditEngine.performComprehensiveAudit();
-            return await this.optimizationEngine.analyzeOptimizationOpportunities(auditResults);
-        } else if (operation.includes('backup') && this.backupEngine) {
-            return await this.backupEngine.createComprehensiveBackup({
-                reason: `Manual backup: ${operation}`,
-                tables: event.data.tables || []
-            });
-        } else if ((operation.includes('consolidate') || operation.includes('field')) && this.fieldConsolidationEngine) {
-            return await this.fieldConsolidationEngine.analyzeFieldConsolidation();
-        } else {
-            return { 
-                operation, 
-                result: 'Manual operation executed',
-                data: event.data 
-            };
-        }
-    }
 
-    /**
-     * Execute backup operations
-     */
-    async executeBackupOperation(operation, event) {
-        if (!this.backupEngine) {
-            throw new Error('BackupEngine not available');
-        }
-        
-        switch (operation) {
-            case 'full_backup':
-                console.log('💾 Creating full backup...');
-                return await this.backupEngine.createFullBackup({
-                    message: 'Event-triggered full backup',
-                    tables: event.data.tables || []
-                });
-                
-            case 'incremental_backup':
-                console.log('💾 Creating incremental backup...');
-                return await this.backupEngine.createIncrementalBackup(
-                    Date.now() - (24 * 60 * 60 * 1000) // 24 hours ago
-                );
-                
-            case 'safety_backup':
-            case 'comprehensive_backup':
-                console.log('💾 Creating comprehensive backup...');
-                return await this.backupEngine.createComprehensiveBackup({
-                    reason: event.data.reason || 'Event-triggered safety backup',
-                    tables: event.data.tables || []
-                });
-                
-            default:
-                console.log('💾 Creating comprehensive backup...');
-                return await this.backupEngine.createComprehensiveBackup({
-                    reason: 'Event-triggered backup'
-                });
-        }
-    }
 
-    /**
-     * Execute field consolidation operations
-     */
-    async executeConsolidationOperation(operation, event) {
-        if (!this.fieldConsolidationEngine) {
-            throw new Error('FieldConsolidationEngine not available');
-        }
-        
-        switch (operation) {
-            case 'analyze_fields':
-                console.log('🔍 Analyzing field consolidation opportunities...');
-                return await this.fieldConsolidationEngine.analyzeFieldConsolidation();
-                
-            case 'consolidate_fields':
-                if (!this.safeFieldConsolidator) {
-                    throw new Error('SafeFieldConsolidator not available');
-                }
-                console.log('🔧 Performing safe field consolidation...');
-                return await this.safeFieldConsolidator.performConsolidation({
-                    dryRun: event.data.dryRun !== false, // Default to dry run
-                    maxOperations: event.data.maxOperations || 10,
-                    backupFirst: event.data.backupFirst !== false
-                });
-                
-            case 'field_similarity_analysis':
-                console.log('🔍 Analyzing field similarities...');
-                return await this.fieldConsolidationEngine.findSimilarFields();
-                
-            default:
-                console.log('🔍 Running field analysis...');
-                return await this.fieldConsolidationEngine.analyzeFieldConsolidation();
-        }
-    }
 
     /**
      * Perform basic health check

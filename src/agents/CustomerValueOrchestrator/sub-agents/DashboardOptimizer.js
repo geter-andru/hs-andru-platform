@@ -5,7 +5,7 @@
  * Focuses on "professional competency development" language for Series A founder credibility
  */
 
-import { Task } from '../services/claudeCodeIntegration.js';
+import { Task } from '../../../services/claudeCodeIntegration.js';
 
 class DashboardOptimizer {
   constructor() {
