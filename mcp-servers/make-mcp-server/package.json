@@ -1,0 +1,16 @@
+{
+  "name": "make-mcp-server",
+  "version": "1.0.0",
+  "description": "Make.com MCP Server for H&S Revenue Intelligence Platform",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.17.3",
+    "axios": "^1.6.0"
+  },
+  "keywords": ["mcp", "make", "automation", "revenue-intelligence"],
+  "author": "H&S Revenue Intelligence Platform",
+  "license": "ISC"
+}
