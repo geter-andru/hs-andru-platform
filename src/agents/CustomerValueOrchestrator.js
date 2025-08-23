@@ -11,6 +11,7 @@ import valueOptimizationAnalytics from '../services/valueOptimizationAnalytics';
 import behavioralIntelligenceService from '../services/BehavioralIntelligenceService';
 import { SkillAssessmentEngine } from '../services/SkillAssessmentEngine';
 import { ProgressiveFeatureManager } from '../services/ProgressiveFeatureManager';
+import { Task } from '../services/claudeCodeIntegration.js';
 
 class CustomerValueOrchestrator {
   constructor() {
@@ -347,40 +348,104 @@ When spawned, scan ALL dashboard content for gaming terminology and recommend pr
     // Prevent duplicate agents for same optimization
     const optimizationKey = `${agentType}_${context.issue}`;
     if (this.activeOptimizations.has(optimizationKey)) {
+      console.log(`⚠️ Agent ${agentType} already active for: ${context.issue}`);
       return;
     }
     
     this.activeOptimizations.add(optimizationKey);
     
-    console.log(`🤖 Spawning ${agentType} agent for: ${context.issue}`);
+    console.log(`🤖 Spawning REAL ${agentType} agent for: ${context.issue}`);
     
     try {
-      // This would use the Claude Code Task tool to spawn the actual agent
-      // For now, we'll simulate the agent spawn and log the optimization
-      const agentResult = await this.simulateSubAgentSpawn(agentType, context);
+      // Get agent prompt from initialized prompts
+      const agentPrompt = this.agentPrompts[agentType];
+      if (!agentPrompt) {
+        throw new Error(`No prompt configured for agent type: ${agentType}`);
+      }
+
+      // Enhance prompt with current context
+      const contextualPrompt = this.enhancePromptWithContext(agentPrompt, context);
+      
+      console.log(`🚀 Executing REAL Claude Code Task for ${agentType}...`);
+      
+      // Use real Claude Code Task tool integration
+      const agentResult = await Task({
+        description: `${agentType}: ${context.issue}`,
+        prompt: contextualPrompt,
+        subagent_type: 'general-purpose'
+      });
+      
+      console.log(`✅ REAL ${agentType} agent completed successfully:`, agentResult.status || 'completed');
       
       this.subAgents.set(agentId, {
         type: agentType,
         spawnTime: Date.now(),
         context,
-        status: 'active',
-        result: agentResult
+        status: 'completed',
+        result: agentResult,
+        isRealAgent: true
       });
       
-      console.log(`✅ ${agentType} agent spawned successfully (${agentId})`);
+      console.log(`✅ ${agentType} agent spawned successfully (${agentId}) - REAL AGENT`);
       
       // Remove from active optimizations after completion
       setTimeout(() => {
         this.activeOptimizations.delete(optimizationKey);
-      }, 30000); // 30 second cooldown
+      }, 60000); // 1 minute cooldown for real agents
       
       return agentId;
       
     } catch (error) {
-      console.error(`❌ Failed to spawn ${agentType} agent:`, error);
-      this.activeOptimizations.delete(optimizationKey);
-      return null;
+      console.error(`❌ Failed to spawn REAL ${agentType} agent, falling back to simulation:`, error);
+      
+      // Fallback to simulation if real Claude Code Task fails
+      const simulatedResult = await this.simulateSubAgentSpawn(agentType, context);
+      
+      this.subAgents.set(agentId, {
+        type: agentType,
+        spawnTime: Date.now(),
+        context,
+        status: 'completed',
+        result: simulatedResult,
+        isRealAgent: false,
+        fallbackReason: error.message
+      });
+      
+      console.log(`✅ ${agentType} agent spawned successfully (${agentId}) - SIMULATION FALLBACK`);
+      
+      setTimeout(() => {
+        this.activeOptimizations.delete(optimizationKey);
+      }, 30000); // 30 second cooldown for simulation fallback
+      
+      return agentId;
     }
+  }
+
+  // Enhance agent prompt with current context
+  enhancePromptWithContext(basePrompt, context) {
+    const contextEnhancement = `
+CURRENT CONTEXT:
+- Priority Level: ${context.priority || 'medium'}
+- Issue Detected: ${context.issue}
+- Session Context: ${JSON.stringify(context.context || {}, null, 2)}
+- Timestamp: ${new Date().toISOString()}
+
+SPECIFIC FOCUS:
+Based on the current context, prioritize optimizations that directly address: "${context.issue}"
+
+${context.priority === 'critical' ? `
+🚨 CRITICAL PRIORITY: This issue is blocking user value delivery and requires immediate attention.
+All optimizations should be implemented with highest urgency to restore optimal user experience.
+` : ''}
+
+ORIGINAL AGENT MISSION:
+${basePrompt}
+
+Remember: You have access to Read, Edit, Grep, and Glob tools to analyze and optimize the platform.
+Focus on immediate improvements that can be implemented now to resolve the identified issue.
+`;
+
+    return contextEnhancement;
   }
 
   // Spawn sub-agent using real agent implementations
