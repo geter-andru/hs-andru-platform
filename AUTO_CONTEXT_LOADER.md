@@ -1,10 +1,17 @@
 # AUTO-CONTEXT LOADER - Claude Code Session Startup
 
-## 🤖 **AUTOMATIC CONTEXT DETECTION**
+## 🤖 **AUTOMATIC CONTEXT DETECTION & SESSIONSTART HOOK**
 
-**This file serves as a trigger for automatic context loading in new Claude Code sessions.**
+**This file works in conjunction with Claude Code SessionStart hooks for automatic context loading.**
 
-### **If Claude detects this file, automatically execute:**
+### **🚀 SESSIONSTART HOOK INTEGRATION**
+**For automatic execution on every session start:**
+1. Run `/hooks` in Claude Code
+2. Configure SessionStart hook with: `/Users/geter/hs-andru-platform/auto-context-loader.sh`
+3. Hook will automatically execute on session startup, resume, and clear
+
+### **📋 MANUAL TRIGGER (Fallback)**
+**If SessionStart hook is not configured, execute manually:**
 
 1. **Read Documentation Files:**
    - `Read CLAUDE.md` - Project context and recent work

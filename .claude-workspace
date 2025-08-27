@@ -1,0 +1,15 @@
+{
+  "name": "H&S Revenue Intelligence Platform",
+  "description": "Enterprise revenue intelligence platform with AI-powered resource generation",
+  "defaultDirectory": "/Users/geter/hs-andru-platform",
+  "autoContextLoader": "./auto-context-loader.sh",
+  "mcpServers": {
+    "airtable": true,
+    "make": true,
+    "github": true,
+    "netlify": true,
+    "supabase": true,
+    "puppeteer": true,
+    "linkedin": true
+  }
+}

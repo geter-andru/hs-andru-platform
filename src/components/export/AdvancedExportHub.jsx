@@ -1,0 +1,402 @@
+import React, { useState } from 'react';
+import { Download, FileText, Database, Mail, MessageSquare, Code, Share2 } from 'lucide-react';
+import { motion } from 'framer-motion';
+
+const AdvancedExportHub = ({ toolData, toolType, assessmentData }) => {
+  const [exportFormat, setExportFormat] = useState('pdf');
+  const [exportOptions, setExportOptions] = useState({
+    includeAssessmentContext: true,
+    includePersonalization: true,
+    includeActionItems: true,
+    includeBranding: true
+  });
+
+  // Enterprise export formats
+  const exportFormats = [
+    {
+      id: 'pdf-executive',
+      name: 'Executive PDF Report',
+      description: 'C-suite ready presentation with ROI calculations',
+      icon: FileText,
+      estimatedTime: '30 seconds',
+      includes: ['Executive summary', 'Key metrics', 'Action plan', 'ROI projections']
+    },
+    {
+      id: 'crm-hubspot',
+      name: 'HubSpot CRM Import',
+      description: 'Deal properties and contact enrichment data',
+      icon: Database,
+      estimatedTime: '15 seconds', 
+      includes: ['Contact properties', 'Deal stage data', 'Custom fields', 'Activity tracking']
+    },
+    {
+      id: 'email-sequences',
+      name: 'Email Automation Templates',
+      description: 'Outreach/SalesLoft ready sequences',
+      icon: Mail,
+      estimatedTime: '45 seconds',
+      includes: ['Follow-up templates', 'Stakeholder messaging', 'Value props', 'Call scripts']
+    },
+    {
+      id: 'slack-shareables',
+      name: 'Team Collaboration Pack',
+      description: 'Slack/Teams ready summaries and action items',
+      icon: MessageSquare,
+      estimatedTime: '20 seconds',
+      includes: ['Team updates', 'Action assignments', 'Progress tracking', 'Key insights']
+    },
+    {
+      id: 'api-integration',
+      name: 'API Integration Package',
+      description: 'JSON/CSV for custom integrations',
+      icon: Code,
+      estimatedTime: '10 seconds',
+      includes: ['Structured JSON', 'CSV exports', 'API endpoints', 'Webhook configs']
+    },
+    {
+      id: 'presentation-deck',
+      name: 'Investor/Board Deck',
+      description: 'Series B ready growth strategy presentation',
+      icon: Share2,
+      estimatedTime: '60 seconds',
+      includes: ['Growth metrics', 'Market validation', 'Competitive analysis', 'Revenue projections']
+    }
+  ];
+
+  const generateExport = async (format) => {
+    // Build comprehensive export data
+    const exportData = {
+      metadata: {
+        tool: toolType,
+        exportFormat: format.id,
+        generatedAt: new Date().toISOString(),
+        version: '2.0',
+        ...assessmentData
+      },
+      toolData,
+      personalization: exportOptions.includePersonalization ? {
+        urgencyLevel: assessmentData.score < 40 ? 'critical' : assessmentData.score < 70 ? 'high' : 'medium',
+        primaryFocus: assessmentData.focusArea,
+        customizations: `Tailored for ${assessmentData.productName} (${assessmentData.score}/100 score)`
+      } : null,
+      actionItems: exportOptions.includeActionItems ? [
+        `Complete ${toolType} implementation within ${assessmentData.score < 50 ? '48 hours' : '1 week'}`,
+        'Schedule stakeholder alignment meeting',
+        'Begin pilot program planning',
+        'Set up success metrics tracking'
+      ] : [],
+      assessmentContext: exportOptions.includeAssessmentContext ? {
+        score: assessmentData.score,
+        challenges: assessmentData.challenges,
+        company: assessmentData.productName,
+        sessionId: assessmentData.sessionId
+      } : null
+    };
+
+    // Format-specific processing
+    switch (format.id) {
+      case 'pdf-executive':
+        return generateExecutivePDF(exportData);
+      case 'crm-hubspot':
+        return generateHubSpotImport(exportData);
+      case 'email-sequences':
+        return generateEmailSequences(exportData);
+      case 'slack-shareables':
+        return generateSlackPack(exportData);
+      case 'api-integration':
+        return generateAPIPackage(exportData);
+      case 'presentation-deck':
+        return generateInvestorDeck(exportData);
+      default:
+        return generateGenericExport(exportData);
+    }
+  };
+
+  const generateExecutivePDF = (data) => {
+    const pdfContent = `
+# Executive Summary: ${data.metadata.company} Revenue Intelligence Analysis
+
+## Assessment Results
+- **Overall Score**: ${data.assessmentContext.score}/100
+- **Challenges Identified**: ${data.assessmentContext.challenges}
+- **Analysis Date**: ${new Date(data.metadata.generatedAt).toLocaleDateString()}
+
+## Key Findings
+${JSON.stringify(data.toolData, null, 2)}
+
+## Immediate Action Items
+${data.actionItems.map(item => `• ${item}`).join('\n')}
+
+## Financial Impact
+- **3-Day Delay Cost**: $${((data.assessmentContext.score * 50000 / 12) * 0.15 / 10).toLocaleString()}
+- **Platform Investment**: $497
+- **ROI Timeline**: Less than 1 week
+
+---
+Generated by H&S Revenue Intelligence Platform
+${data.metadata.generatedAt}
+    `;
+    
+    return {
+      content: pdfContent,
+      filename: `${data.metadata.company}_executive_analysis.md`,
+      type: 'text/markdown'
+    };
+  };
+
+  const generateHubSpotImport = (data) => {
+    const hubspotData = {
+      contactProperties: {
+        hs_assessment_score: data.assessmentContext.score,
+        hs_challenges_identified: data.assessmentContext.challenges,
+        hs_revenue_intelligence_stage: data.assessmentContext.score < 40 ? 'Critical' : 'Optimization',
+        hs_platform_session_id: data.assessmentContext.sessionId
+      },
+      dealProperties: {
+        revenue_intelligence_priority: data.assessmentContext.score < 50 ? 'High' : 'Medium',
+        estimated_annual_revenue: data.assessmentContext.score * 50000,
+        tools_recommended: data.actionItems.length
+      }
+    };
+
+    return {
+      content: JSON.stringify(hubspotData, null, 2),
+      filename: `${data.metadata.company}_hubspot_import.json`,
+      type: 'application/json'
+    };
+  };
+
+  const generateEmailSequences = (data) => {
+    const sequences = {
+      followUp1: `Subject: Your ${data.metadata.company} Revenue Intelligence Analysis is Ready
+      
+Hi ${data.assessmentContext.email?.split('@')[0] || 'there'},
+
+Your assessment revealed ${data.assessmentContext.challenges} critical areas for immediate attention.
+
+Key priority: ${data.actionItems[0]}
+
+Best regards,
+Revenue Intelligence Team`,
+      
+      stakeholderUpdate: `Subject: Revenue Intelligence Analysis - ${data.metadata.company}
+      
+Team,
+
+Completed revenue intelligence assessment showing ${data.assessmentContext.score}/100 score.
+
+Immediate priorities:
+${data.actionItems.slice(0, 3).map(item => `• ${item}`).join('\n')}
+
+Next steps: Review attached analysis and schedule alignment meeting.`,
+
+      executiveSummary: `Subject: Strategic Revenue Analysis Complete - ${data.metadata.company}
+
+Executive team,
+
+Revenue intelligence assessment complete. Score: ${data.assessmentContext.score}/100.
+
+Critical finding: 3-day delay costs $${((data.assessmentContext.score * 50000 / 12) * 0.15 / 10).toLocaleString()}
+
+Recommend immediate action on attached recommendations.`
+    };
+
+    return {
+      content: JSON.stringify(sequences, null, 2),
+      filename: `${data.metadata.company}_email_sequences.json`,
+      type: 'application/json'
+    };
+  };
+
+  const generateSlackPack = (data) => {
+    const slackContent = {
+      announcement: `🎯 Revenue Intelligence Assessment Complete!\n\n**Company**: ${data.metadata.company}\n**Score**: ${data.assessmentContext.score}/100\n**Challenges**: ${data.assessmentContext.challenges}\n\n**Next Steps**:\n${data.actionItems.slice(0, 3).map(item => `• ${item}`).join('\n')}\n\n*Assessment ID: ${data.assessmentContext.sessionId}*`,
+      
+      actionItems: data.actionItems.map((item, index) => ({
+        text: item,
+        assignable: true,
+        priority: index === 0 ? 'high' : 'medium'
+      })),
+      
+      metrics: {
+        assessment_score: data.assessmentContext.score,
+        challenges_found: data.assessmentContext.challenges,
+        urgency_level: data.assessmentContext.score < 40 ? 'Critical' : 'High'
+      }
+    };
+
+    return {
+      content: JSON.stringify(slackContent, null, 2),
+      filename: `${data.metadata.company}_slack_pack.json`,
+      type: 'application/json'
+    };
+  };
+
+  const generateAPIPackage = (data) => {
+    return {
+      content: JSON.stringify(data, null, 2),
+      filename: `${data.metadata.company}_api_export.json`,
+      type: 'application/json'
+    };
+  };
+
+  const generateInvestorDeck = (data) => {
+    const deckOutline = `
+# ${data.metadata.company} Growth Strategy Presentation
+
+## Slide 1: Current State Analysis
+- Revenue Intelligence Score: ${data.assessmentContext.score}/100
+- Identified Optimization Areas: ${data.assessmentContext.challenges}
+- Assessment Date: ${new Date(data.metadata.generatedAt).toLocaleDateString()}
+
+## Slide 2: Market Opportunity
+- Estimated Current Revenue: $${(data.assessmentContext.score * 50000).toLocaleString()}
+- Growth Potential: Based on revenue intelligence optimization
+- Competitive Position: ${data.assessmentContext.score > 70 ? 'Strong' : 'Developing'}
+
+## Slide 3: Strategic Implementation
+${data.actionItems.map((item, i) => `${i + 1}. ${item}`).join('\n')}
+
+## Slide 4: Financial Projections
+- Platform Investment: $497
+- 3-Day ROI: ${Math.round(((data.assessmentContext.score * 50000 / 12) * 0.15 / 10) / 497 * 100)}%
+- Annual Impact: Strategic revenue optimization
+
+## Slide 5: Next Steps & Timeline
+- Immediate (0-7 days): Tool implementation and team alignment
+- Short-term (1-4 weeks): Pilot program launch and metrics tracking
+- Long-term (1-3 months): Scale successful methodologies
+
+---
+Appendix: Detailed tool analysis and implementation guidance
+    `;
+
+    return {
+      content: deckOutline,
+      filename: `${data.metadata.company}_investor_deck_outline.md`,
+      type: 'text/markdown'
+    };
+  };
+
+  const generateGenericExport = (data) => {
+    return {
+      content: JSON.stringify(data, null, 2),
+      filename: `${data.metadata.company}_export.json`,
+      type: 'application/json'
+    };
+  };
+
+  const handleExport = async (format) => {
+    try {
+      const exportResult = await generateExport(format);
+      
+      // Create and download file
+      const blob = new Blob([exportResult.content], { type: exportResult.type });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = exportResult.filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      // Track export event
+      if (window.gtag) {
+        window.gtag('event', 'export_generated', {
+          export_format: format.id,
+          tool_type: toolType,
+          company: assessmentData.productName
+        });
+      }
+    } catch (error) {
+      console.error('Export generation failed:', error);
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center space-x-3 mb-6">
+        <Download className="w-6 h-6 text-cyan-400" />
+        <h2 className="text-xl font-semibold text-white">Enterprise Export Hub</h2>
+      </div>
+
+      {/* Export Options */}
+      <div className="space-y-4 mb-6">
+        <h3 className="font-medium text-gray-300">Export Options</h3>
+        <div className="space-y-2">
+          {Object.entries(exportOptions).map(([key, value]) => (
+            <label key={key} className="flex items-center space-x-3 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={value}
+                onChange={(e) => setExportOptions(prev => ({ ...prev, [key]: e.target.checked }))}
+                className="rounded bg-gray-700 border-gray-600 text-cyan-500 focus:ring-cyan-500"
+              />
+              <span className="text-gray-300 text-sm">
+                {key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
+              </span>
+            </label>
+          ))}
+        </div>
+      </div>
+
+      {/* Export Formats Grid */}
+      <div className="grid gap-4">
+        {exportFormats.map((format, index) => (
+          <motion.div
+            key={format.id}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: index * 0.1 }}
+            className="bg-gray-800/50 rounded-lg p-4 border border-gray-700 hover:border-cyan-500/50 transition-colors group cursor-pointer"
+            onClick={() => handleExport(format)}
+          >
+            <div className="flex items-start space-x-4">
+              <div className="p-2 bg-gray-700 rounded-lg group-hover:bg-cyan-500/20 transition-colors">
+                <format.icon className="w-5 h-5 text-gray-400 group-hover:text-cyan-400" />
+              </div>
+              
+              <div className="flex-1">
+                <div className="flex items-center justify-between mb-2">
+                  <h4 className="font-medium text-white group-hover:text-cyan-400 transition-colors">
+                    {format.name}
+                  </h4>
+                  <span className="text-xs text-gray-500">
+                    {format.estimatedTime}
+                  </span>
+                </div>
+                
+                <p className="text-gray-400 text-sm mb-3">
+                  {format.description}
+                </p>
+                
+                <div className="flex flex-wrap gap-2">
+                  {format.includes.map((item, i) => (
+                    <span 
+                      key={i}
+                      className="text-xs bg-gray-700/50 text-gray-300 px-2 py-1 rounded"
+                    >
+                      {item}
+                    </span>
+                  ))}
+                </div>
+              </div>
+              
+              <Download className="w-4 h-4 text-gray-500 group-hover:text-cyan-400 transition-colors" />
+            </div>
+          </motion.div>
+        ))}
+      </div>
+
+      {/* Enterprise Integration Note */}
+      <div className="bg-blue-900/20 border border-blue-500/30 rounded-lg p-4 mt-6">
+        <p className="text-blue-300 text-sm">
+          <strong>Enterprise Integration:</strong> All exports include your assessment context and can be imported directly into your existing sales stack. Custom integration support available.
+        </p>
+      </div>
+    </div>
+  );
+};
+
+export default AdvancedExportHub;

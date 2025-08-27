@@ -11,6 +11,22 @@ class EventDetector {
         this.eventBus = options.eventBus || new EventBus();
         this.airtableClient = options.airtableClient;
         this.monitoring = false;
+        this.isActive = false;
+        
+        // Event-driven activation tracking
+        this.eventTriggers = {
+          performanceCheck: false,
+          databaseCheck: false,
+          scheduledOperation: false,
+          manualTrigger: false
+        };
+        
+        this.activationHistory = [];
+        this.detectionStats = {
+          totalActivations: 0,
+          averageActiveTime: 0,
+          eventsDetected: 0
+        };
         
         // Performance thresholds
         this.thresholds = {

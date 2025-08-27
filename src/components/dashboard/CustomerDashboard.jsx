@@ -15,6 +15,7 @@ import ProgressNotifications from '../notifications/ProgressNotifications';
 import { useProgressNotifications } from '../notifications/ProgressNotifications';
 import WelcomeHero from '../progressive-engagement/WelcomeHero';
 import ProgressiveEngagementContainer from '../progressive-engagement/ProgressiveEngagementContainer';
+import DashboardAccessControl from '../auth/DashboardAccessControl';
 
 const CustomerDashboard = () => {
   const location = useLocation();
@@ -327,7 +328,7 @@ const CustomerDashboard = () => {
   const shouldUseProgressiveEngagement = true;
 
   return (
-    <>
+    <DashboardAccessControl customerData={workflowData}>
       {shouldUseProgressiveEngagement ? (
         /* Progressive Engagement Experience - Complete Replacement */
         <ProgressiveEngagementContainer
@@ -484,7 +485,7 @@ const CustomerDashboard = () => {
         onDismiss={dismissNotification}
         position="top-right"
       />
-    </>
+    </DashboardAccessControl>
   );
 };
 

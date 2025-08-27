@@ -1,0 +1,19 @@
+{
+  "name": "github-mcp-server-local",
+  "version": "1.0.0",
+  "description": "Local GitHub MCP Server for Andru Platform",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node --inspect index.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^0.6.0",
+    "@octokit/rest": "^20.1.1",
+    "@octokit/auth-app": "^7.1.0"
+  },
+  "keywords": ["mcp", "github", "local"],
+  "author": "Andru Platform",
+  "license": "MIT"
+}

@@ -11,6 +11,7 @@ import DevelopmentFocus from './DevelopmentFocus';
 import AssessmentInsights from './AssessmentInsights';
 import { AssessmentProvider } from '../../contexts/AssessmentContext';
 import { getMockDataByCustomerId, testScenarios } from '../../data/mockProfessionalData';
+import DashboardAccessControl from '../auth/DashboardAccessControl';
 
 const DashboardGrid = ({ children, className = '' }) => {
   return (
@@ -309,8 +310,9 @@ const ProfessionalDashboard = ({ customerId: propCustomerId, mockMode = false, t
   ];
 
   return (
-    <AssessmentProvider customerData={assessmentCustomerData}>
-      <div className="min-h-screen bg-gray-900">
+    <DashboardAccessControl customerData={dashboardData?.customer}>
+      <AssessmentProvider customerData={assessmentCustomerData}>
+        <div className="min-h-screen bg-gray-900">
         {/* Professional Dashboard Header */}
         <DashboardHeader 
           customerName={customer.name}
@@ -407,8 +409,9 @@ const ProfessionalDashboard = ({ customerId: propCustomerId, mockMode = false, t
           </div>
         </div>
       )}
-    </div>
-    </AssessmentProvider>
+      </div>
+      </AssessmentProvider>
+    </DashboardAccessControl>
   );
 };
 

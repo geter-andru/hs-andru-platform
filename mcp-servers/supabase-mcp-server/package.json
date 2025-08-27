@@ -1,0 +1,18 @@
+{
+  "name": "supabase-mcp-server-local",
+  "version": "1.0.0",
+  "description": "Local Supabase MCP Server for Andru Platform",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node --inspect index.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^0.6.0",
+    "@supabase/supabase-js": "^2.45.4"
+  },
+  "keywords": ["mcp", "supabase", "local"],
+  "author": "Andru Platform",
+  "license": "MIT"
+}

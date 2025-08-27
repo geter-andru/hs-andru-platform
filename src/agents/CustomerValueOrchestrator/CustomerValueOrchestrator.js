@@ -53,10 +53,29 @@ class CustomerValueOrchestrator {
     
     this.agentPrompts = this.initializeAgentPrompts();
     
-    // Listen for behavioral intelligence updates
+    // Event-driven activation tracking
+    this.eventTriggers = {
+      sessionStarted: false,
+      behavioralUpdate: false,
+      frictionDetected: false,
+      valueRecognitionNeeded: false
+    };
+    
+    this.activationHistory = [];
+    this.lastActivation = null;
+    
+    // Listen for behavioral intelligence updates (Event-Driven)
     if (typeof window !== 'undefined') {
       window.addEventListener('h_s_platform_behavioral_update', (event) => {
-        this.handleBehavioralUpdate(event.detail);
+        this.activateForBehavioralUpdate(event.detail);
+      });
+      
+      window.addEventListener('h_s_platform_session_start', (event) => {
+        this.activateForSession(event.detail);
+      });
+      
+      window.addEventListener('h_s_platform_friction_detected', (event) => {
+        this.activateForFriction(event.detail);
       });
     }
   }
@@ -174,20 +193,93 @@ When spawned, scan ALL dashboard content for gaming terminology and recommend pr
     };
   }
 
-  // Start orchestration for a customer session
-  async startOrchestration(customerId, sessionId) {
-    console.log(`🎯 Customer Value Orchestrator activated for ${customerId}`);
+  /**
+   * Activate for behavioral intelligence update (Event-Driven)
+   */
+  activateForBehavioralUpdate(updateData) {
+    if (!this.isActive) {
+      this.isActive = true;
+    }
     
-    this.isActive = true;
-    this.workflowMonitoring.currentSession = {
-      customerId,
-      sessionId,
-      startTime: Date.now(),
-      monitoringStarted: true
-    };
+    this.eventTriggers.behavioralUpdate = true;
+    this.lastActivation = Date.now();
+    
+    console.log(`🧠 CustomerValueOrchestrator: Activated for behavioral update ${updateData.userId || updateData.customerId}`);
+    
+    // Handle the behavioral update
+    this.handleBehavioralUpdate(updateData);
+    
+    // Auto-deactivate after processing unless session is active
+    if (!this.eventTriggers.sessionStarted) {
+      this.scheduleDeactivation(300000); // 5 minutes for behavioral updates
+    }
+  }
 
-    // Begin continuous monitoring
-    this.startContinuousMonitoring();
+  /**
+   * Activate for session start (Event-Driven)
+   */
+  activateForSession(sessionData) {
+    if (!this.isActive) {
+      this.isActive = true;
+      this.eventTriggers.sessionStarted = true;
+      this.lastActivation = Date.now();
+      
+      console.log(`🎯 CustomerValueOrchestrator: Activated for session ${sessionData.sessionId || sessionData.customerId}`);
+      
+      this.workflowMonitoring.currentSession = {
+        customerId: sessionData.customerId,
+        sessionId: sessionData.sessionId,
+        startTime: Date.now(),
+        monitoringStarted: true
+      };
+      
+      // Auto-deactivate when session ends or after timeout
+      this.scheduleSessionDeactivation(sessionData.expectedDuration || 1800000); // 30 minutes default
+    }
+  }
+
+  /**
+   * Schedule automatic deactivation
+   */
+  scheduleDeactivation(delayMs) {
+    setTimeout(() => {
+      this.deactivateOrchestrator();
+    }, delayMs);
+  }
+
+  /**
+   * Schedule session deactivation
+   */
+  scheduleSessionDeactivation(sessionDurationMs) {
+    setTimeout(() => {
+      if (this.eventTriggers.sessionStarted) {
+        console.log('🕒 CustomerValueOrchestrator: Session timeout, deactivating');
+        this.deactivateOrchestrator();
+      }
+    }, sessionDurationMs);
+  }
+
+  /**
+   * Deactivate orchestrator
+   */
+  deactivateOrchestrator() {
+    this.isActive = false;
+    Object.keys(this.eventTriggers).forEach(key => {
+      this.eventTriggers[key] = false;
+    });
+    
+    if (this.monitoringInterval) {
+      clearInterval(this.monitoringInterval);
+      this.monitoringInterval = null;
+    }
+    
+    console.log('🛬 CustomerValueOrchestrator: Deactivated');
+  }
+
+  // Legacy method for backward compatibility
+  async startOrchestration(customerId, sessionId) {
+    // Trigger session start event instead of direct activation
+    this.activateForSession({ customerId, sessionId });
     
     return {
       status: 'orchestration-active',

@@ -1,13 +1,12 @@
 import axios from 'axios';
 
 const BASE_URL = 'https://api.airtable.com/v0';
-const BASE_ID = process.env.REACT_APP_AIRTABLE_BASE_ID || 'app0jJkgTCqn46vp9';
-const API_KEY = process.env.REACT_APP_AIRTABLE_API_KEY || 'pat5kFmJsBxfL5Yqr.f44840b8b82995ec43ac998191c43f19d0471c9550d0fea9e0327cc4f4aa4815';
+const BASE_ID = process.env.REACT_APP_AIRTABLE_BASE_ID;
+const API_KEY = process.env.REACT_APP_AIRTABLE_API_KEY;
 
-// Check if we're using fallback values (development mode)
-const USING_FALLBACK_CONFIG = !process.env.REACT_APP_AIRTABLE_BASE_ID || !process.env.REACT_APP_AIRTABLE_API_KEY;
-if (USING_FALLBACK_CONFIG) {
-  console.warn('Using fallback Airtable configuration for development/testing');
+// Check if required environment variables are configured
+if (!BASE_ID || !API_KEY) {
+  throw new Error('REACT_APP_AIRTABLE_BASE_ID and REACT_APP_AIRTABLE_API_KEY environment variables are required');
 }
 
 // Cache for customer assets and user progress to avoid redundant API calls
@@ -2654,6 +2653,18 @@ export const airtableService = {
 
   // Get personalized messaging based on assessment
   getPersonalizedMessaging(assessment) {
+    // Handle null or undefined assessment
+    if (!assessment) {
+      return {
+        urgency: 'medium',
+        tone: 'professional',
+        focus: 'getting started',
+        revenueMessage: 'Revenue optimization opportunity available',
+        encouragement: 'Welcome to your revenue intelligence platform. Let\'s begin with a comprehensive analysis.',
+        nextStep: 'Complete your assessment to receive personalized insights'
+      };
+    }
+
     const { performance, revenue, strategy, challenges } = assessment;
     
     const messagingMap = {

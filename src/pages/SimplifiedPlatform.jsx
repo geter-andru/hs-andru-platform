@@ -10,8 +10,10 @@ import RevenueIntelligenceDashboard from '../components/dashboard/RevenueIntelli
 import SimplifiedICP from '../components/simplified/SimplifiedICP';
 import SimplifiedFinancialImpact from '../components/simplified/SimplifiedFinancialImpact';
 import SimplifiedResourceLibrary from '../components/simplified/SimplifiedResourceLibrary';
+import AssessmentResults from '../components/assessment/AssessmentResults';
 import ErrorBoundary from '../components/common/ErrorBoundary';
 import ResourcesReadyNotification from '../components/notifications/ResourcesReadyNotification';
+import PaymentProtectedRoute from '../components/auth/PaymentProtectedRoute';
 
 const SimplifiedPlatform = () => {
   const { customerId } = useParams();
@@ -26,6 +28,7 @@ const SimplifiedPlatform = () => {
     const path = location.pathname;
     if (path.includes('dashboard-premium')) return 'dashboard-premium';
     if (path.includes('dashboard')) return 'dashboard';
+    if (path.includes('assessment')) return 'assessment';
     if (path.includes('icp')) return 'icp';
     if (path.includes('financial')) return 'financial';
     if (path.includes('resources')) return 'resources';
@@ -110,14 +113,39 @@ const SimplifiedPlatform = () => {
             {/* Modern Sidebar Layout wrapping all routes */}
             <ModernSidebarLayout customerId={customerId} activeRoute={getActiveRoute()}>
               <Routes>
-                <Route path="dashboard" element={<SimplifiedDashboard customerId={customerId} />} />
-                <Route path="dashboard-premium" element={<RevenueIntelligenceDashboard customerId={customerId} variant="premium" />} />
-                <Route path="icp" element={<SimplifiedICP customerId={customerId} />} />
-                <Route path="financial" element={<SimplifiedFinancialImpact customerId={customerId} />} />
-                <Route path="resources" element={<SimplifiedResourceLibrary customerId={customerId} />} />
+                <Route path="dashboard" element={
+                  <PaymentProtectedRoute customerId={customerId} requiredAccess="paid">
+                    <SimplifiedDashboard customerId={customerId} />
+                  </PaymentProtectedRoute>
+                } />
+                <Route path="dashboard-premium" element={
+                  <PaymentProtectedRoute customerId={customerId} requiredAccess="paid">
+                    <RevenueIntelligenceDashboard customerId={customerId} variant="premium" />
+                  </PaymentProtectedRoute>
+                } />
+                <Route path="assessment" element={
+                  <PaymentProtectedRoute customerId={customerId} requiredAccess="assessment">
+                    <AssessmentResults customerId={customerId} />
+                  </PaymentProtectedRoute>
+                } />
+                <Route path="icp" element={
+                  <PaymentProtectedRoute customerId={customerId} requiredAccess="paid">
+                    <SimplifiedICP customerId={customerId} />
+                  </PaymentProtectedRoute>
+                } />
+                <Route path="financial" element={
+                  <PaymentProtectedRoute customerId={customerId} requiredAccess="paid">
+                    <SimplifiedFinancialImpact customerId={customerId} />
+                  </PaymentProtectedRoute>
+                } />
+                <Route path="resources" element={
+                  <PaymentProtectedRoute customerId={customerId} requiredAccess="paid">
+                    <SimplifiedResourceLibrary customerId={customerId} />
+                  </PaymentProtectedRoute>
+                } />
                 
-                {/* Default redirect to dashboard */}
-                <Route path="*" element={<Navigate to="dashboard" replace />} />
+                {/* Default redirect to assessment for unpaid users, dashboard for paid */}
+                <Route path="*" element={<Navigate to="assessment" replace />} />
               </Routes>
             </ModernSidebarLayout>
             

@@ -13,7 +13,9 @@ import {
   Bell,
   Search,
   Menu,
-  X
+  X,
+  ClipboardCheck,
+  Lock
 } from 'lucide-react';
 import QuickActionsGrid from '../simplified/cards/QuickActionsGrid';
 import MilestoneTrackerWidget from '../simplified/cards/MilestoneTrackerWidget';
@@ -51,8 +53,24 @@ const ModernSidebarLayout = ({ children, customerId, activeRoute = 'dashboard' }
         setCustomerData(data);
       } catch (error) {
         console.error('Error fetching customer data:', error);
-        // Fallback to default if fetch fails
-        setCustomerData(null);
+        
+        // Fallback to authService for admin/test users
+        try {
+          const { authService } = await import('../../services/authService');
+          const session = authService.getCurrentSession();
+          if (session?.customerData) {
+            setCustomerData({
+              ...session.customerData,
+              paymentStatus: session.customerData.paymentStatus || 
+                           (session.customerData.isAdmin ? 'Completed' : 'Pending')
+            });
+          } else {
+            setCustomerData(null);
+          }
+        } catch (fallbackError) {
+          console.error('Fallback auth service fetch failed:', fallbackError);
+          setCustomerData(null);
+        }
       } finally {
         setLoading(false);
       }
@@ -100,7 +118,12 @@ const ModernSidebarLayout = ({ children, customerId, activeRoute = 'dashboard' }
   const firstName = getUserFirstName();
   const greeting = getDynamicGreeting(customerId);
 
-  // Navigation items with modern iconography
+  // Check if user has completed payment (access control)
+  const hasCompletedPayment = () => {
+    return customerData?.paymentStatus === 'Completed';
+  };
+
+  // Navigation items with access control based on payment status
   const navigationItems = [
     {
       id: 'dashboard',
@@ -108,8 +131,20 @@ const ModernSidebarLayout = ({ children, customerId, activeRoute = 'dashboard' }
       icon: Home,
       route: '/customer/' + customerId + '/simplified/dashboard',
       description: 'Revenue Intelligence Overview',
-      isPremium: true, // PRO icon moved here since dashboard has premium toggle
-      iconColor: 'text-purple-400' // Colored icon
+      isPremium: true,
+      iconColor: hasCompletedPayment() ? 'text-purple-400' : 'text-gray-500',
+      isLocked: !hasCompletedPayment(),
+      lockReason: 'Requires payment to access full dashboard'
+    },
+    {
+      id: 'assessment',
+      label: 'Assessment Results',
+      icon: ClipboardCheck,
+      route: '/customer/' + customerId + '/simplified/assessment',
+      description: 'Revenue Readiness Analysis',
+      iconColor: 'text-cyan-400', // Always accessible for assessment takers
+      isLocked: false, // Always unlocked for assessment takers
+      lockReason: null
     },
     {
       id: 'icp',
@@ -117,7 +152,9 @@ const ModernSidebarLayout = ({ children, customerId, activeRoute = 'dashboard' }
       icon: Target,
       route: '/customer/' + customerId + '/simplified/icp',
       description: 'Ideal Customer Profiling',
-      iconColor: 'text-blue-400' // Colored icon
+      iconColor: hasCompletedPayment() ? 'text-blue-400' : 'text-gray-500',
+      isLocked: !hasCompletedPayment(),
+      lockReason: 'Upgrade to access ICP Analysis tools'
     },
     {
       id: 'financial',
@@ -125,7 +162,9 @@ const ModernSidebarLayout = ({ children, customerId, activeRoute = 'dashboard' }
       icon: Calculator,
       route: '/customer/' + customerId + '/simplified/financial',
       description: 'ROI & Cost Analysis',
-      iconColor: 'text-gray-400' // Uncolored (locked feature)
+      iconColor: hasCompletedPayment() ? 'text-green-400' : 'text-gray-500',
+      isLocked: !hasCompletedPayment(),
+      lockReason: 'Upgrade to access Cost Calculator'
     },
     {
       id: 'resources',
@@ -133,7 +172,9 @@ const ModernSidebarLayout = ({ children, customerId, activeRoute = 'dashboard' }
       icon: FileText,
       route: '/customer/' + customerId + '/simplified/resources',
       description: 'Templates & Documentation',
-      iconColor: 'text-green-400' // Colored icon
+      iconColor: hasCompletedPayment() ? 'text-orange-400' : 'text-gray-500',
+      isLocked: !hasCompletedPayment(),
+      lockReason: 'Upgrade to access Resource Library'
     }
   ];
 
@@ -311,19 +352,29 @@ const ModernSidebarLayout = ({ children, customerId, activeRoute = 'dashboard' }
               const isActive = activeRoute === item.id;
               
               return (
-                <motion.a
+                <motion.div
                   key={item.id}
-                  href={item.route}
                   className={`
-                    mx-2 px-3 py-2.5 rounded-lg flex items-center space-x-3 transition-all duration-200
+                    mx-2 px-3 py-2.5 rounded-lg flex items-center space-x-3 transition-all duration-200 relative
                     ${isActive 
                       ? 'bg-purple-600/20 border border-purple-500/30 text-purple-300' 
-                      : 'text-gray-300 hover:bg-gray-700/50 hover:text-white'
+                      : item.isLocked 
+                        ? 'text-gray-500 cursor-not-allowed opacity-60' 
+                        : 'text-gray-300 hover:bg-gray-700/50 hover:text-white cursor-pointer'
                     }
                     ${sidebarCollapsed ? 'justify-center' : ''}
+                    ${item.isLocked ? 'grayscale' : ''}
                   `}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
+                  whileHover={item.isLocked ? {} : { scale: 1.02 }}
+                  whileTap={item.isLocked ? {} : { scale: 0.98 }}
+                  onClick={(e) => {
+                    if (item.isLocked) {
+                      e.preventDefault();
+                      // You could show a tooltip or modal here
+                    } else {
+                      window.location.href = item.route;
+                    }
+                  }}
                 >
                   <Icon className={`w-5 h-5 ${isActive ? 'text-purple-400' : item.iconColor || 'text-gray-400'}`} />
                   
@@ -331,18 +382,21 @@ const ModernSidebarLayout = ({ children, customerId, activeRoute = 'dashboard' }
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center space-x-2">
                         <span className="text-sm font-medium truncate">{item.label}</span>
-                        {item.isPremium && (
+                        {item.isPremium && !item.isLocked && (
                           <span className="px-1.5 py-0.5 text-xs bg-gradient-to-r from-purple-500 to-blue-500 rounded text-white font-medium">
                             PRO
                           </span>
                         )}
+                        {item.isLocked && (
+                          <Lock className="w-3 h-3 text-gray-500" />
+                        )}
                       </div>
                       <div className="text-xs text-gray-500 truncate mt-0.5">
-                        {item.description}
+                        {item.isLocked ? item.lockReason : item.description}
                       </div>
                     </div>
                   )}
-                </motion.a>
+                </motion.div>
               );
             })}
             
@@ -361,19 +415,29 @@ const ModernSidebarLayout = ({ children, customerId, activeRoute = 'dashboard' }
                 const isActive = activeRoute === item.id;
                 
                 return (
-                  <motion.a
+                  <motion.div
                     key={item.id}
-                    href={item.route}
                     className={`
-                      mx-2 px-3 py-2.5 rounded-lg flex items-center space-x-3 transition-all duration-200
+                      mx-2 px-3 py-2.5 rounded-lg flex items-center space-x-3 transition-all duration-200 relative
                       ${isActive 
                         ? 'bg-purple-600/20 border border-purple-500/30 text-purple-300' 
-                        : 'text-gray-300 hover:bg-gray-700/50 hover:text-white'
+                        : item.isLocked 
+                          ? 'text-gray-500 cursor-not-allowed opacity-60' 
+                          : 'text-gray-300 hover:bg-gray-700/50 hover:text-white cursor-pointer'
                       }
                       ${sidebarCollapsed ? 'justify-center' : ''}
+                      ${item.isLocked ? 'grayscale' : ''}
                     `}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
+                    whileHover={item.isLocked ? {} : { scale: 1.02 }}
+                    whileTap={item.isLocked ? {} : { scale: 0.98 }}
+                    onClick={(e) => {
+                      if (item.isLocked) {
+                        e.preventDefault();
+                        // You could show a tooltip or modal here
+                      } else {
+                        window.location.href = item.route;
+                      }
+                    }}
                   >
                     <Icon className={`w-5 h-5 ${isActive ? 'text-purple-400' : item.iconColor || 'text-gray-400'}`} />
                     
@@ -381,18 +445,21 @@ const ModernSidebarLayout = ({ children, customerId, activeRoute = 'dashboard' }
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center space-x-2">
                           <span className="text-sm font-medium truncate">{item.label}</span>
-                          {item.isPremium && (
+                          {item.isPremium && !item.isLocked && (
                             <span className="px-1.5 py-0.5 text-xs bg-gradient-to-r from-purple-500 to-blue-500 rounded text-white font-medium">
                               PRO
                             </span>
                           )}
+                          {item.isLocked && (
+                            <Lock className="w-3 h-3 text-gray-500" />
+                          )}
                         </div>
                         <div className="text-xs text-gray-500 truncate mt-0.5">
-                          {item.description}
+                          {item.isLocked ? item.lockReason : item.description}
                         </div>
                       </div>
                     )}
-                  </motion.a>
+                  </motion.div>
                 );
               })}
             </div>

@@ -14,6 +14,17 @@ class UnifiedAgentManager {
     this.isActive = false;
     this.options = options;
     
+    // Event-driven activation tracking
+    this.eventTriggers = {
+      operationRequested: false,
+      statusInquiry: false,
+      healthCheckRequested: false,
+      systemInitialization: false
+    };
+    
+    this.activationHistory = [];
+    this.lastActivation = null;
+    
     // Initialize orchestrators
     this.customerValueOrchestrator = null;
     this.airtableManagementOrchestrator = null;
@@ -245,11 +256,46 @@ class UnifiedAgentManager {
   }
 
   /**
-   * Execute agent operation through appropriate orchestrator
+   * Activate for operation execution (Event-Driven)
+   */
+  activateForOperation(agentName, operation) {
+    if (!this.isActive) {
+      this.isActive = true;
+      this.eventTriggers.operationRequested = true;
+      this.lastActivation = Date.now();
+      
+      console.log(`🎯 UnifiedAgentManager: Activated for ${agentName} -> ${operation}`);
+      
+      // Track activation
+      this.activationHistory.unshift({
+        agentName,
+        operation,
+        timestamp: Date.now()
+      });
+      
+      // Keep last 100 activations
+      if (this.activationHistory.length > 100) {
+        this.activationHistory = this.activationHistory.slice(0, 100);
+      }
+    }
+  }
+
+  /**
+   * Deactivate after operation completion
+   */
+  deactivateAfterOperation(executionTime) {
+    this.isActive = false;
+    this.eventTriggers.operationRequested = false;
+    
+    console.log(`🎯 UnifiedAgentManager: Deactivated (active for ${executionTime}ms)`);
+  }
+
+  /**
+   * Execute agent operation through appropriate orchestrator (Event-Driven)
    */
   async executeOperation(agentName, operation, params = {}) {
-    console.log(`🎯 UnifiedAgentManager executing: ${agentName} -> ${operation}`);
-    this.isActive = true;
+    // Activate for this operation
+    this.activateForOperation(agentName, operation);
     const startTime = Date.now();
     
     try {
@@ -299,6 +345,10 @@ class UnifiedAgentManager {
       };
       
       console.log(`✅ UnifiedAgentManager completed: ${agentName} -> ${operation} (${executionTime}ms)`);
+      
+      // Deactivate after successful completion
+      this.deactivateAfterOperation(executionTime);
+      
       return enhancedResult;
       
     } catch (error) {
@@ -312,9 +362,10 @@ class UnifiedAgentManager {
       }
       
       console.error(`❌ UnifiedAgentManager failed: ${agentName} -> ${operation}`, error);
+      
+      // Deactivate after failure
+      this.deactivateAfterOperation(executionTime);
       throw error;
-    } finally {
-      this.isActive = false;
     }
   }
 

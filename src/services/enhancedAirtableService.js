@@ -7,13 +7,12 @@
 
 import authService from './authService';
 
-const AIRTABLE_BASE_ID = process.env.REACT_APP_AIRTABLE_BASE_ID || 'app0jJkgTCqn46vp9';
-const API_KEY = process.env.REACT_APP_AIRTABLE_API_KEY || 'pat5kFmJsBxfL5Yqr.f44840b8b82995ec43ac998191c43f19d0471c9550d0fea9e0327cc4f4aa4815';
+const AIRTABLE_BASE_ID = process.env.REACT_APP_AIRTABLE_BASE_ID;
+const API_KEY = process.env.REACT_APP_AIRTABLE_API_KEY;
 
-// Check if we're using fallback values (development mode)
-const USING_FALLBACK_CONFIG = !process.env.REACT_APP_AIRTABLE_BASE_ID || !process.env.REACT_APP_AIRTABLE_API_KEY;
-if (USING_FALLBACK_CONFIG) {
-  console.warn('Enhanced Airtable Service: Using fallback configuration for development/testing');
+// Check if required environment variables are configured
+if (!AIRTABLE_BASE_ID || !API_KEY) {
+  throw new Error('REACT_APP_AIRTABLE_BASE_ID and REACT_APP_AIRTABLE_API_KEY environment variables are required');
 }
 const BASE_URL = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}`;
 

@@ -18,6 +18,7 @@ class AgentCommunicationBus {
     this.pendingResponses = new Map(); // messageId -> response handler
     this.messageHistory = [];
     this.deliveryCallbacks = new Map(); // messageId -> callback
+    this.isActive = false;
     
     // Configuration
     this.maxMessageHistory = 1000;
@@ -25,22 +26,77 @@ class AgentCommunicationBus {
     this.messageTimeout = 30000; // 30 seconds
     this.retryAttempts = 3;
     
+    // Event-driven triggers
+    this.eventTriggers = {
+      messageRequested: false,
+      subscriptionRequested: false,
+      coordinationRequested: false,
+      broadcastRequested: false
+    };
+    
     // Statistics
     this.stats = {
       totalMessages: 0,
       deliveredMessages: 0,
       failedMessages: 0,
       activeSubscriptions: 0,
-      messagesByType: new Map()
+      messagesByType: new Map(),
+      activationsCount: 0,
+      averageActiveTime: 0
     };
     
-    console.log('📡 AgentCommunicationBus: Initialized');
+    console.log('📡 AgentCommunicationBus: Initialized (Event-Driven Mode)');
   }
 
   /**
-   * Send direct message from one agent to another
+   * Activate communication bus for message processing
+   */
+  activateForMessage(eventType = 'message') {
+    if (!this.isActive) {
+      this.isActive = true;
+      this.eventTriggers[eventType + 'Requested'] = true;
+      this.stats.activationsCount++;
+      const activationStart = Date.now();
+      
+      console.log(`📡 AgentCommunicationBus: Activated for ${eventType}`);
+      
+      // Auto-deactivate after message processing (with timeout)
+      setTimeout(() => {
+        this.deactivateCommunicationBus(activationStart);
+      }, 10000); // 10 second window
+    }
+  }
+
+  /**
+   * Deactivate communication bus
+   */
+  deactivateCommunicationBus(activationStart) {
+    if (this.isActive) {
+      const activeTime = Date.now() - activationStart;
+      
+      // Update average active time
+      if (this.stats.averageActiveTime === 0) {
+        this.stats.averageActiveTime = activeTime;
+      } else {
+        this.stats.averageActiveTime = (this.stats.averageActiveTime + activeTime) / 2;
+      }
+      
+      this.isActive = false;
+      Object.keys(this.eventTriggers).forEach(key => {
+        this.eventTriggers[key] = false;
+      });
+      
+      console.log(`📡 AgentCommunicationBus: Deactivated (active for ${activeTime}ms)`);
+    }
+  }
+
+  /**
+   * Send direct message from one agent to another (Event-Driven)
    */
   async sendMessage(fromAgent, toAgent, messageType, payload, options = {}) {
+    // Activate for message processing
+    this.activateForMessage('message');
+    
     const messageId = this.generateMessageId();
     const message = {
       id: messageId,
@@ -129,9 +185,12 @@ class AgentCommunicationBus {
   }
 
   /**
-   * Publish message to a topic (pub/sub pattern)
+   * Publish message to a topic (pub/sub pattern) - Event-Driven
    */
   async publishMessage(fromAgent, topic, messageType, payload, options = {}) {
+    // Activate for publish processing
+    this.activateForMessage('broadcast');
+    
     const messageId = this.generateMessageId();
     const message = {
       id: messageId,
@@ -178,9 +237,11 @@ class AgentCommunicationBus {
   }
 
   /**
-   * Subscribe agent to a topic
+   * Subscribe agent to a topic - Event-Driven
    */
   subscribe(agentName, topic, messageHandler, filter = null) {
+    // Activate for subscription processing
+    this.activateForMessage('subscription');
     if (!this.subscriptions.has(topic)) {
       this.subscriptions.set(topic, new Set());
     }

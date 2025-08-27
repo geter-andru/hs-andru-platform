@@ -8,13 +8,20 @@
 class AgentRegistry {
   constructor() {
     this.agents = new Map();
-    this.healthCheckInterval = null;
-    this.healthCheckIntervalMs = 30000; // 30 seconds
     this.capabilities = new Map(); // Track agent capabilities
     this.agentRelationships = new Map(); // Track agent dependencies and relationships
     this.performanceHistory = new Map(); // Track performance over time
+    this.isActive = false;
     
-    this.startHealthMonitoring();
+    // Event-driven configuration
+    this.eventTriggers = {
+      healthCheckRequested: false,
+      systemStartup: false,
+      agentRegistration: false,
+      performanceDegradation: false
+    };
+    
+    console.log('📋 AgentRegistry: Initialized (Event-Driven Mode)');
   }
 
   /**
@@ -419,33 +426,59 @@ class AgentRegistry {
   }
 
   /**
-   * Start health monitoring
+   * Activate registry on health check request (Event-Driven)
    */
-  startHealthMonitoring() {
-    if (this.healthCheckInterval) {
-      clearInterval(this.healthCheckInterval);
+  async activateHealthMonitoring(eventData = {}) {
+    if (this.isActive) {
+      console.log('📋 AgentRegistry: Already active for health monitoring');
+      return;
     }
     
-    this.healthCheckInterval = setInterval(async () => {
-      try {
-        await this.performHealthCheck();
-      } catch (error) {
-        console.error('⚠️ AgentRegistry health check failed:', error);
-      }
-    }, this.healthCheckIntervalMs);
+    this.isActive = true;
+    this.eventTriggers.healthCheckRequested = true;
     
-    console.log(`💓 AgentRegistry: Health monitoring started (${this.healthCheckIntervalMs/1000}s interval)`);
+    console.log('🔍 AgentRegistry: Activated for health monitoring');
+    
+    try {
+      const healthResults = await this.performHealthCheck();
+      
+      // Auto-deactivate after health check
+      setTimeout(() => {
+        this.deactivateHealthMonitoring();
+      }, 5000); // 5 second window for health check completion
+      
+      return healthResults;
+      
+    } catch (error) {
+      console.error('⚠️ AgentRegistry health check failed:', error);
+      this.deactivateHealthMonitoring();
+      throw error;
+    }
   }
 
   /**
-   * Stop health monitoring
+   * Deactivate registry (Event-Driven)
    */
-  stopHealthMonitoring() {
-    if (this.healthCheckInterval) {
-      clearInterval(this.healthCheckInterval);
-      this.healthCheckInterval = null;
-      console.log('⏹️ AgentRegistry: Health monitoring stopped');
-    }
+  deactivateHealthMonitoring() {
+    this.isActive = false;
+    this.eventTriggers.healthCheckRequested = false;
+    console.log('⏹️ AgentRegistry: Deactivated');
+  }
+
+  /**
+   * Activate on agent registration event
+   */
+  async activateForRegistration(eventData) {
+    this.isActive = true;
+    this.eventTriggers.agentRegistration = true;
+    console.log('📋 AgentRegistry: Activated for agent registration');
+    
+    // Process registration and auto-deactivate
+    setTimeout(() => {
+      this.isActive = false;
+      this.eventTriggers.agentRegistration = false;
+      console.log('📋 AgentRegistry: Registration complete, deactivated');
+    }, 1000);
   }
 
   /**

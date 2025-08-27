@@ -148,6 +148,7 @@ export const authService = {
       customer_name: 'Geter',
       company: 'H&S Revenue Intelligence',
       email: 'admin@hs-platform.com',
+      paymentStatus: 'Completed', // Admin user has completed payment
       isAdmin: true,
       demoMode: true,
       hasPersonalizedICP: true,
@@ -185,6 +186,7 @@ export const authService = {
       customer_name: 'Test Customer',
       company: 'Test Company Inc.',
       email: 'test@company.com',
+      paymentStatus: 'Pending', // Test user has pending payment (locked access)
       isAdmin: false,
       demoMode: false,
       hasPersonalizedICP: true,

@@ -18,6 +18,8 @@ import Phase4IntegrationTest from './components/test/Phase4IntegrationTest';
 import Phase5SystemTest from './components/test/Phase5SystemTest';
 import SarahChenUserJourneyTest from './components/test/SarahChenUserJourneyTest';
 import SupabaseAuth from './components/auth/SupabaseAuth';
+import WaitlistPage from './components/WaitlistPage';
+import WelcomePage from './components/WelcomePage';
 import testEnvironmentVariables from './utils/testEnv';
 
 function App() {
@@ -35,6 +37,8 @@ function App() {
                      window.location.pathname.startsWith('/auth') ||
                      window.location.pathname.startsWith('/login') ||
                      window.location.pathname.startsWith('/signup') ||
+                     window.location.pathname.startsWith('/waitlist') ||
+                     window.location.pathname.startsWith('/welcome') ||
                      window.location.search.includes('token=');
 
   // Use legacy routing for test/admin routes, new auth for main app
@@ -58,6 +62,10 @@ function App() {
               <Route path="/auth" element={<SupabaseAuth />} />
               <Route path="/login" element={<SupabaseAuth />} />
               <Route path="/signup" element={<SupabaseAuth />} />
+              
+              {/* Assessment Integration Routes */}
+              <Route path="/waitlist" element={<WaitlistPage />} />
+              <Route path="/welcome" element={<WelcomePage />} />
               
               {/* Dashboard Route - handles authenticated users */}
               <Route path="/dashboard" element={<CustomerDashboard />} />

@@ -1,0 +1,19 @@
+{
+  "name": "linkedin-mcp-server-local",
+  "version": "1.0.0",
+  "description": "Local LinkedIn MCP Server for Andru Platform",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node --inspect index.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^0.6.0",
+    "puppeteer": "^22.15.0",
+    "cheerio": "^1.0.0-rc.12"
+  },
+  "keywords": ["mcp", "linkedin", "local"],
+  "author": "Andru Platform",
+  "license": "MIT"
+}
